@@ -15,7 +15,8 @@
  *
  *  \param clock_id   The id of the clock to enable
  */
-inline clock clock_enable(int clock_id) {
+inline clock clock_enable(int clock_id)
+{
   asm volatile("setc res[%0], 8" :: "r" (clock_id));
   return (clock)clock_id;
 }
@@ -24,7 +25,8 @@ inline clock clock_enable(int clock_id) {
  *
  *  \param clk  The clock to disable
  */
-inline void clock_disable(clock clk) {
+inline void clock_disable(clock clk)
+{
   asm volatile("setc res[%0], 0" :: "r" (clk));
 }
 
@@ -34,7 +36,8 @@ inline void clock_disable(clock clk) {
  *
  *  \param clk  The clock to start running
  */
-inline void clock_start(clock clk) {
+inline void clock_start(clock clk)
+{
   asm volatile("setc res[%0], 0xf" :: "r" (clk));
 }
 
@@ -44,7 +47,8 @@ inline void clock_start(clock clk) {
  *
  *  \param clk  The clock to stop
  */
-void clock_stop(clock clk) {
+void clock_stop(clock clk)
+{
   asm volatile("setc res[%0], 0x7" :: "r" (clk));
 }
 

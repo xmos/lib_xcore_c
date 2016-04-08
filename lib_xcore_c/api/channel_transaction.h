@@ -42,7 +42,8 @@ typedef struct transacting_chanend_s {
  *
  * \returns   A version of the chanend to use within the transaction
  */
-inline transacting_chanend chan_init_transaction_master(chanend c) {
+inline transacting_chanend chan_init_transaction_master(chanend c)
+{
   transacting_chanend tc;
   tc.c = c;
   tc.st = 0;
@@ -92,7 +93,8 @@ inline transacting_chanend chan_init_transaction_slave(chanend c)
  *
  * \returns   A non-transacting version of the chanend
  */
-inline chanend chan_complete_transaction(transacting_chanend c) {
+inline chanend chan_complete_transaction(transacting_chanend c)
+{
   if (c.st) {
     s_chan_output_ct((streaming_chanend) c.c, XS1_CT_END);
     s_chan_check_ct((streaming_chanend) c.c, XS1_CT_END);
@@ -121,7 +123,8 @@ inline chanend chan_complete_transaction(transacting_chanend c) {
  *
  * \param ct   Control token that is expected on the transacting channel
  */
-inline void t_chan_check_ct(REFERENCE_PARAM(transacting_chanend, c), int ct) {
+inline void t_chan_check_ct(REFERENCE_PARAM(transacting_chanend, c), int ct)
+{
   __t_chan_change_to_input(c);
   asm volatile("chkct res[%0],%1" :: "r" (__tc_get_reference_member(c,c)), "r" (ct));
 }
@@ -133,7 +136,8 @@ inline void t_chan_check_ct(REFERENCE_PARAM(transacting_chanend, c), int ct) {
  *
  * \param data The word to be output
  */
-inline void t_chan_output_word(REFERENCE_PARAM(transacting_chanend, c), int data) {
+inline void t_chan_output_word(REFERENCE_PARAM(transacting_chanend, c), int data)
+{
   __t_chan_change_to_output(c);
   asm volatile("out res[%0],%1" :: "r" (__tc_get_reference_member(c,c)), "r" (data));
 }
@@ -144,7 +148,8 @@ inline void t_chan_output_word(REFERENCE_PARAM(transacting_chanend, c), int data
  *
  * \param data The byte to be output
  */
-inline void t_chan_output_byte(REFERENCE_PARAM(transacting_chanend, c), char data) {
+inline void t_chan_output_byte(REFERENCE_PARAM(transacting_chanend, c), char data)
+{
   __t_chan_change_to_output(c);
   asm volatile("outt res[%0],%1" :: "r" (__tc_get_reference_member(c,c)), "r" (data));
 }
@@ -158,7 +163,8 @@ inline void t_chan_output_byte(REFERENCE_PARAM(transacting_chanend, c), char dat
  *
  * \param n    The number of bytes to send
  */
-inline void t_chan_output_block(REFERENCE_PARAM(transacting_chanend, c), char buf[], int n) {
+inline void t_chan_output_block(REFERENCE_PARAM(transacting_chanend, c), char buf[], int n)
+{
   // Note we could do this more efficiently depending on the size of n
   // and the alignment of buf
   __t_chan_change_to_output(c);
@@ -203,7 +209,8 @@ inline char t_chan_input_byte(REFERENCE_PARAM(transacting_chanend, c))
  *
  * \param n    The number of bytes to receive
  */
-inline void t_chan_input_block(REFERENCE_PARAM(transacting_chanend, c), char buf[], int n) {
+inline void t_chan_input_block(REFERENCE_PARAM(transacting_chanend, c), char buf[], int n)
+{
   // Note we could do this more efficiently depending on the size of n
   // and the alignment of buf
   __t_chan_change_to_input(c);

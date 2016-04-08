@@ -1,15 +1,18 @@
+// Copyright (c) 2016, XMOS Ltd, All rights reserved
+
 #ifndef __timer_h__
 #define __timer_h__
 
 #include <xccompat.h>
 
-/** Allocates and initialise a timer. This macro is to be
- * called once on every variable of the type ``timer``.
- * If there are no timers availble, then the function will return NULL.
- * When the timer is no longer required, timer_free() should be called
- * to free the timer.
+/** Allocates and initialise a timer.
  *
- * \returns   The initialized timer
+ *  This macro is to be called once on every variable of the type ``timer``.
+ *  If there are no timers availble, then the function will return NULL.
+ *  When the timer is no longer required, timer_free() should be called
+ *  to free the timer.
+ *
+ *  \returns   The initialized timer
  */
 #ifndef __XC__
 inline timer timer_alloc(void)
@@ -19,10 +22,11 @@ inline timer timer_alloc(void)
   return t;
 }
 
-/** Deallocate a timer. This function is to be
- * called once on every variable of the type ``timer``.
+/** Deallocate a timer.
  *
- * \param t  Timer to be freed
+ *  This function is to be called once on every variable of the type ``timer``.
+ *
+ *  \param t  Timer to be freed
  */
 inline void timer_free(timer t)
 {
@@ -31,9 +35,9 @@ inline void timer_free(timer t)
 
 /** Get the current time from the timer.
  *
- * \param t    Timer on which to input
+ *  \param t    Timer on which to input
  *
- * \returns    The 32-bit time
+ *  \returns    The time value (a 32-bit value)
  */
 inline int timer_get_time(timer t)
 {
@@ -43,7 +47,7 @@ inline int timer_get_time(timer t)
 }
 
 
-/** Pause until after a specified time
+/** Pause until after a specified time.
  *
  *  \param tmr  The timer to use for timing
  *
@@ -53,12 +57,17 @@ inline int timer_get_time(timer t)
 inline int timer_wait_until(timer tmr, int time)
 {
   asm volatile("setd res[%0], %1" :: "r" (tmr), "r" (time));
-  asm volatile("setc res[%0], 9" :: "r" (tmr));
-  return timer_get_time(tmr);
+  asm volatile("setc res[%0], 0x9" :: "r" (tmr));
+  int i = timer_get_time(tmr);
+
+  // Clear the condition so that a timer_get_time() will work by default
+  asm volatile("setc res[%0], 0x1" :: "r" (tmr));
+  return i;
 }
 
-/** Delay for a specified time. This function pauses until the time is
- *  reached.
+/** Delay for a specified time.
+ *
+ *  This function pauses until the time is reached.
  *
  *  \param period    The amount of time to wait (in reference time ticks,
  *                   usually 10ns steps)

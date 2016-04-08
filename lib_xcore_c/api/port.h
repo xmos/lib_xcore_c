@@ -9,11 +9,10 @@
 
 /** Enables a port.
  *
- * The port
- * should be one of XS1_PORT_1A .. XS1_PORT_32A as specified on the
- * datasheet and in the xs1.h include file. Either this function or
- * port_init_buffered() should be called once for each variable of type
- * ``port``; port_free() should be called afterwards.
+ *  The port should be one of XS1_PORT_1A .. XS1_PORT_32A as specified on the
+ *  datasheet and in the xs1.h include file. Either this function or
+ *  port_init_buffered() should be called once for each variable of type
+ *  ``port``; port_free() should be called afterwards.
  *
  * \param port_id   Value that identifies which port to drive.
  *
@@ -29,11 +28,10 @@ inline port port_enable(int port_id)
 /** Initialise a port variable to a specific port, and enables
  * the port to buffer and serialise/deserialise data.
  *
- * The port should be
- * one of XS1_PORT_1A .. XS1_PORT_32A as specified on the datasheet and in
- * the xs1.h include file. Either this function or port_init() should
- * be called once for each variable of type ``port``; port_free()
- * should be called afterwards.
+ *  The port should be one of XS1_PORT_1A .. XS1_PORT_32A as specified on the
+ *  datasheet and in the xs1.h include file. Either this function or port_init()
+ *  should be called once for each variable of type ``port``; port_free()
+ *  should be called afterwards.
  *
  * \param port_id      Value that identifies which port to drive.
  *
@@ -44,19 +42,19 @@ inline port port_enable(int port_id)
 inline port port_enable_buffered(int port_id, int shift_width)
 {
   port p = port_id;
-  asm volatile("setc res[%0],8" :: "r" (p));        \
-  asm volatile("setc res[%0],0x200f" :: "r" (p));                       \
-  asm volatile("settw res[%0],%1" :: "r" (p), "r" (shift_width));
+  asm volatile("setc res[%0], 8" :: "r" (p));
+  asm volatile("setc res[%0], 0x200f" :: "r" (p));
+  asm volatile("settw res[%0], %1" :: "r" (p), "r" (shift_width));
   return p;
 }
 
 #endif // __XC__
 
-/** Uninitialise a port variable and disable the port.
- *  This function switches off
- *  the port.
+/** Disable the port.
  *
- * \param p      Port variable to initialise
+ *  This function switches off the port.
+ *
+ *  \param p      Port variable to disable
  */
 inline void port_disable(port p)
 {
@@ -65,12 +63,13 @@ inline void port_disable(port p)
 }
 
 
-/** Outputs a value onto a port. In the case of an unbuffered
- * port, the value will be driven on the pins on the next clock cycle. In
- * the case of a buffered port, the data will be stored in the buffer, and
- * be serialised onto the output pins.
+/** Outputs a value onto a port.
  *
- * \param p      Port variable that inidicates which port to output to
+ *  In the case of an unbuffered port, the value will be driven on the pins on
+ *  the next clock cycle. In the case of a buffered port, the data will be
+ *  stored in the buffer, and be serialised onto the output pins.
+ *
+ *  \param p      Port variable that inidicates which port to output to
  *
  * \param data   Value to output
  */
@@ -79,19 +78,18 @@ inline void port_output(port p, int data)
   asm volatile("out res[%0],%1" :: "r" (p), "r" (data));
 }
 
-/** Outputs a value onto a port at a specified time.
+/** Outputs a value onto a port at a specified port counter value.
  *
- * In the case of an unbuffered
- * port, the value will be driven on the pins when on the clock cycle that
- * moves the port counter to the specified time. In
- * the case of a buffered port, the data will be stored in the buffer, and
- * be serialised onto the output pins at the point that the time is reached.
+ *  In the case of an unbuffered port, the value will be driven on the pins when
+ *  on the clock cycle that moves the port counter to the specified time. In
+ *  the case of a buffered port, the data will be stored in the buffer, and
+ *  be serialised onto the output pins at the point that the time is reached.
  *
  * \param p      Port variable that inidicates which port to output to
  *
  * \param data   Value to output
  *
- * \param t      The time of the output
+ *  \param t      The port counter value at which the output should occur
  */
 inline void port_output_at_time(port p, int data, int t)
 {
@@ -100,14 +98,14 @@ inline void port_output_at_time(port p, int data, int t)
 }
 
 /** Outputs a value onto a port and shifts the output data.
- * In the case of an unbuffered
- * port, the value will be driven on the pins on the next clock cycle. In
- * the case of a buffered port, the data will be stored in the buffer, and
- * be serialised onto the output pins.
  *
- * \param p      Port variable that inidicates which port to output to
+ *  In the case of an unbuffered port, the value will be driven on the pins on
+ *  the next clock cycle. In the case of a buffered port, the data will be stored
+ *  in the buffer, and be serialised onto the output pins.
  *
- * \param data   Value to output
+ *  \param p      Port variable that inidicates which port to output to
+ *
+ *  \param data   Value to output
  *
  * \returns      The output data shifted right by the transfer width of the port
  */
@@ -119,11 +117,10 @@ inline int port_output_shift_right(port p, int data)
 
 /** Outputs a value onto a port at a specified time and shifts the output data.
  *
- * In the case of an unbuffered
- * port, the value will be driven on the pins when on the clock cycle that
- * moves the port counter to the specified time. In
- * the case of a buffered port, the data will be stored in the buffer, and
- * be serialised onto the output pins at the point that the time is reached.
+ *  In the case of an unbuffered port, the value will be driven on the pins when
+ *  on the clock cycle that moves the port counter to the specified time. In
+ *  the case of a buffered port, the data will be stored in the buffer, and
+ *  be serialised onto the output pins at the point that the time is reached.
  *
  * \param p      Port variable that inidicates which port to output to
  *
@@ -133,7 +130,6 @@ inline int port_output_shift_right(port p, int data)
  *
  * \returns      The output data shifted right by the transfer width
  *               of the port
- *
  */
 inline int port_output_shift_right_at_time(port p, int data, int t)
 {
@@ -143,10 +139,11 @@ inline int port_output_shift_right_at_time(port p, int data, int t)
 }
 
 
-/** Input a value from a port. In the case of an unbuffered
- * port, the data will be whatever is on the input pins. In the case of a
- * buffered port, this function will wait until the buffer is filled up with
- * deserialised data.
+/** Input a value from a port.
+ *
+ *  In the case of an unbuffered port, the data will be whatever is on the input
+ *  pins. In the case of a buffered port, this function will wait until the buffer
+ *  is filled up with deserialised data.
  *
  * \param p      Port variable that inidicates which port to input from
  *
@@ -228,10 +225,9 @@ inline int port_input_at_time(port p, int t)
 
 /** Input a value from a port and shift the data.
  *
- * In the case of an unbuffered
- * port, the data will be whatever is on the input pins. In the case of a
- * buffered port, this function will wait until the buffer is filled up with
- * deserialised data.
+ *  In the case of an unbuffered port, the data will be whatever is on the input
+ *  pins. In the case of a buffered port, this function will wait until the
+ *  buffer is filled up with deserialised data.
  *
  * \param p      Port variable that inidicates which port to input from
  *
