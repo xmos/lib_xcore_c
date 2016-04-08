@@ -1,5 +1,5 @@
-lib_xore_c
-==========
+lib_xcore_c
+===========
 
 Overview
 --------
