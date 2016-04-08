@@ -16,7 +16,7 @@ USED_MODULES = lib_logging lib_xcore_c
 # XCC_XC_FLAGS, XCC_C_FLAGS, XCC_ASM_FLAGS, XCC_CPP_FLAGS
 # If the variable XCC_MAP_FLAGS is set it overrides the flags passed to
 # xcc for the final link (mapping) stage.
-XCC_FLAGS = -g -O2 -save-temps
+XCC_FLAGS = -g -O2 -save-temps -DDEBUG_PRINT_ENABLE=1
 
 # The VERBOSE variable, if set to 1, enables verbose output from the make
 # system.
