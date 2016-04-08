@@ -95,10 +95,10 @@ inline void chan_free(chanend c1, chanend c2)
  */
 inline void s_chan_free(streaming_chanend c1, streaming_chanend c2)
 {
-  s_chan_output_ctEND(c1);
-  s_chan_output_ctEND(c2);
-  s_chan_check_ctEND(c1);
-  s_chan_check_ctEND(c1);
+  s_chan_output_ct_end(c1);
+  s_chan_output_ct_end(c2);
+  s_chan_check_ct_end(c1);
+  s_chan_check_ct_end(c1);
   asm volatile("freer res[%0]" :: "r" (c1));
   asm volatile("freer res[%0]" :: "r" (c2));
 }
@@ -227,11 +227,11 @@ inline void s_chan_input_block(streaming_chanend c, char buf[], int n)
  */
 inline void chan_output_word(chanend c, int data)
 {
-  s_chan_output_ctEND(c);
-  s_chan_check_ctEND(c);
+  s_chan_output_ct_end(c);
+  s_chan_check_ct_end(c);
   s_chan_output_word(c, data);
-  s_chan_output_ctEND(c);
-  s_chan_check_ctEND(c);
+  s_chan_output_ct_end(c);
+  s_chan_check_ct_end(c);
 }
 
 /** Output a byte over a channel-end.
@@ -242,11 +242,11 @@ inline void chan_output_word(chanend c, int data)
  */
 inline void chan_output_byte(chanend c, char data)
 {
-  s_chan_output_ctEND(c);
-  s_chan_check_ctEND(c);
+  s_chan_output_ct_end(c);
+  s_chan_check_ct_end(c);
   s_chan_output_byte(c, data);
-  s_chan_output_ctEND(c);
-  s_chan_check_ctEND(c);
+  s_chan_output_ct_end(c);
+  s_chan_check_ct_end(c);
 }
 
 /** Output a block of data over a channel-end.
@@ -259,11 +259,11 @@ inline void chan_output_byte(chanend c, char data)
  */
 inline void chan_output_block(chanend c, char buf[], int n)
 {
-  s_chan_output_ctEND(c);
-  s_chan_check_ctEND(c);
+  s_chan_output_ct_end(c);
+  s_chan_check_ct_end(c);
   s_chan_output_block(c, buf, n);
-  s_chan_output_ctEND(c);
-  s_chan_check_ctEND(c);
+  s_chan_output_ct_end(c);
+  s_chan_check_ct_end(c);
 }
 
 
@@ -276,11 +276,11 @@ inline void chan_output_block(chanend c, char buf[], int n)
 inline int chan_input_word(chanend c)
 {
   int data;
-  s_chan_output_ctEND(c);
-  s_chan_check_ctEND(c);
+  s_chan_output_ct_end(c);
+  s_chan_check_ct_end(c);
   data = s_chan_input_word(c);
-  s_chan_output_ctEND(c);
-  s_chan_check_ctEND(c);
+  s_chan_output_ct_end(c);
+  s_chan_check_ct_end(c);
   return data;
 }
 
@@ -293,11 +293,11 @@ inline int chan_input_word(chanend c)
 inline int chan_input_byte(chanend c)
 {
   int data;
-  s_chan_output_ctEND(c);
-  s_chan_check_ctEND(c);
+  s_chan_output_ct_end(c);
+  s_chan_check_ct_end(c);
   data = s_chan_input_word(c);
-  s_chan_output_ctEND(c);
-  s_chan_check_ctEND(c);
+  s_chan_output_ct_end(c);
+  s_chan_check_ct_end(c);
   return data;
 }
 
@@ -312,11 +312,11 @@ inline int chan_input_byte(chanend c)
  */
 inline void chan_input_block(chanend c, char buf[], int n)
 {
-  s_chan_output_ctEND(c);
-  s_chan_check_ctEND(c);
+  s_chan_output_ct_end(c);
+  s_chan_check_ct_end(c);
   s_chan_input_block(c, buf, n);
-  s_chan_output_ctEND(c);
-  s_chan_check_ctEND(c);
+  s_chan_output_ct_end(c);
+  s_chan_check_ct_end(c);
 }
 
 #include "channel_transaction.h"
