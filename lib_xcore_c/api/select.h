@@ -3,6 +3,8 @@
 #ifndef __select_h__
 #define __select_h__
 
+#ifndef __XC__
+
 #include <stdint.h>
 #include <assert.h>
 #include <xccompat.h>
@@ -210,5 +212,7 @@ unsigned event_select();
  *            in if no event fired.
  */
 unsigned event_select_no_wait(unsigned no_wait_value);
+
+#endif // __XC__
 
 #endif // __select_h__

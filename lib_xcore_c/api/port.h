@@ -49,8 +49,6 @@ inline port port_enable_buffered(int port_id, int shift_width)
   return p;
 }
 
-#endif // __XC__
-
 /** Disable the port.
  *
  *  This function switches off the port.
@@ -468,5 +466,7 @@ void port_clear_buffer(port p);
  *  \return    The number of bits of data remaining
  */
 unsigned port_endin(port p);
+
+#endif // __XC__
 
 #endif // __port_h__

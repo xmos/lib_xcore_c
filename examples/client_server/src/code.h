@@ -5,7 +5,6 @@
 
 #include <xccompat.h>
 #include <xs1.h>
-#include "xcore_c.h"
 
 #if __XC__
 extern "C" {

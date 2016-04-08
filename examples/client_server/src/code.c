@@ -1,5 +1,6 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
+#include "xcore_c.h"
 #include "code.h"
 #include "debug_print.h"
 
