@@ -8,6 +8,14 @@
 #include <xccompat.h>
 #include "port.h"
 
+#if defined(__XS2A__)
+#define EVENT_ENUM_BASE 0
+#else
+// On XS1 the environment vectors (EVs) are only 16-bit and bit 16 will be set
+// to 1 as it is expected to be used as a memory address.
+#define EVENT_ENUM_BASE 0x10000
+#endif
+
 typedef unsigned resource;
 
 /*

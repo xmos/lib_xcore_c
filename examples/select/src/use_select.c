@@ -6,7 +6,7 @@
 
 // For XS1 support all values passed to the event_setup function must have bit 16 set
 typedef enum {
-  CHAN_C = 0x10000,
+  CHAN_C = EVENT_ENUM_BASE,
   CHAN_D
 } chan_event_result_t;
 
@@ -37,7 +37,7 @@ void channel_example(chanend c, chanend d)
 
 // For XS1 support all values passed to the event_setup function must have bit 16 set
 typedef enum {
-  CHAN_E = 0x10000,
+  CHAN_E = EVENT_ENUM_BASE,
   CHAN_F
 } chan_event_fair_result_t;
 
@@ -72,7 +72,7 @@ void channel_example_fair(chanend e, chanend f)
 
 // For XS1 support all values passed to the event_setup function must have bit 16 set
 typedef enum {
-  TIMER = 0x10000,
+  TIMER = EVENT_ENUM_BASE,
   PORT_P
 } port_event_result_t;
 
