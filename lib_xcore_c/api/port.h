@@ -361,8 +361,9 @@ inline int port_get_timestamp(port p) {
  *
  */
 typedef enum port_condition_t {
-  XS1_PORT_PINSEQ = 0x11,  //< Condition that holds when the pins of the port are equal to the port conditional data
-  XS1_PORT_PINSNEQ = 0x19  //< Condition that holds when the pins of the port are equal to the port conditional data
+  PORT_COND_FULL    =  0x1, //< Condition that holds when port contains data ready to be input
+  PORT_COND_PINSEQ  = 0x11, //< Condition that holds when the pins of the port are equal to the port conditional data
+  PORT_COND_PINSNEQ = 0x19  //< Condition that holds when the pins of the port are equal to the port conditional data
 } port_condition_t;
 
 /** Set the condition on a port.

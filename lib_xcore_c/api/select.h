@@ -1,181 +1,206 @@
+// Copyright (c) 2016, XMOS Ltd, All rights reserved
+
 #ifndef __select_h__
 #define __select_h__
 
-enum select_control {
-  SELECT_END = -1,
-  SELECT_DEFAULT = -2,
-  SELECT_OVER_ARRAY = -3,
-  SELECT_WHEN_PINSEQ = -4,
-  SELECT_WHEN_PINSNEQ = -5,
-  SELECT_WHEN_TIMERAFTER = -6,
-  SELECT_AT_TIME = -7,
-  SELECT_GUARD = -8
-};
+#include <stdint.h>
+#include <assert.h>
+#include <xccompat.h>
+#include "port.h"
 
-int __c_select(int x, ...);
-int __c_ordered_select(int x, ...);
+typedef unsigned resource;
 
-#ifdef __DOXYGEN__
-
-
-/** Predicate to select only if port pins are equal to a value.
- *
- *  This function alters the port to only cause a select
- *  to fire on that port if the ports pins match a given value.
- *  It can be used in a select in the following manner:
- *
- *  \code
- *    res = select(...,when_pinseq(p, 5),...)
- *  \endcode
- *
- *  \param p     the port resource to select on
- *  \param value the value to match against the pins
+/*
+ * TODO: ordered select
  */
-when_pinseq(port p, int value);
 
-/** Predicate to select only if port pins are not equal to a value.
+/** Clear all pending events.
  *
- *  This function alters the port to only cause a select
- *  to fire on that port if the ports pins do not match a given value.
- *  It can be used in a select in the following manner:
- *
- *  \code
- *    res = select(...,when_pinsneq(p, 5),...)
- *  \endcode
- *
- *  \param p     the port resource to select on
- *  \param value the value to match against the pins
+ *  This function should be called before starting to configure events for
+ *  a new event loop to ensure that no other events will be triggered by
+ *  events set up by other code.
  */
-when_pinsneq(port p, int value);
+inline void event_clear_all()
+{
+  asm volatile("clre");
+}
 
-/** Predicate to select only if port pins is at a particular time.
+/** Disable events from a given resource.
  *
- *  This function alters the port to only cause a select
- *  to fire on that port if the ports counter is at a particular time value:
+ *  Disable a given resource raising events. They can be enabled using
+ *  event_enable().
  *
- *  \code
- *    res = select(...,when_at_time(p, 5),...)
- *  \endcode
- *
- *  Please note that if you are using this for a buffered port and the port
- *  does not event, you will need to clear the time condition on that port using
- *  port_clear_time_condition().
- *
- *  \param p     the port resource to select on
- *  \param time  the specified time when the port should event
+ *  \param r  The resource to disable events for
  */
-when_at_time(port p, int time);
+inline void event_disable(resource r)
+{
+  asm volatile("edu res[%0]" :: "r" (r));
+}
 
-
-/** Predicate to select only if a timer is after a specified.
+/** Enable events from a given resource.
  *
- *  This function alters a timer to only cause a select
- *  to fire on that timer is after a particular time. It can be used
- *  in a select in the following manner:
+ *  Enable a given resource to trigger events. They can be disabled using
+ *  event_disable().
  *
- *  \code
- *    res = select(...,when_timerafter(t, time),...)
- *  \endcode
- *
- *
- *  \param t     the timer resourcpe to select on
- *  \param time  the specified time after which the timer should event
+ *  \param r  The resource to enable events for
  */
-when_timerafter(timer t, int time);
+inline void event_enable(resource r)
+{
+  asm volatile("eeu res[%0]" :: "r" (r));
+}
 
-/** A default case within a select.
+/** Enable events on a resource.
  *
- *  This macro value can be used within a select to specify a *default* case.
- *  If none of the other resources of the select are ready to event when the
- *  select is called then the default case will activate and the select will
- *  return with the value of the argument index of the ``SELECT_DEFAULT``
- *  argument.
+ *  This is a shared function to be used by enable_events_chanend(),
+ *  enable_events_port() and enable_events_timer().
  *
- *  For example, in the following call:
- *
- *  \code
- *  res = select(a, b, SELECT_DEFAULT)
- *  \endcode
- *
- *  If resources ``a`` and ``b`` are not ready to event then the select will
- *  return will value 2 (since the argument of the ``SELECT_DEFAULT`` is at
- *  index 2).
- *
- *  If two or more ``SELECT_DEFAULT`` arguments are passed to a select then
- *  the behaviour is undefined.
+ *  \param r      The resource to enable events for
+ *  \param value The value to be returned by event_select()/event_select_no_wait()
+ *               when the timer event is triggered.
  */
-#define SELECT_DEFAULT
+inline void event_setup_resource(resource r, unsigned value)
+{
+  // Set the event vector
+  asm volatile("ldap r11, __event_target");
+  asm volatile("setv res[%0], r11" :: "r" (r));
 
-/** Select over an array of resources in the select case.
- *
- *  This function can be used in #define SELECT_DEFAULT
- a select to add an array of resources to the
- *  select. If any of the resources in the select events then the select will
- *  return the index of the ``select_over_array`` argument in the select.
- *  To determine which array element caused the select to fire you can call
- *  the get_selected_array_index() function.
- *
- *  For example, in the following code:
- *
- *  \code
- *  res = select(a, select_over_array(b,5), c);
- *  \endcode
- *
- *  If one of the resources in the array ``b[]`` events then the select would
- *  return 1 and get_selected_array_index() will return an index between ``0``
- *  and ``4``.
- *
- *  \param arr  The array of resources to select over
- *  \param n  The size of the array
- */
-select_over_array(arr[], int n);
-
-
-/** Only enable a select case if a guard expression is true.
- *
- *  This function is used within a select to only fire on an event if the
- *  given value is true. For example, in the following code:
- *
- *  \code
- *  res = select(a, select_only_if(x<5,b), c);
- *  \endcode
- *
- *  If ``x < 5`` evaluates to non-zero at the time of calling the select then
- *  resource ``b`` will be monitored for an event to occur. If ``x < 5``
- *  evaluates to 0 then ``b`` cannot cause the select to return.
- *
- *  Note that if the guard is false, the indexing is unaffected. In the
- *  above example, if ``x<5`` is false and ``c`` is selected then the select
- *  will still return ``2``.
- *
- *  \param guard  a value that will disable the select case if 0
- *  \param x      the resource to select with if the guard is true
- */
-select_only_if(int guard, x);
-
+#if !defined(__XS2A__)
+  if ((value >> 16) != 0x1) {
+  	__assert(__FILE__, __LINE__,
+   	 "On XS1 bit 16 will always be set in the value returned from an event");
+  }
 #endif
 
-#define select(...) __c_select(__VA_ARGS__, SELECT_END)
+  // Store the data to be returned on event
+  asm volatile("add r11, %0, 0" :: "r" (value));
+  asm volatile("setev res[%0], r11" :: "r" (r));
 
-#define select_over_array(a, n) SELECT_OVER_ARRAY,a,n
+  // Enable the events
+  asm volatile("eeu res[%0]" :: "r" (r));
+}
 
-#define when_pinseq(p, d) SELECT_WHEN_PINSEQ, p, d
-
-#define when_pinsneq(p, d) SELECT_WHEN_PINSNEQ, p, d
-
-#define when_at_time(p, d) SELECT_AT_TIME, p, d
-
-#define when_timerafter(p, d) SELECT_WHEN_TIMERAFTER, p, d
-
-#define select_only_if(e, x) SELECT_IF, e, x
-
-
-/** Return the index of a select array element.
+/** Setup events on a timer.
  *
- *  This function is to be used in conjunction with select_over_array().
- *  If an array is selected then this function will return the index of the
- *  resource within that array that caused the event.
+ *  This function configures a timer to trigger events when data is ready. By
+ *  default a timer is ready instantly. event_change_timer_time() should be used
+ *  to cause the timer to wait for a time to be met.
+ *
+ *  \param t     The timer to enable events on
+ *  \param value The value to be returned by event_select()/event_select_no_wait()
+ *               when the timer event is triggered.
+ *  \param time  The time at which the timer should trigger an event. The default
+ *               timer ticks are at a 10ns resolution.
  */
-int get_selected_array_index();
+inline void event_setup_timer(timer t, unsigned value, int time)
+{
+  event_setup_resource(t, value);
 
-#endif
+  // Set the condition to be AFTER
+  asm volatile("setc res[%0], 0x9" :: "r" (t));
+
+  // Set the time at which the event should fire
+  asm volatile("setd res[%0], %1" :: "r" (t), "r" (time));
+}
+
+/** Change the time at which a timer event will fire.
+ *
+ *  This function modifies the time at which the timer event will be triggered.
+ *  It should be used after an event caused by a timer configured using
+ *  event_setup_timer() has happened.
+ *
+ *  \param t     The timer to change the time for
+ *  \param time  The time at which the timer should trigger an event. The default
+ *               timer ticks are at a 10ns resolution.
+ */
+inline void event_change_timer_time(timer t, int time)
+{
+  asm volatile("setd res[%0], %1" :: "r" (t), "r" (time));
+}
+
+/** Setup events on a channel end.
+ *
+ *  This function configures a channel end to trigger events when data is ready.
+ *
+ *  \param c     The channel end to enable events on
+ *  \param value The value to be returned by event_select()/event_select_no_wait()
+ *               when the channel end event is triggered.
+ */
+inline void event_setup_chanend(chanend c, unsigned value)
+{
+  event_setup_resource(c, value);
+}
+
+/** Setup events on a port.
+ *
+ *  This function configures a port to trigger events when ready. By default a
+ *  port will trigger when there is data available. The trigger event change be
+ *  changed using the event_change_port_condition() function.
+ *
+ *  \param p     The port to enable events on
+ *  \param value The value to be returned by event_select()/event_select_no_wait()
+ *               when the port event is triggered.
+ */
+inline void event_setup_port(port p, unsigned value)
+{
+  event_setup_resource(p, value);
+
+  // Set the default condition to be when there is data available
+  asm volatile("setc res[%0], %1" :: "r" (p), "r" (PORT_COND_FULL));
+}
+
+/** Change the condition that triggers events on a port.
+ *
+ *  A port can wait for the data in the port to be equal or not equal to a
+ *  specified value. After a port detects the value it resets to a default value
+ *  of triggering when full.
+ *
+ *  \param p     The port to enable events on
+ *  \param data  The data value that is being compared. The data has no effect
+ *               when the condition is being set to PORT_COND_FULL.
+ */
+inline void event_change_port_condition(port p, port_condition_t cond, unsigned data)
+{
+  asm volatile("setc res[%0], %1" :: "r" (p), "r" (cond));
+  asm volatile("setd res[%0], %1" :: "r" (p), "r" (data));
+}
+
+/** Set the time at which the port will input data and trigger an event.
+ *
+ *  A port can wait for the data in the port to be equal or not equal to a
+ *  specified value.
+ *  port will trigger when there is data available. The trigger event change be
+ *  changed using the event_change_port_condition() function.
+ *
+ *  \param p     The port to enable events on
+ *  \param time  The port counter value at which the port will capture data and
+ *               trigger an event.
+ */
+inline void event_change_port_time(port p, uint16_t time)
+{
+  asm volatile("setpt res[%0], %1" :: "r" (p), "r" (time));
+}
+
+/** Wait for an event to fire.
+ *
+ *  This function waits for an event to trigger and then returns the value the
+ *  user has registered with the resource that triggered the event.
+ *
+ *  \returns  The value registered with the resource when events were enabled
+ */
+unsigned event_select();
+
+/** Check whether any events are ready, otherwise return.
+ *
+ *  This function tests for an event to being ready. If there is one ready then
+ *  it returns the value the user has registered with the resource that
+ *  triggered the event. If no events are ready then returns the no_wait_value
+ *  passed in by the user.
+ *
+ *  \param no_wait_value  The value to return if no event is triggered.
+ *
+ *  \returns  The value registered with the resource or the no_wait_value passed
+ *            in if no event fired.
+ */
+unsigned event_select_no_wait(unsigned no_wait_value);
+
+#endif // __select_h__
