@@ -1,7 +1,7 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
-#ifndef __xio_clock_h__
-#define __xio_clock_h__
+#ifndef __xcore_c_clock_h__
+#define __xcore_c_clock_h__
 
 #ifndef __XC__
 
@@ -54,4 +54,4 @@ void clock_stop(clock clk)
 
 #endif // __XC__
 
-#endif // __xio_clock_h__
+#endif // __xcore_c_clock_h__
