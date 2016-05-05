@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <assert.h>
 #include <xccompat.h>
+#include "resource.h"
 #include "port.h"
 
 #if defined(__XS2A__)
@@ -17,8 +18,6 @@
 // to 1 as it is expected to be used as a memory address.
 #define EVENT_ENUM_BASE 0x10000
 #endif
-
-typedef unsigned resource;
 
 /*
  * TODO: ordered select
@@ -74,19 +73,8 @@ inline void event_setup_resource(resource r, unsigned value)
   asm volatile("ldap r11, __event_target");
   asm volatile("setv res[%0], r11" :: "r" (r));
 
-#if !defined(__XS2A__)
-  if ((value >> 16) != 0x1) {
-  	__assert(__FILE__, __LINE__,
-   	 "On XS1 bit 16 will always be set in the value returned from an event");
-  }
-#endif
-
-  // Store the data to be returned on event
-  asm volatile("add r11, %0, 0" :: "r" (value));
-  asm volatile("setev res[%0], r11" :: "r" (r));
-
-  // Enable the events
-  asm volatile("eeu res[%0]" :: "r" (r));
+  resource_set_ev(r, value);
+  event_enable(r);
 }
 
 /** Setup events on a timer.
