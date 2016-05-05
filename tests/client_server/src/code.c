@@ -4,10 +4,13 @@
 #include "code.h"
 #include "debug_print.h"
 
-#define SHUT_DOWN -1
+#define SHUT_DOWN 0
 
 void get_addresses(chanend c, unsigned *local_server, unsigned *remote_server)
 {
+  unsigned tile_id = get_local_tile_id();
+  unsigned core_id = get_logical_core_id();
+
   *local_server = c;
 
   // Exchange channel IDs with the other end of a channel
@@ -15,7 +18,8 @@ void get_addresses(chanend c, unsigned *local_server, unsigned *remote_server)
   s_chan_output_ct(c, XS1_CT_END);
   *remote_server = s_chan_input_word(c);
   s_chan_check_ct(c, XS1_CT_END);
-  debug_printf("get_addresses: local %x, remote: %x\n", *local_server, *remote_server);
+  debug_printf("%x:%d: get_addresses: local %x, remote: %x\n",
+    tile_id, core_id, *local_server, *remote_server);
 }
 
 /*
@@ -26,21 +30,23 @@ void get_addresses(chanend c, unsigned *local_server, unsigned *remote_server)
 void chanend_server(chanend c)
 {
   // Get information about the tile/core running the server for debug messages
-  unsigned id = get_local_tile_id();
-  unsigned core = get_logical_core_id();
+  unsigned tile_id = get_local_tile_id();
+  unsigned core_id = get_logical_core_id();
 
   while(1) {
   	chanend sender = s_chan_input_word(c);
   	int command = s_chan_input_word(c);
   	s_chan_check_ct(c, XS1_CT_END);
 
-  	debug_printf("%x:%d: received %d from %x\n", id, core, command, sender);
+  	debug_printf("%x:%d: received %d from %x\n", tile_id, core_id, command, sender);
 
-  	// Send a response
+  	// Send a response (simply invert the data)
   	chanend_set_dest(c, sender);
   	s_chan_output_word(c, ~command);
   	s_chan_output_ct(c, XS1_CT_END);
+
   	if (command == SHUT_DOWN) {
+      debug_printf("%x:%d: shutting down\n", tile_id, core_id);
   		break;
   	}
   }
@@ -63,7 +69,11 @@ int send_command(chanend dst, int command)
   s_chan_check_ct(c, XS1_CT_END);
 
   chanend_free(c);
-  debug_printf("Send cmd %d to %x received %d response\n", command, dst, response);
+  if (command == ~response) {
+    debug_printf("Send cmd %d to %x response ok\n", command, dst);
+  } else {
+    debug_printf("Send cmd %d to %x response not ok\n", command, dst);
+  }
   return response;
 }
 
