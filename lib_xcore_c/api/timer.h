@@ -26,7 +26,7 @@ inline timer timer_alloc(void)
  *
  *  This function is to be called once on every variable of the type ``timer``.
  *
- *  \param t  Timer to be freed
+ *  \param t  The timer to be freed
  */
 inline void timer_free(timer t)
 {
@@ -35,7 +35,7 @@ inline void timer_free(timer t)
 
 /** Get the current time from the timer.
  *
- *  \param t    Timer on which to input
+ *  \param t    The timer on which to input
  *
  *  \returns    The time value (a 32-bit value)
  */
@@ -45,7 +45,6 @@ inline int timer_get_time(timer t)
   asm volatile("in %0, res[%1]" : "=r" (i): "r" (t));
   return i;
 }
-
 
 /** Pause until after a specified time.
  *
@@ -65,23 +64,6 @@ inline int timer_wait_until(timer tmr, int time)
   return i;
 }
 
-/** Delay for a specified time.
- *
- *  This function pauses until the time is reached.
- *
- *  \param period    The amount of time to wait (in reference time ticks,
- *                   usually 10ns steps)
- */
-inline void delay(int period)
-{
-  timer tmr = timer_alloc();
-  int time;
-  time = timer_get_time(tmr);
-  time += period;
-  timer_wait_until(tmr, time);
-  timer_free(tmr);
-}
-
 /** Delay for a specified time using a specific timer.
 
  *  This function pauses until the time is
@@ -94,8 +76,7 @@ inline void delay(int period)
  */
 inline void timer_delay(timer tmr, int period)
 {
-  int time;
-  time = timer_get_time(tmr);
+  int time = timer_get_time(tmr);
   time += period;
   timer_wait_until(tmr, time);
 }
