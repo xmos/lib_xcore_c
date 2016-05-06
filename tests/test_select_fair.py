@@ -3,7 +3,7 @@ import xmostest
 import os
 
 def runtest():
-    test_name = "client_server" 
+    test_name = "select_fair" 
 
     resources = xmostest.request_resource("xsim")
 

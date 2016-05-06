@@ -2,6 +2,7 @@
 # compiled for. It either refers to an XN file in the source directories
 # or a valid argument for the --target option when compiling
 TARGET = XCORE-200-EXPLORER
+#TARGET = XK-1A
 
 # The APP_NAME variable determines the name of the final .xe file. It should
 # not include the .xe postfix. If left blank the name will default to
@@ -33,4 +34,5 @@ include $(XMOS_MAKE_PATH)/xcommon/module_xcommon/build/Makefile.common
 # This depends on the common makefile
 .PHONY: run
 run: $(BIN_DIR)/$(APP_NAME).xe
-	xsim --xscope "-offline xscope.xmt" $(BIN_DIR)/$(APP_NAME).xe
+	xsim --plugin LoopbackPort.dll "-port tile[0] XS1_PORT_1A 1 0 -port tile[0] XS1_PORT_1B 1 0" --xscope "-offline xscope.xmt" $(BIN_DIR)/$(APP_NAME).xe
+

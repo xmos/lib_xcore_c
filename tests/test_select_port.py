@@ -3,7 +3,7 @@ import xmostest
 import os
 
 def runtest():
-    test_name = "client_server" 
+    test_name = "select_port" 
 
     resources = xmostest.request_resource("xsim")
 
@@ -18,4 +18,6 @@ def runtest():
     xmostest.run_on_simulator(resources['xsim'], binary,
                               simthreads=[],
                               tester=tester,
-                              simargs=['--xscope', '-offline xscope.xmt'])
+                              simargs=['--xscope', '-offline xscope.xmt'],
+                              loopback=[{'from': 'tile[0]:XS1_PORT_1A',
+                                         'to': 'tile[0]:XS1_PORT_1B'}])
