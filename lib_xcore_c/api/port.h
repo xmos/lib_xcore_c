@@ -8,12 +8,15 @@
 #include <stdint.h>
 #include <xccompat.h>
 
+inline void port_set_buffered(port p);
+inline void port_set_transfer_width(port p, int transfer_width);
+
 /** Enables a port.
  *
  *  The port should be one of XS1_PORT_1A .. XS1_PORT_32A as specified on the
  *  datasheet and in the xs1.h include file. Either this function or
- *  port_init_buffered() should be called once for each variable of type
- *  ``port``; port_free() should be called afterwards.
+ *  port_enable_buffered() should be called once for each variable of type
+ *  ``port`` before use. port_disable() should be called afterwards.
  *
  *  \param port_id   Value that identifies which port to drive.
  *
@@ -26,26 +29,26 @@ inline port port_enable(int port_id)
   return p;
 }
 
-/** Initialise a port variable to a specific port, and enables
- *  the port to buffer and serialise/deserialise data.
+/** Eables a port to buffer and serialise/deserialise data.
  *
  *  The port should be one of XS1_PORT_1A .. XS1_PORT_32A as specified on the
- *  datasheet and in the xs1.h include file. Either this function or port_init()
- *  should be called once for each variable of type ``port``; port_free()
- *  should be called afterwards.
+ *  datasheet and in the xs1.h include file. Either this function or port_enable()
+ *  should be called once for each variable of type ``port`` before use.
+ *  port_disable() should be called afterwards.
  *
- *  \param port_id      Value that identifies which port to drive.
+ *  \param port_id         Value that identifies which port to drive.
  *
- *  \param shift_width  Number of bits to serialise; must be 1, 2, 4, 8, or 32
+ *  \param transfer_width  Number of bits to serialise; must be 1, 2, 4, 8, or 32.
+ *                         The number of bits must be >= to the physical port
+ *                         width.
  *
- *  \returns            Port variable representing the initialised port
+ *  \returns               Port variable representing the initialised port
  */
-inline port port_enable_buffered(int port_id, int shift_width)
+inline port port_enable_buffered(int port_id, int transfer_width)
 {
-  port p = port_id;
-  asm volatile("setc res[%0], 8" :: "r" (p));
-  asm volatile("setc res[%0], 0x200f" :: "r" (p));
-  asm volatile("settw res[%0], %1" :: "r" (p), "r" (shift_width));
+  port p = port_enable(port_id);
+  port_set_buffered(p);
+  port_set_transfer_width(p, transfer_width);
   return p;
 }
 
@@ -53,7 +56,7 @@ inline port port_enable_buffered(int port_id, int shift_width)
  *
  *  This function switches off the port.
  *
- *  \param p      Port variable to disable
+ *  \param p      Port to disable
  */
 inline void port_disable(port p)
 {
@@ -61,6 +64,59 @@ inline void port_disable(port p)
   return;
 }
 
+/** Change the transfer width of a port.
+ *
+ *  Note that a port must have been set to buffered before calling this function.
+ *
+ *  \param p               The port to change the transfer width of.
+ *
+ *  \param transfer_width  Number of bits to serialise; must be 1, 2, 4, 8, or 32.
+ *                         The number of bits must be >= to the physical port
+ *                         width.
+ */
+inline void port_set_transfer_width(port p, int transfer_width)
+{
+  asm volatile("settw res[%0], %1" :: "r" (p), "r" (transfer_width));
+}
+
+/** Sets a port to be unbuffered.
+ *
+ *  Configures a port into unbuffered mode. Note that before this is called, a
+ *  a port needs to have its transfer width equal to the port width and be
+ *  configured as a master port.
+ *
+ *  \param p      The port to set as unbuffered
+ */
+inline void port_set_unbuffered(port p)
+{
+  asm volatile("setc res[%0], 0x2007" :: "r" (p));
+}
+
+/** Sets a port to be buffered.
+ *
+ *  Configures a port into buffered mode where it can automatically serialise or
+ *  deserialise data.
+ *
+ *  \param p      The port to set as buffered
+ */
+inline void port_set_buffered(port p)
+{
+  asm volatile("setc res[%0], 0x200f" :: "r" (p));
+}
+
+/** Set the clock controlling a port
+ *
+ *  This function connects a port to a clock.
+ *
+ *  \param p      Port to set its
+ *
+ *  \param clk    Clock to attach the port to
+ */
+inline void port_set_clock(port p, clock clk)
+{
+  asm volatile("setclk res[%0], %1" :: "r" (p), "r" (clk));
+  return;
+}
 
 /** Outputs a value onto a port.
  *
@@ -68,7 +124,7 @@ inline void port_disable(port p)
  *  the next clock cycle. In the case of a buffered port, the data will be
  *  stored in the buffer, and be serialised onto the output pins.
  *
- *  \param p      Port variable that inidicates which port to output to
+ *  \param p      Port to output to
  *
  *  \param data   Value to output
  */
@@ -84,7 +140,7 @@ inline void port_output(port p, int data)
  *  the case of a buffered port, the data will be stored in the buffer, and
  *  be serialised onto the output pins at the point that the time is reached.
  *
- *  \param p      Port variable that inidicates which port to output to
+ *  \param p      Port to output to
  *
  *  \param data   Value to output
  *
@@ -102,7 +158,7 @@ inline void port_output_at_time(port p, int data, int16_t t)
  *  the next clock cycle. In the case of a buffered port, the data will be stored
  *  in the buffer, and be serialised onto the output pins.
  *
- *  \param p      Port variable that inidicates which port to output to
+ *  \param p      Port to output to
  *
  *  \param data   Value to output
  *
@@ -122,14 +178,13 @@ inline int port_output_shift_right(port p, int data)
  *  the case of a buffered port, the data will be stored in the buffer, and
  *  be serialised onto the output pins at the point that the time is reached.
  *
- *  \param p      Port variable that inidicates which port to output to
+ *  \param p      Port to output to
  *
  *  \param data   Value to output
  *
  *  \param t      The time of the output
  *
- *  \returns      The output data shifted right by the transfer width
- *               of the port
+ *  \returns      The output data shifted right by the transfer width of the port
  */
 inline int port_output_shift_right_at_time(port p, int data, int16_t t)
 {
@@ -139,6 +194,21 @@ inline int port_output_shift_right_at_time(port p, int data, int16_t t)
   return (data);
 }
 
+/** Peek at the value on a a port.
+ *
+ *  Peeking a port returns the current value on the pins of a port, regardless
+ *  of whether the port is an output or input and without affecting its direciton.
+ *
+ *  \param p      Port to be peeked
+ *
+ *  \returns      The current value on the pins
+ */
+inline int port_peek(port p)
+{
+  int data;
+  asm volatile("peek %0, res[%1]" : "=r" (data): "r" (p));
+  return data;
+}
 
 /** Input a value from a port.
  *
@@ -146,7 +216,7 @@ inline int port_output_shift_right_at_time(port p, int data, int16_t t)
  *  pins. In the case of a buffered port, this function will wait until the buffer
  *  is filled up with deserialised data.
  *
- *  \param p      Port variable that inidicates which port to input from
+ *  \param p      Port to input from
  *
  *  \returns      The inputted data
  */
@@ -164,7 +234,7 @@ inline int port_input(port p)
  *  will wait until the value appears on the pins and then return that
  *  value and some previous values that have been deserialised.
  *
- *  \param p      Port variable that inidicates which port to input from
+ *  \param p      Port to input from
  *
  *  \param value  The value to match against the pins
  *
@@ -187,7 +257,7 @@ inline int port_input_when_pinseq(port p, int value)
  *  this macro will wait until a non matching value appears on the pins, and
  *  then return that value and previous values that have been deserialised.
  *
- *  \param p      Port variable that inidicates which port to input from
+ *  \param p      Port to input from
  *
  *  \param value  The value to match against the pins
  *
@@ -209,7 +279,7 @@ inline int port_input_when_pinsneq(port p, int value)
  *  will wait until the given time and then will start capturing data,
  *  returning a value when the buffer is full.
  *
- *  \param p      Port variable that inidicates which port to input from
+ *  \param p      Port to input from
  *
  *  \param t      The time to do input
  *
@@ -223,14 +293,13 @@ inline int port_input_at_time(port p, int16_t t)
   return data;
 }
 
-
 /** Input a value from a port and shift the data.
  *
  *  In the case of an unbuffered port, the data will be whatever is on the input
  *  pins. In the case of a buffered port, this function will wait until the
  *  buffer is filled up with deserialised data.
  *
- *  \param p      Port variable that inidicates which port to input from
+ *  \param p      Port to input from
  *
  *  \returns      The input data shifted right by the transfer width
  *                of the port
@@ -249,7 +318,7 @@ inline int port_input_shift_right(port p)
  *  will wait until the value appears on the pins and then return that
  *  value and some previous values that have been deserialised.
  *
- *  \param p      Port variable that inidicates which port to input from
+ *  \param p      Port to input from
  *
  *  \param value  The value to match against the pins
  *
@@ -273,7 +342,7 @@ inline int port_input_shift_right_when_pinseq(port p, int value)
  *  this macro will wait until a non matching value appears on the pins, and
  *  then return that value and previous values that have been deserialised.
  *
- *  \param p      Port variable that inidicates which port to input from
+ *  \param p      Port to input from
  *
  *  \param value  The value to match against the pins
  *
@@ -296,7 +365,7 @@ inline int port_input_shift_right_when_pinsneq(port p, int value)
  *  will wait until the given time and then will start capturing data,
  *  returning a value when the buffer is full.
  *
- *  \param p      Port variable that inidicates which port to input from
+ *  \param p      Port to input from
  *
  *  \param t      The time to do input
  *
@@ -413,13 +482,13 @@ inline void port_clear_condition(port p)
  *  This function sets the time condition on the next input or output on
  *  a port.
  *
- *  \param p  The port to set the condition on
+ *  \param p      The port to set the condition on
  *
- *  \param t  The time
+ *  \param count  The port counter value
  */
-inline void port_set_time_condition(port p, int16_t t)
+inline void port_set_time_condition(port p, int16_t count)
 {
-  asm volatile("setpt res[%0], %0" :: "r" (p), "r" (t));
+  asm volatile("setpt res[%0], %0" :: "r" (p), "r" (count));
 }
 
 /** Clear the time condition on a port.
@@ -448,7 +517,10 @@ inline void port_clear_time_condition(port p)
  *
  *  \param p  The port whose buffer is to be cleared
  */
-void port_clear_buffer(port p);
+inline void port_clear_buffer(port p)
+{
+  asm volatile("setc res[%0], 0x17" :: "r" (p));
+}
 
 /** Ends the current input on a buffered port.
  *
@@ -465,7 +537,12 @@ void port_clear_buffer(port p);
  *
  *  \return    The number of bits of data remaining
  */
-unsigned port_endin(port p);
+inline int port_endin(port p)
+{
+  int num_bits;
+  asm volatile("endin %0, res[%1]" : "=r" (num_bits) : "r" (p));
+  return num_bits;
+}
 
 #endif // __XC__
 

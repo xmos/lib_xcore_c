@@ -170,12 +170,12 @@ inline void event_change_port_condition(port p, port_condition_t cond, unsigned 
  *  changed using the event_change_port_condition() function.
  *
  *  \param p     The port to enable events on
- *  \param time  The port counter value at which the port will capture data and
+ *  \param count The port counter value at which the port will capture data and
  *               trigger an event.
  */
-inline void event_change_port_time(port p, uint16_t time)
+inline void event_change_port_time(port p, int16_t count)
 {
-  asm volatile("setpt res[%0], %1" :: "r" (p), "r" (time));
+  port_set_time_condition(p, count);
 }
 
 /** Wait for an event to fire.
