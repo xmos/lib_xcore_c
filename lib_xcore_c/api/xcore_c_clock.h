@@ -8,7 +8,7 @@
 #include <xccompat.h>
 #include <xs1.h>
 
-/** Enable a clock.
+/** Enable a clock
  *
  *  This function enables a specified clock block and returns a clock
  *  variable denoting the clock.
@@ -50,6 +50,40 @@ inline void clock_start(clock clk)
 void clock_stop(clock clk)
 {
   asm volatile("setc res[%0], 0x7" :: "r" (clk));
+}
+
+/** Configure a clock's source to a 1-bit port
+ *
+ *  A clock can be a 1-bit port, the reference clock or the xCORE clock. Note
+ *  that if the xCORE clock is used then a non-zero divide must be used for
+ *  ports to function correctly.
+ *
+ *  \param clk  The clock to configure
+ *
+ *  \param p  The 1-bit port to set as the clock input. Attempting to set a
+ *            port which is not 1-bit as the input will cause an exception.
+ */
+void clock_set_source_port(clock clk, port p)
+{
+  asm volatile("setclk res[%0], %1" :: "r" (clk), "r" (p));
+}
+
+/** Configure a clock's source to be the 100MHz reference clock
+ *
+ *  \param clk  The clock to configure
+ */
+void clock_set_source_clk_ref(clock clk)
+{
+  asm volatile("setclk res[%0], %1" :: "r" (clk), "r" (0x1));
+}
+
+/** Configure a clock's source to be the xCORE clock
+ *
+ *  \param clk  The clock to configure
+ */
+void clock_set_source_clk_xcore(clock clk)
+{
+  asm volatile("setclk res[%0], %1" :: "r" (clk), "r" (0x101));
 }
 
 #endif // __XC__
