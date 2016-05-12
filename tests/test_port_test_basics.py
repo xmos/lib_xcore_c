@@ -2,16 +2,16 @@
 import xmostest
 import os
 
-def runtest():
+def run(arch):
     test_name = "port_test_basics" 
 
     resources = xmostest.request_resource("xsim")
 
-    binary = '{}/bin/{}.xe'.format(test_name, test_name)
+    binary = '{}/bin/{}/{}_{}.xe'.format(test_name, arch, test_name, arch)
 
     tester = xmostest.ComparisonTester(open('{}.expect'.format(test_name)),
                                      'lib_xcore_c', 'xcore_c_tests',
-                                     test_name)
+                                     "{}_{}".format(test_name, arch), regexp=True)
 
     tester.set_min_testlevel("smoke")
 
@@ -23,3 +23,7 @@ def runtest():
                                          'to': 'tile[0]:XS1_PORT_1B'},
                                         {'from': 'tile[1]:XS1_PORT_1A',
                                          'to': 'tile[1]:XS1_PORT_1B'}])
+
+def runtest():
+    run("XS1")
+    run("XS2")

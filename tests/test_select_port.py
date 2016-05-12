@@ -2,16 +2,16 @@
 import xmostest
 import os
 
-def runtest():
-    test_name = "select_port" 
+def run(arch):
+    test_name = "select_port"
 
     resources = xmostest.request_resource("xsim")
 
-    binary = '{}/bin/{}.xe'.format(test_name, test_name)
+    binary = '{}/bin/{}/{}_{}.xe'.format(test_name, arch, test_name, arch)
 
     tester = xmostest.ComparisonTester(open('{}.expect'.format(test_name)),
                                      'lib_xcore_c', 'xcore_c_tests',
-                                     test_name)
+                                     "{}_{}".format(test_name, arch))
 
     tester.set_min_testlevel("smoke")
 
@@ -21,3 +21,7 @@ def runtest():
                               simargs=['--xscope', '-offline xscope.xmt'],
                               loopback=[{'from': 'tile[0]:XS1_PORT_1A',
                                          'to': 'tile[0]:XS1_PORT_1B'}])
+
+def runtest():
+    run("XS1")
+    run("XS2")

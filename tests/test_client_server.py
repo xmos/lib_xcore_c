@@ -2,16 +2,16 @@
 import xmostest
 import os
 
-def runtest():
-    test_name = "client_server" 
+def run(arch):
+    test_name = "client_server"
 
     resources = xmostest.request_resource("xsim")
 
-    binary = '{}/bin/{}.xe'.format(test_name, test_name)
+    binary = '{}/bin/{}/{}_{}.xe'.format(test_name, arch, test_name, arch)
 
     tester = xmostest.ComparisonTester(open('{}.expect'.format(test_name)),
                                      'lib_xcore_c', 'xcore_c_tests',
-                                     test_name)
+                                     "{}_{}".format(test_name, arch), regexp=True)
 
     tester.set_min_testlevel("smoke")
 
@@ -19,3 +19,7 @@ def runtest():
                               simthreads=[],
                               tester=tester,
                               simargs=['--xscope', '-offline xscope.xmt'])
+
+def runtest():
+    run("XS1")
+    run("XS2")

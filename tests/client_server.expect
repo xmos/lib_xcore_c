@@ -1,16 +1,16 @@
-8002:0: get_addresses: local 80020002, remote: 80030002
-8003:0: get_addresses: local 80030002, remote: 80020002
-8002:1: received 1 from 80020202
-8003:1: received 1 from 80030202
-Send cmd 1 to 80020002 response ok
-Send cmd 1 to 80030002 response ok
-8003:1: received 2 from 80020202
-8002:1: received 2 from 80030202
-Send cmd 2 to 80030002 response ok
-Send cmd 2 to 80020002 response ok
-8002:1: received 0 from 80020202
-8003:1: received 0 from 80030202
-8002:1: shutting down
-Send cmd 0 to 80020002 response ok
-8003:1: shutting down
-Send cmd 0 to 80030002 response ok
+800\d:0: get_addresses: local 800\d0002, remote: 800\d0002
+800\d:0: get_addresses: local 800\d0002, remote: 800\d0002
+800\d:1: received 1 from 800\d0202
+800\d:1: received 1 from 800\d0202
+Send cmd 1 to 800\d0002 response ok
+Send cmd 1 to 800\d0002 response ok
+800\d:1: received 2 from 800\d0202
+800\d:1: received 2 from 800\d0202
+Send cmd 2 to 800\d0002 response ok
+Send cmd 2 to 800\d0002 response ok
+800\d:1: received 0 from 800\d0202
+800\d:1: received 0 from 800\d0202
+800\d:1: shutting down
+Send cmd 0 to 800\d0002 response ok
+800\d:1: shutting down
+Send cmd 0 to 800\d0002 response ok
