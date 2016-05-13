@@ -2,8 +2,9 @@
 
 .text
 
-// Make this global so that it can be used as the default event vector
+// Make these global so that it can be used as the default event vector
 .globl __event_target
+.globl __event_function_wrapper
 
 .globl event_select
 .globl event_select.nstackwords
@@ -20,8 +21,8 @@
 .set event_select.maxchanends, 0
 .set event_select.maxsync, 0
 
-// This code will cope with being called in single or dual issue. Hence the extra
-// nops.
+// This code will cope with being called in single or dual issue.
+// Hence the extra nops.
 .align 4
 event_select:
   waiteu
@@ -31,6 +32,44 @@ __event_target:
   nop
   add r0, r11, 0
   retsp 0
+
+
+.globl __event_function_wrapper
+.globl __event_function_wrapper.nstackwords
+.globl __event_function_wrapper.maxthreads
+.globl __event_function_wrapper.maxtimers
+.globl __event_function_wrapper.maxchanends
+.globl __event_function_wrapper.maxsync
+.type  __event_function_wrapper, @function
+.linkset __event_function_wrapper.locnoside, 1
+.linkset __event_function_wrapper.locnochandec, 1
+.set __event_function_wrapper.nstackwords, 0
+.set __event_function_wrapper.maxthreads, 0
+.set __event_function_wrapper.maxtimers, 0
+.set __event_function_wrapper.maxchanends, 0
+.set __event_function_wrapper.maxsync, 0
+
+// This code will cope with being called in single or dual issue.
+// Hence the extra nops.
+.align 4
+__event_function_wrapper:
+  nop
+  entsp 2
+
+  // The index is stored in the ED. It needs the top bits cleared on XS1
+  get r11, ed
+  mkmsk r3, 16
+  and r3, r11, r3
+  ldap r11, event_handler_state
+  ldaw r0, r11[r3]
+  ldw r2, r0[1]
+  ldw r1, r0[2]
+  ldw r0, r0[0]
+  bla r2
+
+  ldw lr, sp[2]
+  ldaw sp, sp[2]
+  waiteu
 
 
 .globl event_select_no_wait

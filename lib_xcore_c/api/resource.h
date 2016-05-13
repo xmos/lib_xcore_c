@@ -5,6 +5,7 @@
 
 #include <stdint.h>
 #include <xccompat.h>
+#include <assert.h>
 
 typedef unsigned resource;
 

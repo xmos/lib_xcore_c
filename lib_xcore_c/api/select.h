@@ -5,34 +5,8 @@
 
 #ifndef __XC__
 
-#include <stdint.h>
-#include <assert.h>
-#include <xccompat.h>
 #include "resource.h"
 #include "port.h"
-
-#if defined(__XS2A__)
-#define EVENT_ENUM_BASE 0
-#else
-// On XS1 the environment vectors (EVs) are only 16-bit and bit 16 will be set
-// to 1 as it is expected to be used as a memory address.
-#define EVENT_ENUM_BASE 0x10000
-#endif
-
-/*
- * TODO: ordered select
- */
-
-/** Clear all pending events.
- *
- *  This function should be called before starting to configure events for
- *  a new event loop to ensure that no other events will be triggered by
- *  events set up by other code.
- */
-inline void event_clear_all()
-{
-  asm volatile("clre");
-}
 
 /** Disable events from a given resource.
  *
@@ -58,30 +32,25 @@ inline void event_enable(resource r)
   asm volatile("eeu res[%0]" :: "r" (r));
 }
 
-/** Enable events on a resource.
- *
- *  This is a shared function to be used by enable_events_chanend(),
- *  enable_events_port() and enable_events_timer().
- *
- *  \param r      The resource to enable events for
- *  \param value The value to be returned by event_select()/event_select_no_wait()
- *               when the timer event is triggered.
- */
-inline void event_setup_resource(resource r, unsigned value)
-{
-  // Set the event vector
-  asm volatile("ldap r11, __event_target");
-  asm volatile("setv res[%0], r11" :: "r" (r));
+#include "event_internal.h"
 
-  resource_set_ev(r, value);
-  event_enable(r);
+/** Clear all pending events.
+ *
+ *  In order to ensure that no events set up by other code will be triggered
+ *  then this function should be called before starting to configure events for
+ *  a new event loop.
+ */
+inline void event_clear_all()
+{
+  asm volatile("clre");
 }
 
 /** Setup events on a timer.
  *
- *  This function configures a timer to trigger events when data is ready. By
- *  default a timer is ready instantly. event_change_timer_time() should be used
- *  to cause the timer to wait for a time to be met.
+ *  This function configures a timer to trigger events when the timer has reached
+ *  the specified time. This function configures a timer to be used within the
+ *  context of an event handling function and so is passed the value to return
+ *  when the event is triggered.
  *
  *  \param t     The timer to enable events on
  *  \param value The value to be returned by event_select()/event_select_no_wait()
@@ -92,12 +61,37 @@ inline void event_setup_resource(resource r, unsigned value)
 inline void event_setup_timer(timer t, unsigned value, int time)
 {
   event_setup_resource(t, value);
+  event_setup_timer_common(t, time);
+}
 
-  // Set the condition to be AFTER
-  asm volatile("setc res[%0], 0x9" :: "r" (t));
+/** Setup events on a timer where the events are handled by a function.
+ *
+ *  This sets up events in the same way as event_setup_timer() but the events
+ *  are designed to be handled by an event handler function which is passed in.
+ *
+ *  \param t       The timer to enable events on
+ *  \param handler The function to handle the events
+ *  \param data    The value to be passed to the event handler function
+ *  \param time    The time at which the timer should trigger an event. The default
+ *                 timer ticks are at a 10ns resolution.
+ */
+inline void event_setup_timer_function(timer t, event_handler_t handler,
+                                       void *data, int time)
+{
+  event_setup_resource_function(t, handler, data);
+  event_setup_timer_common(t, time);
+}
 
-  // Set the time at which the event should fire
-  asm volatile("setd res[%0], %1" :: "r" (t), "r" (time));
+/** Clear events for a given timer.
+ *
+ *  This function prevents any further events being triggered by a given timer.
+ *
+ *  \param t  The timer to clear events on
+ */
+inline void event_clear_timer(timer t)
+{
+  event_deregister_function(t);
+  event_disable(t);
 }
 
 /** Change the time at which a timer event will fire.
@@ -128,6 +122,34 @@ inline void event_setup_chanend(chanend c, unsigned value)
   event_setup_resource(c, value);
 }
 
+/** Setup events on a channel end where the events are handled by a function.
+ *
+ *  Same as event_setup_chanend() except that a handler function is used.
+ *
+ *  \param c       The channel end to enable events on
+ *  \param handler The handler function to handle events
+ *  \param data    The value to be passed to the event handler function
+ */
+inline void event_setup_chanend_function(chanend c, event_handler_t handler,
+                                         void *data)
+{
+  event_setup_resource_function(c, handler, data);
+}
+
+
+/** Clear events for a given chanend.
+ *
+ *  This function prevents any further events being triggered by a given channel
+ *  end.
+ *
+ *  \param c  The chanend to clear events on
+ */
+inline void event_clear_chanend(chanend c)
+{
+  event_deregister_function(c);
+  event_disable(c);
+}
+
 /** Setup events on a port.
  *
  *  This function configures a port to trigger events when ready. By default a
@@ -144,6 +166,35 @@ inline void event_setup_port(port p, unsigned value)
 
   // Set the default condition to be when there is data available
   asm volatile("setc res[%0], %1" :: "r" (p), "r" (PORT_COND_FULL));
+}
+
+/** Setup events on a port where the events are handler by a function.
+ *
+ *  Same as event_setup_port() except that a handler function is used.
+ *
+ *  \param p       The port to enable events on
+ *  \param handler The handler function to handle events
+ *  \param data    The value to be passed to the event handler function
+ */
+inline void event_setup_port_function(port p, event_handler_t handler,
+                                      void *data)
+{
+  event_setup_resource_function(p, handler, data);
+
+  // Set the default condition to be when there is data available
+  asm volatile("setc res[%0], %1" :: "r" (p), "r" (PORT_COND_FULL));
+}
+
+/** Clear events for a given port.
+ *
+ *  This function prevents any further events being triggered by a given port.
+ *
+ *  \param p  The port to clear events on
+ */
+inline void event_clear_port(port p)
+{
+  event_deregister_function(p);
+  event_disable(p);
 }
 
 /** Change the condition that triggers events on a port.
