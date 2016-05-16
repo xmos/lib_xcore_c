@@ -89,9 +89,10 @@ __event_function_wrapper:
 
 #if defined(__XS2A__)
 
-.issue_mode dual
+.issue_mode single
 .align 4
 event_select_no_wait:
+  nop
   entsp 0x0           // Enter single issue
   setsr 0x1           // Enable events
   nop                 // Allow channel events to fire
