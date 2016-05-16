@@ -38,9 +38,3 @@ VERBOSE = 0
 
 XMOS_MAKE_PATH ?= ../..
 include $(XMOS_MAKE_PATH)/xcommon/module_xcommon/build/Makefile.common
-
-#=============================================================================
-# This depends on the common makefile
-.PHONY: run
-run: $(BIN_DIR)/$(APP_NAME).xe
-	xsim --xscope "-offline xscope.xmt" $(BIN_DIR)/$(APP_NAME).xe
