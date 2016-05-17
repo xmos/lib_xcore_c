@@ -5,7 +5,7 @@
 #include "debug_print.h"
 
 // Timer period which allows enough time for the debug_printfs to complete
-#define PERIOD 10000
+static const int period = 10000;
 
 // For XS1 support all values passed to the event_setup function must have bit 16 set
 typedef enum {
@@ -51,7 +51,7 @@ void handle_timer(resource r, void *data)
 
   int time = timer_get_time(t);
   debug_printf("Timer event data 0x%x\n", (int)data);
-  event_change_timer_time(t, time + PERIOD);
+  event_change_timer_time(t, time + period);
 }
 
 void test(chanend c, chanend d)
@@ -62,7 +62,7 @@ void test(chanend c, chanend d)
 
   // Test 1: Run the test function with the timer enabled
   int time = timer_get_time(t);
-  event_setup_timer_function(t, handle_timer, (void*)0xfeedbeef, time + PERIOD);
+  event_setup_timer_function(t, handle_timer, (void*)0xfeedbeef, time + period);
   test_select_function(c, d);
 
   // Test 2: Run the test function again with the timer disabled
@@ -71,6 +71,6 @@ void test(chanend c, chanend d)
 
   // Test 3: Run the test function again with the timer enabled
   time = timer_get_time(t);
-  event_setup_timer_function(t, handle_timer, (void*)0xfeedbeef, time + PERIOD);
+  event_setup_timer_function(t, handle_timer, (void*)0xfeedbeef, time + period);
   test_select_function(c, d);
 }
