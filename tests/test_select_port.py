@@ -3,9 +3,7 @@ import xmostest
 import os
 
 def run(arch):
-    # Derive test name from the python script name with out leading "test_" or
-    # the trailing ".py"
-    test_name = os.path.basename(__file__)[5:-3]
+    test_name = os.path.basename(__file__).replace("test_", "", 1).replace(".py", "")
 
     resources = xmostest.request_resource("xsim")
 
