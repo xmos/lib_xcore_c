@@ -1,0 +1,32 @@
+Running with order [c, d, timer]
+Received 555 on channel c
+Received 556 on channel c
+Received 557 on channel c
+Received 558 on channel c
+Received 559 on channel c
+Received 333 on channel d
+Received 334 on channel d
+Received 335 on channel d
+Received 336 on channel d
+Received 337 on channel d
+Timer event 1
+Timer event 2
+Timer event 3
+Timer event 4
+Timer event 5
+Running with order [timer, d, c]
+Timer event 1
+Timer event 2
+Timer event 3
+Timer event 4
+Timer event 5
+Received 333 on channel d
+Received 334 on channel d
+Received 335 on channel d
+Received 336 on channel d
+Received 337 on channel d
+Received 555 on channel c
+Received 556 on channel c
+Received 557 on channel c
+Received 558 on channel c
+Received 559 on channel c

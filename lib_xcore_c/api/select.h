@@ -222,7 +222,7 @@ inline void event_change_port_condition(port p, port_condition_t cond, unsigned 
  *
  *  \param p     The port to enable events on
  *  \param count The port counter value at which the port will capture data and
- *               trigger an event.
+ *               trigger an event
  */
 inline void event_change_port_time(port p, int16_t count)
 {
@@ -245,12 +245,39 @@ unsigned event_select();
  *  triggered the event. If no events are ready then returns the no_wait_value
  *  passed in by the user.
  *
- *  \param no_wait_value  The value to return if no event is triggered.
+ *  \param no_wait_value  The value to return if no event is triggered
  *
- *  \returns  The value registered with the resource or the no_wait_value passed
- *            in if no event fired.
+ *  \returns  The value registered with the resource which triggered an event
+ *            or the no_wait_value passed in if no event fired
  */
 unsigned event_select_no_wait(unsigned no_wait_value);
+
+/** Wait for an event from a list of resources using an ordered enable sequence
+ *
+ *  This function:
+ *    - starts by clearing all events that have been configured
+ *    - setting events on the core to be enabled
+ *    - enabling events on each resource in turn so that there is a defined
+ *      order in which events will be taken
+ *
+ *  \param ids  Null-terminated list of resources to enable events on
+ *
+ *  \returns    The value registered with the resource which triggers an event
+ */
+unsigned event_select_ordered(resource ids[]);
+
+/** Wait for an event from a list of resources using an ordered enable sequence
+ *
+ *  This function does the same as event_select_ordered, but will return the
+ *  no_wait_value if no event fires by the end of the enabling sequence.
+ *
+ *  \param ids            Null-terminated list of resources to enable events on
+ *  \param no_wait_value  The value to return if no event is triggered
+ *
+ *  \returns  The value registered with the resource which triggered an event
+ *            or the no_wait_value passed in if no event fired
+ */
+unsigned event_select_ordered_no_wait(resource ids[], unsigned no_wait_value);
 
 #endif // __XC__
 
