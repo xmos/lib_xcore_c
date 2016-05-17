@@ -75,8 +75,8 @@ void event_deregister_function(resource r);
 inline void event_setup_resource(resource r, unsigned value)
 {
   // Set the event vector
-  asm volatile("ldap r11, __event_target");
-  asm volatile("setv res[%0], r11" :: "r" (r));
+  asm volatile("ldap r11, __event_target" : : : /* clobbers */ "r11");
+  asm volatile("setv res[%0], r11" : : "r" (r));
 
   resource_set_ev(r, value);
   event_enable(r);
@@ -95,12 +95,12 @@ inline void event_setup_resource_function(resource r, event_handler_t handler, v
 {
   int value = event_register_function(r, handler, data);
   // Set the event vector
-  asm volatile("ldap r11, __event_function_wrapper");
-  asm volatile("setv res[%0], r11" :: "r" (r));
+  asm volatile("ldap r11, __event_function_wrapper" : : : /* clobbers */ "r11");
+  asm volatile("setv res[%0], r11" : : "r" (r));
 
   // Don't call resource_set_ev() function as that requires the value to have bit 16 set
-  asm volatile("add r11, %0, 0" :: "r" (value));
-  asm volatile("setev res[%0], r11" :: "r" (r));
+  asm volatile("add r11, %0, 0" : : "r" (value) : /* clobbers */ "r11");
+  asm volatile("setev res[%0], r11" : : "r" (r));
   event_enable(r);
 }
 

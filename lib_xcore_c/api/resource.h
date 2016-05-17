@@ -33,8 +33,8 @@ inline void resource_set_ev(resource r, uint32_t value)
   }
 #endif
 
-  asm volatile("add r11, %0, 0" :: "r" (value));
-  asm volatile("setev res[%0], r11" :: "r" (r));
+  asm volatile("add r11, %0, 0" : : "r" (value) : /* clobbers */ "r11");
+  asm volatile("setev res[%0], r11" : : "r" (r));
 }
 
 #endif // __resource_h__
