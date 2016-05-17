@@ -3,7 +3,9 @@ import xmostest
 import os
 
 def run(arch):
-    test_name = "event_handler_functions"
+    # Derive test name from the python script name with out leading "test_" or
+    # the trailing ".py"
+    test_name = os.path.basename(__file__)[5:-3]
 
     resources = xmostest.request_resource("xsim")
 
