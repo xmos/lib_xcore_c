@@ -25,7 +25,7 @@ extern void chan_input_block(chanend c, char *buf, int n);
 
 extern inline transacting_chanend chan_init_transaction_master(chanend c);
 extern inline transacting_chanend chan_init_transaction_slave(chanend c);
-extern inline chanend chan_complete_transaction(transacting_chanend c);
+extern inline chanend chan_complete_transaction(REFERENCE_PARAM(transacting_chanend, c));
 extern inline void t_chan_check_ct(REFERENCE_PARAM(transacting_chanend, c), int ct);
 extern inline void t_chan_output_word(REFERENCE_PARAM(transacting_chanend, c), int data);
 extern inline void t_chan_output_byte(REFERENCE_PARAM(transacting_chanend, c), char data);
