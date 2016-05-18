@@ -10,10 +10,10 @@ int main()
 {
   chan c0, c1;
   par {
-  	on tile[0] : port_test_output(c0);
-  	on tile[0] : port_test_input(c0);
-  	on tile[1] : port_test_output(c1);
-  	on tile[1] : port_test_input(c1);
+    on tile[0] : port_test_output(c0);
+    on tile[0] : port_test_input(c0);
+    on tile[1] : port_test_output(c1);
+    on tile[1] : port_test_input(c1);
   }
   return 0;
 }

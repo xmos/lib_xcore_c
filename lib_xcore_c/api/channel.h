@@ -130,7 +130,7 @@ inline void s_chan_output_ct(streaming_chanend c, int ct)
  */
 inline void s_chan_check_ct(streaming_chanend c, int ct)
 {
-    asm volatile("chkct res[%0], %1" :: "r" (c), "r" (ct));
+  asm volatile("chkct res[%0], %1" :: "r" (c), "r" (ct));
 }
 
 
@@ -266,7 +266,6 @@ inline void chan_output_block(chanend c, char buf[], int n)
   s_chan_check_ct_end(c);
 }
 
-
 /** Input a word from a channel.
  *
  *  \param c    The channel-end
@@ -300,7 +299,6 @@ inline int chan_input_byte(chanend c)
   s_chan_check_ct_end(c);
   return data;
 }
-
 
 /** Input a block of data from a channel-end.
  *

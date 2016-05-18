@@ -422,7 +422,7 @@ inline int16_t port_get_timestamp(port p)
   return ts;
 }
 
-/** Type representing port conditions
+/** Type representing port conditions.
  *
  */
 typedef enum port_condition_t {

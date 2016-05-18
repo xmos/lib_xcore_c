@@ -107,11 +107,20 @@ inline chanend chan_complete_transaction(transacting_chanend c)
 }
 
 #define __t_chan_change_to_input(c) \
-  do { if (__tc_get_reference_member(c,st)) {__tc_get_reference_member(c,st) = 0;s_chan_check_ct(__tc_get_reference_member(c,c), XS1_CT_END);} } while (0)
+  do { \
+    if (__tc_get_reference_member(c,st)) { \
+      __tc_get_reference_member(c,st) = 0; \
+      s_chan_check_ct(__tc_get_reference_member(c,c), XS1_CT_END); \
+    } \
+  } while (0)
 
 #define __t_chan_change_to_output(c) \
-  do { if (!__tc_get_reference_member(c,st)) {__tc_get_reference_member(c,st) = 1;s_chan_output_ct(__tc_get_reference_member(c,c), XS1_CT_END);} } while (0)
-
+  do { \
+    if (!__tc_get_reference_member(c,st)) { \
+      __tc_get_reference_member(c,st) = 1; \
+      s_chan_output_ct(__tc_get_reference_member(c,c), XS1_CT_END); \
+    } \
+  } while (0)
 
 /** Check that a specific control token is available on a
  * transacting channel-end. This function blocks until a token is available on
@@ -128,7 +137,6 @@ inline void t_chan_check_ct(REFERENCE_PARAM(transacting_chanend, c), int ct)
   __t_chan_change_to_input(c);
   asm volatile("chkct res[%0],%1" :: "r" (__tc_get_reference_member(c,c)), "r" (ct));
 }
-
 
 /** Output a word over a transacting channel-end.
  *
@@ -154,7 +162,6 @@ inline void t_chan_output_byte(REFERENCE_PARAM(transacting_chanend, c), char dat
   asm volatile("outt res[%0],%1" :: "r" (__tc_get_reference_member(c,c)), "r" (data));
 }
 
-
 /** Output a block of data over a transacting channel-end.
  *
  * \param c    The transacting channel-end
@@ -168,10 +175,10 @@ inline void t_chan_output_block(REFERENCE_PARAM(transacting_chanend, c), char bu
   // Note we could do this more efficiently depending on the size of n
   // and the alignment of buf
   __t_chan_change_to_output(c);
-  for (int i=0;i<n;i++)
+  for (int i = 0; i < n; i++) {
     s_chan_output_byte(__tc_get_reference_member(c,c), buf[i]);
+  }
 }
-
 
 /** Input a word from a transacting channel-end.
  *
@@ -214,8 +221,9 @@ inline void t_chan_input_block(REFERENCE_PARAM(transacting_chanend, c), char buf
   // Note we could do this more efficiently depending on the size of n
   // and the alignment of buf
   __t_chan_change_to_input(c);
-  for (int i=0;i<n;i++)
+  for (int i = 0; i < n; i++) {
     buf[i] = s_chan_input_byte(__tc_get_reference_member(c,c));
+  }
 }
 
 #endif // __XC__

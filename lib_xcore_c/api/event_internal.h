@@ -19,7 +19,7 @@
 #define EVENT_MAX_HANDLER_FUNCTIONS 20
 #endif
 
-/** The typedef for all function event handlers
+/** The typedef for all function event handlers.
  *
  * The ID of the resource that triggered the event is passed to the handler along
  * with the user data registered with that resource.
@@ -35,7 +35,7 @@ typedef struct event_handler_function_state_t {
   void *data;
 } event_handler_function_state_t;
 
-/** Register an event handler for a resource
+/** Register an event handler for a resource.
  *
  *  Find a free registry entry and register the function and data for the given
  *  resource.

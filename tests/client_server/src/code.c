@@ -34,21 +34,21 @@ void chanend_server(chanend c)
   unsigned core_id = get_logical_core_id();
 
   while(1) {
-  	chanend sender = s_chan_input_word(c);
-  	int command = s_chan_input_word(c);
-  	s_chan_check_ct(c, XS1_CT_END);
+    chanend sender = s_chan_input_word(c);
+    int command = s_chan_input_word(c);
+    s_chan_check_ct(c, XS1_CT_END);
 
-  	debug_printf("%x:%d: received %d from %x\n", tile_id, core_id, command, sender);
+    debug_printf("%x:%d: received %d from %x\n", tile_id, core_id, command, sender);
 
-  	// Send a response (simply invert the data)
-  	chanend_set_dest(c, sender);
-  	s_chan_output_word(c, ~command);
-  	s_chan_output_ct(c, XS1_CT_END);
+    // Send a response (simply invert the data)
+    chanend_set_dest(c, sender);
+    s_chan_output_word(c, ~command);
+    s_chan_output_ct(c, XS1_CT_END);
 
-  	if (command == SHUT_DOWN) {
+    if (command == SHUT_DOWN) {
       debug_printf("%x:%d: shutting down\n", tile_id, core_id);
-  		break;
-  	}
+      break;
+    }
   }
 }
 

@@ -9,7 +9,7 @@
 
 typedef unsigned resource;
 
-/** Set the Environment Vector (EV) of a resource
+/** Set the Environment Vector (EV) of a resource.
  *
  *  The EV for a resource is a piece of state associated with each resource. The
  *  value of the EV is placed in the Exception Data (ED) register when an event
