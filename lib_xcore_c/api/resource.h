@@ -7,6 +7,9 @@
 #include <xccompat.h>
 #include <assert.h>
 
+/** The generic resource type
+ *
+ */
 typedef unsigned resource;
 
 /** Set the Environment Vector (EV) of a resource.
