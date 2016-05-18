@@ -14,7 +14,8 @@
  *
  *  \returns   The initialized timer
  */
-#ifndef __XC__
+#if !defined(__XC__) || defined(__DOXYGEN__)
+
 inline timer timer_alloc(void)
 {
   timer t;

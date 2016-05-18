@@ -3,7 +3,7 @@
 #ifndef __select_h__
 #define __select_h__
 
-#ifndef __XC__
+#if !defined(__XC__) || defined(__DOXYGEN__)
 
 #include "resource.h"
 #include "port.h"
@@ -75,7 +75,7 @@ inline void event_setup_timer(timer t, unsigned value, int time)
  *  \param time    The time at which the timer should trigger an event. The default
  *                 timer ticks are at a 10ns resolution.
  */
-inline void event_setup_timer_function(timer t, event_handler_t handler,
+inline void event_setup_timer_function(timer t, event_handler handler,
                                        void *data, int time)
 {
   event_setup_resource_function(t, handler, data);
@@ -130,7 +130,7 @@ inline void event_setup_chanend(chanend c, unsigned value)
  *  \param handler The handler function to handle events
  *  \param data    The value to be passed to the event handler function
  */
-inline void event_setup_chanend_function(chanend c, event_handler_t handler,
+inline void event_setup_chanend_function(chanend c, event_handler handler,
                                          void *data)
 {
   event_setup_resource_function(c, handler, data);
@@ -176,7 +176,7 @@ inline void event_setup_port(port p, unsigned value)
  *  \param handler The handler function to handle events
  *  \param data    The value to be passed to the event handler function
  */
-inline void event_setup_port_function(port p, event_handler_t handler,
+inline void event_setup_port_function(port p, event_handler handler,
                                       void *data)
 {
   event_setup_resource_function(p, handler, data);
@@ -204,10 +204,11 @@ inline void event_clear_port(port p)
  *  of triggering when full.
  *
  *  \param p     The port to enable events on
+ *  \param cond  The condition which the port is waiting for
  *  \param data  The data value that is being compared. The data has no effect
  *               when the condition is being set to PORT_COND_FULL.
  */
-inline void event_change_port_condition(port p, port_condition_t cond, unsigned data)
+inline void event_change_port_condition(port p, port_condition cond, unsigned data)
 {
   asm volatile("setc res[%0], %1" :: "r" (p), "r" (cond));
   asm volatile("setd res[%0], %1" :: "r" (p), "r" (data));

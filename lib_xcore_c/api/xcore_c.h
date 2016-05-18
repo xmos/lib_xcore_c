@@ -8,7 +8,7 @@
 #include "channel.h"
 #include "port.h"
 #include "timer.h"
-#include "select.h"
+#include "event.h"
 #include "xcore_c_clock.h"
 
 #endif // __xcore_c_h__

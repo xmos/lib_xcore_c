@@ -3,7 +3,13 @@
 #ifndef __channel_transaction_h__
 #define __channel_transaction_h__
 
-#ifndef __XC__
+#if defined(__XC__) || defined(__DOXYGEN__)
+#define __tc_get_reference_member(x,m) x.m
+#else
+#define __tc_get_reference_member(x,m) x->m
+#endif
+
+#if !defined(__XC__) || defined(__DOXYGEN__)
 
 #include <xs1.h>
 
@@ -18,12 +24,6 @@ typedef struct transacting_chanend_s {
   chanend c;
   int last_out;
 } transacting_chanend;
-
-#ifdef __XC__
-#define __tc_get_reference_member(x,m) x.m
-#else
-#define __tc_get_reference_member(x,m) x->m
-#endif
 
 /** Start a transaction (master).
  *

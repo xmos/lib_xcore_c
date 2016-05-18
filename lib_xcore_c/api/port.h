@@ -3,7 +3,7 @@
 #ifndef __port_h__
 #define __port_h__
 
-#ifndef __XC__
+#if !defined(__XC__) || defined(__DOXYGEN__)
 
 #include <stdint.h>
 #include <xccompat.h>
@@ -381,31 +381,6 @@ inline int port_input_shift_right_at_time(port p, int16_t t)
   return data;
 }
 
-/** Force an input on a buffered port.
- *
- *  The function will perform an input on a buffered port even if the buffer is
- *  only partially full.
- *
- *  \param      p    The port to do the input on
- *
- *  \param[out] n    A variable to be filled with number of bits inputted
- *
- *  \returns         The inputted data
- */
-#ifdef __XC__
-inline int port_force_input(port p, int &n)
-{
-  asm volatile("endin %0, res[%1]" : "=r" (n) : "r" (p));
-  return port_input(p);
-}
-#else
-inline int port_force_input(port p, int *n)
-{
-  asm volatile("endin %0, res[%1]" : "=r" (*n) : "r" (p));
-  return port_input(p);
-}
-#endif
-
 /** Get the timestamp of the last operation on a port.
  *
  *  This function gets the timestamp of the last input or output operation
@@ -425,11 +400,11 @@ inline int16_t port_get_timestamp(port p)
 /** Type representing port conditions.
  *
  */
-typedef enum port_condition_t {
+typedef enum port_condition {
   PORT_COND_FULL    =  0x1, //< Condition that holds when port contains data ready to be input
   PORT_COND_PINSEQ  = 0x11, //< Condition that holds when the pins of the port are equal to the port conditional data
   PORT_COND_PINSNEQ = 0x19  //< Condition that holds when the pins of the port are equal to the port conditional data
-} port_condition_t;
+} port_condition;
 
 /** Set the condition on a port.
  *
@@ -445,7 +420,7 @@ typedef enum port_condition_t {
  *
  *  \sa port_set_conditional_data
  */
-inline void port_set_condition(port p, port_condition_t c)
+inline void port_set_condition(port p, port_condition c)
 {
   asm volatile("setc res[%0], %1" :: "r" (p), "r" (c));
 }
@@ -545,5 +520,30 @@ inline int port_endin(port p)
 }
 
 #endif // __XC__
+
+/** Force an input on a buffered port.
+ *
+ *  The function will perform an input on a buffered port even if the buffer is
+ *  only partially full.
+ *
+ *  \param      p    The port to do the input on
+ *
+ *  \param[out] n    A variable to be filled with number of bits inputted
+ *
+ *  \returns         The inputted data
+ */
+#if defined(__XC__) || defined(__DOXYGEN__)
+inline int port_force_input(port p, int &n)
+{
+  asm volatile("endin %0, res[%1]" : "=r" (n) : "r" (p));
+  return port_input(p);
+}
+#else
+inline int port_force_input(port p, int *n)
+{
+  asm volatile("endin %0, res[%1]" : "=r" (*n) : "r" (p));
+  return port_input(p);
+}
+#endif
 
 #endif // __port_h__

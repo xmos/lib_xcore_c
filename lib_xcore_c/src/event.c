@@ -1,13 +1,13 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
-#include "select.h"
+#include "event.h"
 
 /*
  * State to store registered event handler state
  */
-event_handler_function_state_t event_handler_state[EVENT_MAX_HANDLER_FUNCTIONS];
+event_handler_function_state event_handler_state[EVENT_MAX_HANDLER_FUNCTIONS];
 
-int event_register_function(resource r, event_handler_t handler, void *data)
+int event_register_function(resource r, event_handler handler, void *data)
 {
   for (int i = 0; i < EVENT_MAX_HANDLER_FUNCTIONS; ++i)
   {

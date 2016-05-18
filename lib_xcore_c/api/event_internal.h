@@ -3,7 +3,7 @@
 #ifndef __event_internal_h__
 #define __event_internal_h__
 
-#ifndef __XC__
+#if !defined(__XC__) || defined(__DOXYGEN__)
 
 #include <stdint.h>
 #include <assert.h>
@@ -24,26 +24,27 @@
  * The ID of the resource that triggered the event is passed to the handler along
  * with the user data registered with that resource.
  */
-typedef void (*event_handler_t)(resource, void*);
+typedef void (*event_handler)(resource, void*);
 
-/**
- * The structure to register event function handlers
+/** The structure to register event function handlers
  */
-typedef struct event_handler_function_state_t {
+typedef struct event_handler_function_state {
   resource owner;
-  event_handler_t handler;
+  event_handler handler;
   void *data;
-} event_handler_function_state_t;
+} event_handler_function_state;
 
 /** Register an event handler for a resource.
  *
  *  Find a free registry entry and register the function and data for the given
  *  resource.
  *
- *  \param r  The resource to de-register
- *  \returns  The index allocated for this resource or -1 if the register is full
+ *  \param r       The resource to de-register
+ *  \param handler The function to handle the events
+ *  \param data    The value to be passed to the event handler function
+ *  \returns       The index allocated for this resource or -1 if the register is full
  */
-int event_register_function(resource r, event_handler_t handler, void *data);
+int event_register_function(resource r, event_handler handler, void *data);
 
 /** Deregister an event handler for a resource
  *
@@ -68,7 +69,7 @@ void event_deregister_function(resource r);
  *  This is a shared function to be used by enable_events_chanend(),
  *  enable_events_port() and enable_events_timer().
  *
- *  \param r      The resource to enable events for
+ *  \param r     The resource to enable events for
  *  \param value The value to be returned by event_select()/event_select_no_wait()
  *               when the timer event is triggered.
  */
@@ -82,16 +83,16 @@ inline void event_setup_resource(resource r, unsigned value)
   event_enable(r);
 }
 
-/** Enable events on a resource.
+/** Enable events on a resource to be handled by a function.
  *
- *  This is a shared function to be used by enable_events_chanend(),
- *  enable_events_port() and enable_events_timer().
+ *  This is a shared function to be used by enable_events_chanend_function(),
+ *  enable_events_port_function() and enable_events_timer_function().
  *
- *  \param r      The resource to enable events for
- *  \param value The value to be returned by event_select()/event_select_no_wait()
- *               when the timer event is triggered.
+ *  \param r       The resource to enable events for
+ *  \param handler The function to handle the events
+ *  \param data    The value to be passed to the event handler function
  */
-inline void event_setup_resource_function(resource r, event_handler_t handler, void *data)
+inline void event_setup_resource_function(resource r, event_handler handler, void *data)
 {
   int value = event_register_function(r, handler, data);
   // Set the event vector
@@ -106,11 +107,10 @@ inline void event_setup_resource_function(resource r, event_handler_t handler, v
 
 /** Basic setup function for timer.
  *
- *  Configure the 
- *  enable_events_port() and enable_events_timer().
+ *  Function shared by event_setup_timer() and event_setup_timer_function().
  *
- *  \param r      The resource to enable events for
- *  \param value The value to be returned by event_select()/event_select_no_wait()
+ *  \param t     The timer to enable events for
+ *  \param time  The value to be returned by event_select()/event_select_no_wait()
  *               when the timer event is triggered.
  */
 inline void event_setup_timer_common(timer t, int time)

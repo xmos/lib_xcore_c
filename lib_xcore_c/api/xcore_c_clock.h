@@ -3,7 +3,7 @@
 #ifndef __xcore_c_clock_h__
 #define __xcore_c_clock_h__
 
-#ifndef __XC__
+#if !defined(__XC__) || defined(__DOXYGEN__)
 
 #include <xccompat.h>
 #include <xs1.h>
