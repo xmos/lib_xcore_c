@@ -1,10 +1,10 @@
-lib_xcore_c
-===========
+xCORE C Library
+===============
 
 Overview
 --------
 
-C library for xCORE hardware features
+A library providing a native C implementation of xCORE hardware features.
 
 Features
 ........
