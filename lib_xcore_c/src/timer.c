@@ -1,3 +1,5 @@
+// Copyright (c) 2016, XMOS Ltd, All rights reserved
+
 #include "timer.h"
 
 extern inline timer timer_alloc(void);
