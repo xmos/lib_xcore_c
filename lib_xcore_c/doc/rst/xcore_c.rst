@@ -190,6 +190,14 @@ Ports
 
 .. doxygenfunction:: port_set_clock
 
+.. doxygenfunction:: port_set_mode_data_port
+
+.. doxygenfunction:: port_set_mode_ready_port
+
+.. doxygenfunction:: port_set_mode_clock_port
+
+.. doxygenfunction:: port_set_ready_input
+
 .. doxygenfunction:: port_output
 
 .. doxygenfunction:: port_output_at_time
@@ -252,6 +260,8 @@ Clock blocks
 .. doxygenfunction:: clock_set_source_clk_ref
 
 .. doxygenfunction:: clock_set_source_clk_xcore
+
+.. doxygenfunction:: clock_set_divide
 
 |newpage|
 

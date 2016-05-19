@@ -5,6 +5,7 @@
 
 #if !defined(__XC__) || defined(__DOXYGEN__)
 
+#include <stdint.h>
 #include <xccompat.h>
 #include <xs1.h>
 
@@ -47,7 +48,7 @@ inline void clock_start(clock clk)
  *
  *  \param clk  The clock to stop
  */
-void clock_stop(clock clk)
+inline void clock_stop(clock clk)
 {
   asm volatile("setc res[%0], 0x7" :: "r" (clk));
 }
@@ -63,7 +64,7 @@ void clock_stop(clock clk)
  *  \param p  The 1-bit port to set as the clock input. Attempting to set a
  *            port which is not 1-bit as the input will cause an exception.
  */
-void clock_set_source_port(clock clk, port p)
+inline void clock_set_source_port(clock clk, port p)
 {
   asm volatile("setclk res[%0], %1" :: "r" (clk), "r" (p));
 }
@@ -72,18 +73,42 @@ void clock_set_source_port(clock clk, port p)
  *
  *  \param clk  The clock to configure
  */
-void clock_set_source_clk_ref(clock clk)
+inline void clock_set_source_clk_ref(clock clk)
 {
   asm volatile("setclk res[%0], %1" :: "r" (clk), "r" (0x1));
 }
 
-/** Configure a clock's source to be the xCORE clock
+/** Configure a clock's source to be the xCORE clock.
+ *
+ *  *Note*: When using the xCORE clock as the clock input a divide of > 0 should
+ *  be used for the ports to function correclty.
  *
  *  \param clk  The clock to configure
  */
-void clock_set_source_clk_xcore(clock clk)
+inline void clock_set_source_clk_xcore(clock clk)
 {
   asm volatile("setclk res[%0], %1" :: "r" (clk), "r" (0x101));
+}
+
+/** Configure the divider for a clock.
+ *
+ *  A clock can divide its input signal by an integer value which this function
+ *  specifies. The XS2 architecture supports dividing the signal from a 1-bit
+ *  port while the XS1 architecture will raise a trap if a non-zero divide is
+ *  used with a 1-bit port input.
+ *
+ *  If the clock has been started then this will raise an exception.
+ *
+ *  If the divide is 0 then the value signal will be passed through the clock.
+ *  If the value is non-zero then the clock output will be divided by 2*divide.
+ *
+ *  \param clk    The clock to configure
+ *
+ *  \param divide The divide value
+ */
+inline void clock_set_divide(clock clk, uint8_t divide)
+{
+  asm volatile("setd res[%0], %1" :: "r" (clk), "r" (divide));
 }
 
 #endif // __XC__

@@ -61,7 +61,6 @@ inline port port_enable_buffered(int port_id, int transfer_width)
 inline void port_disable(port p)
 {
   asm volatile("setc res[%0], 0" :: "r" (p));
-  return;
 }
 
 /** Change the transfer width of a port.
@@ -104,7 +103,7 @@ inline void port_set_buffered(port p)
   asm volatile("setc res[%0], 0x200f" :: "r" (p));
 }
 
-/** Set the clock controlling a port
+/** Set the clock controlling a port.
  *
  *  This function connects a port to a clock.
  *
@@ -115,7 +114,57 @@ inline void port_set_buffered(port p)
 inline void port_set_clock(port p, clock clk)
 {
   asm volatile("setclk res[%0], %1" :: "r" (p), "r" (clk));
-  return;
+}
+
+/** Set a port drive out the data value.
+ *
+ *  \param p      Port to change the mode of
+ */
+inline void port_set_mode_data_port(port p)
+{
+  asm volatile("setclk res[%0], 0x5007" :: "r" (p));
+}
+
+/** Set a port drive out the ready signal of another port.
+ *
+ *  This function configures the port to drive the ready signal of another port
+ *  instead of its own data values. The source of the ready input is configured
+ *  using the port_set_ready_input() function.
+ *
+ *  \param p      Port to change the mode of
+ */
+inline void port_set_mode_ready_port(port p)
+{
+  asm volatile("setc res[%0], 0x5017" :: "r" (p));
+}
+
+/** Set a port drive out the clock signal.
+ *
+ *  This function configures the port to drive the clock signal instead of its
+ *  own data values. The clock signal that is driven out is configured using the
+ *  port_set_clock() function.
+ *
+ *  \param p      Port to change the mode of
+ */
+inline void port_set_mode_clock_port(port p)
+{
+  asm volatile("setc res[%0], 0x500f" :: "r" (p));
+}
+
+/** Set the ready input of a port.
+ *
+ *  This function configures the ready input of one port to be driven by the
+ *  ready output of another port. The port then must be configured using
+ *  port_set_mode_ready_port() to get it to drive out this ready signal.
+ *
+ *  \param p             Port to change the ready input of. This must be a 1-bit
+ *                       port or this function will trap.
+ *
+ *  \param ready_source  The port whose ready signal is being used
+ */
+inline void port_set_ready_input(port p, port ready_source)
+{
+  asm volatile("setrdy res[%0], %1" :: "r" (p), "r" (ready_source));
 }
 
 /** Outputs a value onto a port.
