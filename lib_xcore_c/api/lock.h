@@ -10,6 +10,8 @@
  */
 typedef int lock;
 
+#if !defined(__XC__) || defined(__DOXYGEN__)
+
 /** Allocates a lock.
  *
  *  This function allocates a hardware lock. If there are no locks availble,
@@ -18,8 +20,6 @@ typedef int lock;
  *
  *  \returns   The lock or NULL if there are no locks available.
  */
-#if !defined(__XC__) || defined(__DOXYGEN__)
-
 inline lock lock_alloc(void)
 {
   lock l;

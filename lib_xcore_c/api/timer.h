@@ -5,6 +5,8 @@
 
 #include <xccompat.h>
 
+#if !defined(__XC__) || defined(__DOXYGEN__)
+
 /** Allocates and initialise a timer.
  *
  *  This macro is to be called once on every variable of the type ``timer``.
@@ -14,8 +16,6 @@
  *
  *  \returns   The initialized timer
  */
-#if !defined(__XC__) || defined(__DOXYGEN__)
-
 inline timer timer_alloc(void)
 {
   timer t;
