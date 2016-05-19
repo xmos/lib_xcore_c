@@ -7,7 +7,7 @@
 
 /** Type that denotes a stremaing channel-end. Streaming communication
  *  channels comprise two connected streaming channel-ends and can be
- *  created using s_chan_init(). Streaming channels should be deinitialised
+ *  created using s_chan_alloc(). Streaming channels should be deinitialised
  *  using s_chan_free().
  */
 typedef chanend streaming_chanend;

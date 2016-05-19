@@ -63,6 +63,8 @@ Supporting types
 
 .. doxygentypedef:: resource
 
+.. doxygentypedef:: lock
+
 .. doxygentypedef:: streaming_chanend
 
 .. doxygentypedef:: transacting_chanend
@@ -232,6 +234,8 @@ Ports
 
 .. doxygenfunction:: port_force_input
 
+|newpage|
+
 Clock blocks
 ............
 
@@ -249,10 +253,20 @@ Clock blocks
 
 .. doxygenfunction:: clock_set_source_clk_xcore
 
+|newpage|
+
 Locks
 .....
 
-TODO
+.. doxygenfunction:: lock_alloc
+
+.. doxygenfunction:: lock_free
+
+.. doxygenfunction:: lock_acquire
+
+.. doxygenfunction:: lock_release
+
+|newpage|
 
 Events
 ......
@@ -295,14 +309,19 @@ Events
 
 .. doxygenfunction:: event_select_ordered_no_wait
 
+|newpage|
 
 Interrupts
 ..........
 
 TODO
 
+|newpage|
+
 Trap handlers
 .............
+
+TODO
 
 |appendix|
 
