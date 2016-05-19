@@ -1,0 +1,4 @@
+Core1 try acquire
+Core0 owns the lock
+Core0 done work
+Core1 owns the lock

@@ -9,6 +9,7 @@
 #include "port.h"
 #include "timer.h"
 #include "event.h"
+#include "lock.h"
 #include "xcore_c_clock.h"
 
 #endif // __xcore_c_h__
