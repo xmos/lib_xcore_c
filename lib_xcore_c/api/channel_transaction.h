@@ -119,22 +119,6 @@ inline chanend chan_complete_transaction(REFERENCE_PARAM(transacting_chanend, tc
     } \
   } while (0)
 
-/** Check that a specific control token is available on a
- * transacting channel-end. This function blocks until a token is available on
- * the transacting channel. If the available token is a control token and
- * has the value ``ct``, then the token is input and discarded. Otherwise
- * an exception is raised.
- *
- * \param tc   Transacting channel-end
- *
- * \param ct   Control token that is expected on the transacting channel
- */
-inline void t_chan_check_ct(REFERENCE_PARAM(transacting_chanend, tc), int ct)
-{
-  __t_chan_change_to_input(tc);
-  asm volatile("chkct res[%0],%1" :: "r" (__tc_get_reference_member(tc,c)), "r" (ct));
-}
-
 /** Output a word over a transacting channel-end.
  *
  * \param tc   Transacting channel-end

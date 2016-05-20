@@ -85,7 +85,6 @@ inline void chan_free(chanend c1, chanend c2)
   asm volatile("freer res[%0]" :: "r" (c2));
 }
 
-
 /** Disconnect and deallocate a streaming channel between a
  *  pair of streaming channel-ends.
  *
@@ -103,7 +102,6 @@ inline void s_chan_free(streaming_chanend c1, streaming_chanend c2)
 }
 #endif
 
-
 /** Output a control token onto a streaming channel-end.
  *
  *  \param c    The streaming channel-end
@@ -115,7 +113,6 @@ inline void s_chan_output_ct(streaming_chanend c, int ct)
 {
   asm volatile("outct res[%0], %1" :: "r" (c), "r" (ct));
 }
-
 
 /** Check that a specific control token is available on a streaming channel-end.
  *
@@ -131,7 +128,6 @@ inline void s_chan_check_ct(streaming_chanend c, int ct)
 {
   asm volatile("chkct res[%0], %1" :: "r" (c), "r" (ct));
 }
-
 
 /** Output a word over a streaming channel-end.
  *
@@ -155,7 +151,6 @@ inline void s_chan_output_byte(streaming_chanend c, char data)
   asm volatile("outt res[%0], %1" :: "r" (c), "r" (data));
 }
 
-
 /** Output a block of data over a streaming channel-end.
  *
  *  \param c    The streaming channel-end
@@ -172,7 +167,6 @@ inline void s_chan_output_block(streaming_chanend c, char buf[], int n)
     s_chan_output_byte(c, buf[i]);
   }
 }
-
 
 /** Input a word from a streaming channel-end.
  *
@@ -216,7 +210,6 @@ inline void s_chan_input_block(streaming_chanend c, char buf[], int n)
     buf[i] = s_chan_input_byte(c);
   }
 }
-
 
 /** Output a word over a channel-end.
  *
