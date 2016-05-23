@@ -199,10 +199,29 @@ In order to clean up, both the port and clock block should be disabled::
   clock_disable(c);
   port_disable(c);
 
+Driving clock
+
 Ready signals
 ~~~~~~~~~~~~~
 
-TODO
+Configuring ports to use ready signals should be done using the ``port_configure_``
+functions provided in ``port_configure.h``. All the basic functions needed to
+implement this functionality is provided, but the order of configuring a port
+as a strobed or handshaken port is critical and therefore best done using these
+wrapper functions.
+
+For example, to create a data port which is controlled by a strobe then the
+following code sequence could be used::
+
+  port p = port_enable(XS1_PORT_4A);
+  port p_ready = port_enable(XS1_PORT_1A);
+  clock clk = clock_enable(XS1_CLKBLK_1);
+  clock_start(clk);
+
+  port_configure_in_strobed_slave(p, p_ready, clk);
+
+After this, any data received on the port ``p`` will only be available when the
+valid signal (strobe on ``PORT_1A``) is high.
 
 Using hardware locks
 ....................
@@ -422,16 +441,6 @@ of resource IDs to define the order in which events are enabled::
     }
   }
 
-Using interrupts
-................
-
-TODO
-
-Trap handlers
-.............
-
-TODO
-
 API
 ---
 
@@ -571,7 +580,25 @@ Ports
 
 .. doxygenfunction:: port_set_mode_clock_port
 
-.. doxygenfunction:: port_set_ready_input
+.. doxygenfunction:: port_set_ready_src
+
+.. doxygenfunction:: port_set_invert
+
+.. doxygenfunction:: port_set_no_invert
+
+.. doxygenfunction:: port_set_sample_delay
+
+.. doxygenfunction:: port_set_no_sample_delay
+
+.. doxygenfunction:: port_set_master
+
+.. doxygenfunction:: port_set_slave
+
+.. doxygenfunction:: port_set_no_ready
+
+.. doxygenfunction:: port_set_ready_strobed
+
+.. doxygenfunction:: port_set_ready_handshake
 
 .. doxygenfunction:: port_output
 
@@ -616,6 +643,23 @@ Ports
 .. doxygenfunction:: port_endin
 
 .. doxygenfunction:: port_force_input
+
+|newpage|
+
+Port configuration helpers
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. doxygenfunction:: port_configure_in_handshake
+
+.. doxygenfunction:: port_configure_out_handshake
+
+.. doxygenfunction:: port_configure_in_strobed_master
+
+.. doxygenfunction:: port_configure_out_strobed_master
+
+.. doxygenfunction:: port_configure_in_strobed_slave
+
+.. doxygenfunction:: port_configure_out_strobed_slave
 
 |newpage|
 

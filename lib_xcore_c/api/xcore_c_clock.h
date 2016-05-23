@@ -111,6 +111,20 @@ inline void clock_set_divide(clock clk, uint8_t divide)
   asm volatile("setd res[%0], %1" :: "r" (clk), "r" (divide));
 }
 
+/** Sets a clock to use a 1-bit port for the ready-in signal.
+ *
+ * If the port is not a 1-bit port then an exception is raised. The ready-in
+ * port controls when data is sampled from the pins.
+ *
+ * \param clk          The clock to configure.
+ *
+ * \param ready_source The 1-bit port to use for the ready-in signal.
+ */
+inline void clock_set_ready_src(clock c, port ready_source)
+{
+  asm volatile("setrdy res[%0], %1" :: "r" (c), "r" (ready_source));
+}
+
 #endif // __XC__
 
 #endif // __xcore_c_clock_h__

@@ -7,6 +7,7 @@
 #include <xccompat.h>
 #include "channel.h"
 #include "port.h"
+#include "port_configure.h"
 #include "timer.h"
 #include "event.h"
 #include "lock.h"

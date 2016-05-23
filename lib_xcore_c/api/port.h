@@ -18,7 +18,7 @@ inline void port_set_transfer_width(port p, int transfer_width);
  *  port_enable_buffered() should be called once for each variable of type
  *  ``port`` before use. port_disable() should be called afterwards.
  *
- *  \param port_id   Value that identifies which port to drive.
+ *  \param port_id   Value that identifies which port to drive
  *
  *  \returns         Port variable representing the initialised port
  */
@@ -36,7 +36,7 @@ inline port port_enable(int port_id)
  *  should be called once for each variable of type ``port`` before use.
  *  port_disable() should be called afterwards.
  *
- *  \param port_id         Value that identifies which port to drive.
+ *  \param port_id         Value that identifies which port to drive
  *
  *  \param transfer_width  Number of bits to serialise; must be 1, 2, 4, 8, or 32.
  *                         The number of bits must be >= to the physical port
@@ -67,7 +67,7 @@ inline void port_disable(port p)
  *
  *  Note that a port must have been set to buffered before calling this function.
  *
- *  \param p               The port to change the transfer width of.
+ *  \param p               The port to change the transfer width of
  *
  *  \param transfer_width  Number of bits to serialise; must be 1, 2, 4, 8, or 32.
  *                         The number of bits must be >= to the physical port
@@ -107,7 +107,7 @@ inline void port_set_buffered(port p)
  *
  *  This function connects a port to a clock.
  *
- *  \param p      Port to set its
+ *  \param p      Port to set its clock
  *
  *  \param clk    Clock to attach the port to
  */
@@ -122,7 +122,7 @@ inline void port_set_clock(port p, clock clk)
  */
 inline void port_set_mode_data_port(port p)
 {
-  asm volatile("setclk res[%0], 0x5007" :: "r" (p));
+  asm volatile("setc res[%0], 0x5007" :: "r" (p));
 }
 
 /** Set a port drive out the ready signal of another port.
@@ -162,9 +162,147 @@ inline void port_set_mode_clock_port(port p)
  *
  *  \param ready_source  The port whose ready signal is being used
  */
-inline void port_set_ready_input(port p, port ready_source)
+inline void port_set_ready_src(port p, port ready_source)
 {
   asm volatile("setrdy res[%0], %1" :: "r" (p), "r" (ready_source));
+}
+
+/** Set the port to invert its data.
+ *
+ *  This function configures a port to invert the data on the pin. This can be
+ *  reverted by calling port_set_no_invert().
+ *
+ *  \param p   Port to set its data to be inverted. This must be a 1-bit port
+ *             or a trap will be raised.
+ */
+inline void port_set_invert(port p)
+{
+  asm volatile("setc res[%0], 0x600f" :: "r" (p));
+}
+
+/** Set the port to not invert its data.
+ *
+ *  This function configures a port to not invert the data on the pin.
+ *
+ *  \param p   Port to set the data to not be inverted. This must be a 1-bit port
+ *             or a trap will be raised.
+ */
+inline void port_set_no_invert(port p)
+{
+  asm volatile("setc res[%0], 0x6007" :: "r" (p));
+}
+
+/** Set the port to sample on the falling edge.
+ *
+ *  The default is for a port to sample data on the rising edge of the clock.
+ *  This function changes the port to sample on the falling edge instead.
+ *  This change can be reverted by calling port_set_no_sample_delay().
+ *
+ *  \param p   Port to change to sample on the falling edge.
+ */
+inline void port_set_sample_delay(port p)
+{
+  asm volatile("setc res[%0], 0x400f" :: "r" (p));
+}
+
+/** Set the port to sample on the rising edge.
+ *
+ *  This function restores a port to sampling data on the rising edge of the clock.
+ *
+ *  \param p   Port to restore to sampling on the rising edge
+ */
+inline void port_set_no_sample_delay(port p)
+{
+  asm volatile("setc res[%0], 0x4007" :: "r" (p));
+}
+
+/** Set the port to master mode (default state).
+ *
+ *  This function configures a port to be a master. This is only relevant when
+ *  using ready signals (port_set_ready_strobed() / port_set_ready_handshake()).
+ *
+ *  It is highly recommended to use the ``port_configure_*`` functions to put a
+ *  port into its desired mode as the order of operations is critical.
+ *
+ *  \param p   Port to set as a master
+ */
+inline void port_set_master(port p)
+{
+  asm volatile("setc res[%0], 0x1007" :: "r" (p));
+}
+
+/** Set the port to slave mode.
+ *
+ *  This function configures a port to be a master. This is only relevant when
+ *  using a ready strobe (port_set_ready_strobed())
+ *
+ *  *Note*: the port must be set to use a ready strobe, otherwise this function
+ *          will raise an exception.
+ *
+ *  It is highly recommended to use the ``port_configure_*`` functions to put a
+ *  port into its desired mode as the order of operations is critical.
+ *
+ *  \param p   Port to set as a slave
+ */
+inline void port_set_slave(port p)
+{
+  asm volatile("setc res[%0], 0x100f" :: "r" (p));
+}
+
+/** Set the port to use no ready signals (default state).
+ *
+ *  This function changes a port to not use ready signals. A port can be configured
+ *  to use strobes or handshaking signals using port_set_ready_strobed() or
+ *  port_set_ready_handshake().
+ *
+ *  *Note*: the port must be a ``master`` port otherwise this function will raise
+ *          an exception.
+ *
+ *  It is highly recommended to use the ``port_configure_*`` functions to put a
+ *  port into its desired mode as the order of operations is critical.
+ *
+ *  \param p   Port to change to not use ready signals
+ */
+inline void port_set_no_ready(port p)
+{
+  asm volatile("setc res[%0], 0x3007" :: "r" (p));
+}
+
+/** Set the port to use a single strobe.
+ *
+ *  This function changes a port to not use ready signals. A port can be configured
+ *  to use strobes or handshaking signals using port_set_ready_strobed() or
+ *  port_set_ready_handshake().
+ *
+ *  *Note*: the port must be a buffered port otherwise this function will raise
+ *          an exception.
+ *
+ *  It is highly recommended to use the ``port_configure_*`` functions to put a
+ *  port into its desired mode as the order of operations is critical.
+ *
+ *  \param p   Port to change to not use ready signals
+ */
+inline void port_set_ready_strobed(port p)
+{
+  asm volatile("setc res[%0], 0x300f" :: "r" (p));
+}
+
+/** Set the port to be fully handshaken.
+ *
+ *  This function changes a port to use both a ready input and drive a ready
+ *  output in order to control when data is sampled or written.
+ *
+ *  *Note*: the port must be a master buffered port otherwise this function will
+ *          raise an exception.
+ *
+ *  It is highly recommended to use the ``port_configure_*`` functions to put a
+ *  port into its desired mode as the order of operations is critical.
+ *
+ *  \param p   Port to change to not use ready signals
+ */
+inline void port_set_ready_handshake(port p)
+{
+  asm volatile("setc res[%0], 0x3017" :: "r" (p));
 }
 
 /** Outputs a value onto a port.
