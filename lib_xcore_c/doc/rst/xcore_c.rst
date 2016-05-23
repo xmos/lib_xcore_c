@@ -137,8 +137,8 @@ Channel transactions
 ~~~~~~~~~~~~~~~~~~~~
 
 The library has functions to support interacting with xC channel ends. This
-includes master/slave transactions. For example, a block of xC could use a
-master transaction to send a block of words syhchronised only at the beginning
+includes ``master``/``slave`` transactions. For example, a block of xC could use a
+``master`` transaction to send a block of words syhchronised only at the beginning
 and end::
 
   int data[10] = {...}
@@ -199,8 +199,8 @@ In order to clean up, both the port and clock block should be disabled::
   clock_disable(c);
   port_disable(c);
 
-Handshaking
-~~~~~~~~~~~
+Ready signals
+~~~~~~~~~~~~~
 
 TODO
 
@@ -230,7 +230,7 @@ The lock resource is released using::
 Using events
 ............
 
-The library provides the ability to re-create the equivalent of the xC *select*
+The library provides the ability to re-create the equivalent of the xC ``select``
 statement.
 
 Example
@@ -240,7 +240,7 @@ As an example, take a function which receives data from two channels and handles
 whichever one is ready.
 
 The function needs to have an *enum* containing an entry per resource that is
-part of the *select*::
+part of the ``select``::
 
   typedef enum {
     EVENT_CHAN_C = EVENT_ENUM_BASE,
@@ -263,7 +263,7 @@ The resources are each configured to trigger events and return a value from the
 And then the rest of the function can simply use the ``event_select()`` function
 to wait for events to be triggered by either resource::
 
-    for (int count = 0; count < 10; count++) {
+    while (1) {
       event_choice_t choice = event_select();
       switch (choice) {
         case EVENT_CHAN_C: {
@@ -284,17 +284,143 @@ to wait for events to be triggered by either resource::
 Event handling with a default
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-TODO
+In xC a ``select`` can have a ``default`` case which is executed if no events
+have triggered. This library provides the user with the ability to do this by
+using the ``event_select_no_wait()`` function. For example, the above example
+could be changed to add to the ``enum`` a default value::
+
+  typedef enum {
+    EVENT_CHAN_C = EVENT_ENUM_BASE,
+    EVENT_CHAN_D,
+    EVENT_DEFAULT
+  } event_choice_t;
+
+And then to test for events but perform some background task if there is no data
+available on either channel::
+
+    while (1) {
+      event_choice_t choice = event_select_no_wait(EVENT_DEFAULT);
+      switch (choice) {
+        case EVENT_CHAN_C: {
+          // Read value and clear event
+          int x = chan_input_word(c);
+          ...
+          break;
+        }
+        case EVENT_CHAN_D: {
+          // Read value and clear event
+          int x = chan_input_word(d);
+          ...
+          break;
+        }
+        case EVENT_DEFAULT: {
+          // Run background task
+          ...
+          break;
+        }
+      }
+    }
+
+The argument that is passed to ``event_select_no_wait()`` is the value that will
+be returned if no events are ready.
 
 Event handling functions
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-TODO
+This library also supports the ability to install event handling functions. This
+allows the user to write code where events are not all handled within one
+``switch`` statement. It makes it possible to write libraries which are completely
+self-contained.
 
-The default statement
-~~~~~~~~~~~~~~~~~~~~~
+For example, if the user writes a library to perform a real-time task based on
+a timer event the library initialisation would install a handler::
 
-TODO
+  void lib_init(void *data)
+  {
+    timer tmr = timer_alloc();
+    int time = timer_get_time(tmr);
+    event_setup_timer_function(tmr, timer_handler_func, data, time + period);
+  }
+
+This code allocates a hardware timer and then gets the current time before
+registering an event handler. The call to ``event_setup_timer_function()`` takes
+four arguments.
+
+  1. The timer to configure
+
+  2. The handler function to call when events are triggered by the timer
+
+  3. A ``void*`` which is user data that is passed to the handler
+
+  4. The time at which the next event should fire
+
+*Note*: There are similar functions for ports (``event_setup_port_function()``)
+and channel ends (``event_setup_chanend_function()``).
+
+The handler function is passed the resource triggering the event and the user
+data registered with that resource::
+
+  void timer_handler_func(resource r, void *data);
+
+A table is used to register the user data with an event and this table has a
+default size of 20 entries. In order to change the number of resources that can
+have event handler functions registered then the define ``EVENT_MAX_HANDLER_FUNCTIONS``
+can be changed at compile time.
+
+The main event handling function then needs to change in order to use this style
+of event handling function. The ``event_clear_all()`` function should not be
+called, otherwise the timer event will be disabled. Instead, the function should
+now clear any events it enables::
+
+  void handle_events(chanend c, chanend d)
+  {
+    // Setup the channels to generate events
+    event_setup_chanend(c, EVENT_CHAN_C);
+    event_setup_chanend(d, EVENT_CHAN_D);
+
+    // Handle events using event_select() / event_select_no_wait()
+    ...
+
+    // Disable events local to this function
+    event_clear_chanend(c);
+    event_clear_chanend(d);
+  }
+
+After the ``handle_events()`` function has completed another equivalent function
+can be called in which the timer handler will continue to be called periodically.
+
+When the timer events are no longer required then they can be disabled using the
+``event_clear_timer()`` function (or equivalent port/chanend functions)::
+
+  event_clear_timer(tmr);
+
+Ordered events
+~~~~~~~~~~~~~~
+
+The xCORE hardware has implicit ordering enforced. Ports are highest priority,
+then timers, then channels. If there are multiple resources of the same type
+that are ready then the resource with the lowest resource ID will be selected.
+
+If the user wants to enforce a different ordering from that provided by the
+hardware then they can use ``event_select_ordered()`` (or
+``event_select_ordered_no_wait()`` to have a default).
+
+Events are set up in as detailed above and a list is created with all the active
+resources. For example, if using two channels (``c``, ``d``) and a timer (``tmr``)
+then a null-terminated list can be defined to ensure the channels are handled
+before the timer if they are ready::
+
+  resource ids[4] = {c, d, tmr, 0};
+
+And then the core of the event handling loop would be changed to pass this list
+of resource IDs to define the order in which events are enabled::
+
+  while (1) {
+    event_choice_t choice = event_select_ordered(ids);
+    switch (choice) {
+    ...
+    }
+  }
 
 Using interrupts
 ................
