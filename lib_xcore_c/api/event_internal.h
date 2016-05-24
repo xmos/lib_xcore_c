@@ -39,7 +39,7 @@ typedef struct event_handler_function_state {
  *  Find a free registry entry and register the function and data for the given
  *  resource.
  *
- *  \param r       The resource to de-register
+ *  \param r       The resource to register the handler for
  *  \param handler The function to handle the events
  *  \param data    The value to be passed to the event handler function
  *  \returns       The index allocated for this resource or -1 if the register is full
