@@ -136,7 +136,6 @@ inline void event_setup_chanend_function(chanend c, event_handler handler,
   event_setup_resource_function(c, handler, data);
 }
 
-
 /** Clear events for a given chanend.
  *
  *  This function prevents any further events being triggered by a given channel

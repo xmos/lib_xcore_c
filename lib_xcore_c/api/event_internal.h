@@ -110,8 +110,8 @@ inline void event_setup_resource_function(resource r, event_handler handler, voi
  *  Function shared by event_setup_timer() and event_setup_timer_function().
  *
  *  \param t     The timer to enable events for
- *  \param time  The value to be returned by event_select()/event_select_no_wait()
- *               when the timer event is triggered.
+ *  \param time  The time at which the timer should trigger an event. The
+ *               default timer ticks are at a 10ns resolution.
  */
 inline void event_setup_timer_common(timer t, int time)
 {
