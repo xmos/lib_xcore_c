@@ -54,21 +54,32 @@ __event_target:
 .align 4
 __event_function_wrapper:
   nop
-  entsp 2
+  entsp 2 // Keep stack double word aligned
 
   // The index is stored in the ED. It needs the top bits cleared on XS1
   get r11, ed
+#ifndef __XS2A__
+  // XS1 always makes the environment vector a memory address so need to clear
+  // bit 16 and above
   mkmsk r3, 16
   and r3, r11, r3
+#endif
   ldap r11, event_handler_state
   ldaw r0, r11[r3]
+  // Load the handler function address
   ldw r2, r0[1]
+  // Load the user data (void *)
   ldw r1, r0[2]
+  // Load the resource ID
   ldw r0, r0[0]
+  // Call handler
   bla r2
 
+  // Restore link register
   ldw lr, sp[2]
+  // Restore the stack
   ldaw sp, sp[2]
+  // Wait for more events
   waiteu
 
 
