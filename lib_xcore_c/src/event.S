@@ -63,6 +63,8 @@ __event_function_wrapper:
   // bit 16 and above
   mkmsk r3, 16
   and r3, r11, r3
+#else
+  add r3, r11, 0
 #endif
   ldap r11, event_handler_state
   ldaw r0, r11[r3]
