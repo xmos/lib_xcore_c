@@ -700,6 +700,8 @@ Locks
 Events
 ......
 
+.. doxygendefine:: EVENT_MAX_HANDLER_FUNCTIONS
+
 .. doxygenfunction:: event_disable
 
 .. doxygenfunction:: event_enable
