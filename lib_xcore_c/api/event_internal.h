@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <assert.h>
 #include <xccompat.h>
+#include "event_defines.h"
 #include "resource.h"
 #include "port.h"
 
@@ -33,6 +34,10 @@ typedef struct event_handler_function_state {
   event_handler handler;
   void *data;
 } event_handler_function_state;
+
+_Static_assert(((SIZEOF_EVENT_HANDLER_FUNCTION_STATE * sizeof(int)) ==
+                sizeof(event_handler_function_state)),
+               "SIZEOF_EVENT_HANDLER_FUNCTION_STATE define is incorrect");
 
 /** Register an event handler for a resource.
  *

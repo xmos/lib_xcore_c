@@ -1,5 +1,7 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
+#include "event_defines.h"
+
 .text
 
 // Make these global so that it can be used as the default event vector
@@ -67,6 +69,9 @@ __event_function_wrapper:
   add r3, r11, 0
 #endif
   ldap r11, event_handler_state
+  // Calculate offset into event_handler_state table
+  ldc r2, SIZEOF_EVENT_HANDLER_FUNCTION_STATE
+  mul r3, r3, r2
   ldaw r0, r11[r3]
   // Load the handler function address
   ldw r2, r0[1]
