@@ -706,31 +706,23 @@ inline int port_endin(port p)
   return num_bits;
 }
 
-#endif // __XC__
-
 /** Force an input on a buffered port.
  *
  *  The function will perform an input on a buffered port even if the buffer is
  *  only partially full.
  *
- *  \param      p    The port to do the input on
+ *  \param p  The port to do the input on
  *
- *  \param[out] n    A variable to be filled with number of bits inputted
+ *  \param n  A variable to be filled with number of bits inputted
  *
- *  \returns         The inputted data
+ *  \returns  The inputted data
  */
-#if defined(__XC__) || defined(__DOXYGEN__)
-inline int port_force_input(port p, int &n)
-{
-  asm volatile("endin %0, res[%1]" : "=r" (n) : "r" (p));
-  return port_input(p);
-}
-#else
 inline int port_force_input(port p, int *n)
 {
-  asm volatile("endin %0, res[%1]" : "=r" (*n) : "r" (p));
+  *n = port_endin(p);
   return port_input(p);
 }
-#endif
+
+#endif // __XC__
 
 #endif // __port_h__
