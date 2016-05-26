@@ -457,6 +457,11 @@ requirements which must be adhered to ensure safe operation:
 
   #. The core must have interrupts masked when disabling interrupts for a
      resource.
+.. Using trap handlers
+.. ...................
+
+.. TODO
+
 API
 ---
 
@@ -793,10 +798,10 @@ Interrupts
 
 |newpage|
 
-Trap handlers
-.............
+.. Trap handlers
+.. .............
 
-TODO
+.. TODO
 
 |appendix|
 
