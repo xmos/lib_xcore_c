@@ -199,7 +199,9 @@ In order to clean up, both the port and clock block should be disabled::
   clock_disable(c);
   port_disable(c);
 
-Driving clock
+.. TODO: example of driving clock from input port
+
+.. Driving clock
 
 Ready signals
 ~~~~~~~~~~~~~
