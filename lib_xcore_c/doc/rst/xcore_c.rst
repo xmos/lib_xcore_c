@@ -441,6 +441,22 @@ of resource IDs to define the order in which events are enabled::
     }
   }
 
+Using interrupts
+................
+
+The library provides support for hardware interrupts from xCORE resources.
+
+Interrupts can be raised by resources as an alternative to events, and will be vectored to the provided handler function.
+
+As interrupts can occur at any point during program execution there are certain
+requirements which must be adhered to ensure safe operation:
+
+  #. Resources must not have interrupts enabled whilst being configured, or
+     the core must have interrupts masked if the resource has already been
+     configured to raise interrupts.
+
+  #. The core must have interrupts masked when disabling interrupts for a
+     resource.
 API
 ---
 
@@ -456,6 +472,8 @@ Supporting types
 .. doxygentypedef:: transacting_chanend
 
 .. doxygentypedef:: event_handler
+
+.. doxygentypedef:: interrupt_handler
 
 .. doxygenenum:: port_condition
 
@@ -745,7 +763,33 @@ Events
 Interrupts
 ..........
 
-TODO
+.. doxygendefine:: INTERRUPT_MAX_HANDLER_FUNCTIONS
+
+.. doxygenfunction:: interrupt_disable
+
+.. doxygenfunction:: interrupt_enable
+
+.. doxygenfunction:: interrupt_mask_all
+
+.. doxygenfunction:: interrupt_unmask_all
+
+.. doxygenfunction:: interrupt_setup_timer_function
+
+.. doxygenfunction:: interrupt_clear_timer
+
+.. doxygenfunction:: interrupt_change_timer_time
+
+.. doxygenfunction:: interrupt_setup_chanend_function
+
+.. doxygenfunction:: interrupt_clear_chanend
+
+.. doxygenfunction:: interrupt_setup_port_function
+
+.. doxygenfunction:: interrupt_clear_port
+
+.. doxygenfunction:: interrupt_change_port_condition
+
+.. doxygenfunction:: interrupt_change_port_time
 
 |newpage|
 

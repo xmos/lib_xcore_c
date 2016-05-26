@@ -107,6 +107,8 @@ inline void event_setup_resource_function(resource r, event_handler handler, voi
   // Don't call resource_set_ev() function as that requires the value to have bit 16 set
   asm volatile("add r11, %0, 0" : : "r" (value) : /* clobbers */ "r11");
   asm volatile("setev res[%0], r11" : : "r" (r));
+  asm volatile("setc res[%0], 0x2" : : "r" (r)); // Ensure events are raised
+  // Events are the default, but do this in case interrupts were previously enabled
   event_enable(r);
 }
 
