@@ -12,7 +12,7 @@
  */
 typedef chanend streaming_chanend;
 
-#include <channel_internal.h>
+#include "channel_internal.h"
 
 #if !defined(__XC__) || defined(__DOXYGEN__)
 /** Allocate a single channel-end.
