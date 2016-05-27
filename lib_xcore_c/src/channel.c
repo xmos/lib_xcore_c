@@ -3,9 +3,9 @@
 #include <xccompat.h>
 #include <channel.h>
 
-extern void s_chan_output_ctEND(streaming_chanend c);
-extern void s_chan_check_ctEND(streaming_chanend c);
-
+extern void chanend_alloc(chanend *c);
+extern void chanend_free(chanend c);
+extern void chanend_set_dest(chanend c, chanend dst);
 extern void chan_alloc(chanend *c1, chanend *c2);
 extern void s_chan_alloc(streaming_chanend *c1, streaming_chanend *c2);
 extern void chan_free(chanend c1, chanend c2);
@@ -35,3 +35,6 @@ extern inline void t_chan_output_block(REFERENCE_PARAM(transacting_chanend, c), 
 extern inline int t_chan_input_word(REFERENCE_PARAM(transacting_chanend, c));
 extern inline char t_chan_input_byte(REFERENCE_PARAM(transacting_chanend, c));
 extern inline void t_chan_input_block(REFERENCE_PARAM(transacting_chanend, c), char buf[], int n);
+
+extern void s_chan_output_ct_end(streaming_chanend c);
+extern void s_chan_check_ct_end(streaming_chanend c);
