@@ -40,7 +40,7 @@ inline void event_enable(resource r)
  *  then this function should be called before starting to configure events for
  *  a new event loop.
  */
-inline void event_clear_all()
+inline void event_clear_all(void)
 {
   asm volatile("clre");
 }
@@ -236,7 +236,7 @@ inline void event_change_port_time(port p, int16_t count)
  *
  *  \returns  The value registered with the resource when events were enabled
  */
-unsigned event_select();
+unsigned event_select(void);
 
 /** Check whether any events are ready, otherwise return.
  *

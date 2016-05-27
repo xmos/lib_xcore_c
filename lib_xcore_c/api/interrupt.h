@@ -37,7 +37,7 @@ inline void interrupt_enable(resource r)
  *  Prevent any enabled interrupts from triggering. They can be restored by
  *  using interrupt_unmask_all().
  */
-inline void interrupt_mask_all()
+inline void interrupt_mask_all(void)
 {
   asm volatile("clrsr 0x2"); // IEBLE is bit 1
 }
@@ -47,7 +47,7 @@ inline void interrupt_mask_all()
  *  Allow any enabled interrupts to trigger. They can be suppressed by using
  *  interrupt_mask_all().
  */
-inline void interrupt_unmask_all()
+inline void interrupt_unmask_all(void)
 {
 
   asm volatile("setsr 0x2"); // IEBLE is bit 1

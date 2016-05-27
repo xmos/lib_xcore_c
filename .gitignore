@@ -19,3 +19,4 @@
 *.log
 *.xmt
 *.csv
+**/tests/build_with_no_inline/src/test.c
