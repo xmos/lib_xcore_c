@@ -30,10 +30,10 @@ __interrupt_function_wrapper:
   entsp 6 // Keep stack double word aligned
 
   // Store the caller-save registers to the stack
-  stw r0, sp[0]
-  stw r1, sp[1]
-  stw r2, sp[2]
-  stw r3, sp[3]
+  stw r0, sp[1]
+  stw r1, sp[2]
+  stw r2, sp[3]
+  stw r3, sp[4]
 
   // The index is stored in the ED. It needs the top bits cleared on XS1
   get r11, ed
@@ -60,10 +60,10 @@ __interrupt_function_wrapper:
   bla r2
 
   // Restore the caller-save registers
-  ldw r0, sp[0]
-  ldw r1, sp[1]
-  ldw r2, sp[2]
-  ldw r3, sp[3]
+  ldw r0, sp[1]
+  ldw r1, sp[2]
+  ldw r2, sp[3]
+  ldw r3, sp[4]
 
   // Restore link register
   ldw lr, sp[6]
