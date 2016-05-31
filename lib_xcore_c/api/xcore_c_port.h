@@ -38,7 +38,7 @@ inline port port_enable(int port_id)
  *
  *  \param port_id         Value that identifies which port to drive
  *
- *  \param transfer_width  Number of bits to serialise; must be 1, 2, 4, 8, or 32.
+ *  \param transfer_width  Number of bits to serialise; must be 1, 4, 8, or 32.
  *                         The number of bits must be >= to the physical port
  *                         width.
  *
@@ -69,7 +69,7 @@ inline void port_disable(port p)
  *
  *  \param p               The port to change the transfer width of
  *
- *  \param transfer_width  Number of bits to serialise; must be 1, 2, 4, 8, or 32.
+ *  \param transfer_width  Number of bits to serialise; must be 1, 4, 8, or 32.
  *                         The number of bits must be >= to the physical port
  *                         width.
  */
