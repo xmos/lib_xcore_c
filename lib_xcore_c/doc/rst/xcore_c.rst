@@ -581,10 +581,6 @@ Channels with transactions
 Ports
 .....
 
-.. doxygenfunction:: port_set_buffered
-
-.. doxygenfunction:: port_set_transfer_width
-
 .. doxygenfunction:: port_enable
 
 .. doxygenfunction:: port_enable_buffered
