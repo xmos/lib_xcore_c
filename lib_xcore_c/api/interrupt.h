@@ -142,7 +142,10 @@ inline void interrupt_clear_chanend(chanend c)
 
 /** Setup interrupts on a port where the interrupts are handler by a function.
  *
- *  Same as interrupt_setup_port() except that a handler function is used.
+ *  This function configures a port to trigger an interrupt when ready. By
+ *  default a port will trigger when there is data available. The trigger
+ *  condition can be changed using the interrupt_change_port_condition()
+ *  function.
  *
  *  \param p       The port to enable interrupts on
  *  \param handler The handler function to handle interrupts
@@ -196,7 +199,7 @@ inline void interrupt_change_port_condition(port p,
  *
  *  A port can wait for the data in the port to be equal or not equal to a
  *  specified value.
- *  port will trigger when there is data available. The trigger interrupt change
+ *  port will trigger when there is data available. The trigger condition can
  *  be changed using the interrupt_change_port_condition() function.
  *
  *  \param p     The port to enable interrupts on

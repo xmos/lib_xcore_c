@@ -31,6 +31,9 @@ typedef struct interrupt_handler_function_state {
   void *data;
 } interrupt_handler_function_state;
 
+/* Compile time check to ensure the SIZEOF_INTERRUPT_HANDLER_FUNCTION_STATE
+ * define is always set correctly
+ */
 _Static_assert(((SIZEOF_INTERRUPT_HANDLER_FUNCTION_STATE * sizeof(int)) ==
                 sizeof(interrupt_handler_function_state)),
                "SIZEOF_INTERRUPT_HANDLER_FUNCTION_STATE define is incorrect");

@@ -35,6 +35,9 @@ typedef struct event_handler_function_state {
   void *data;
 } event_handler_function_state;
 
+/* Compile time check to ensure the SIZEOF_EVENT_HANDLER_FUNCTION_STATE
+ * define is always set correctly
+ */
 _Static_assert(((SIZEOF_EVENT_HANDLER_FUNCTION_STATE * sizeof(int)) ==
                 sizeof(event_handler_function_state)),
                "SIZEOF_EVENT_HANDLER_FUNCTION_STATE define is incorrect");

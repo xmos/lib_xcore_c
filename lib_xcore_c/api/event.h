@@ -152,7 +152,7 @@ inline void event_clear_chanend(chanend c)
 /** Setup events on a port.
  *
  *  This function configures a port to trigger events when ready. By default a
- *  port will trigger when there is data available. The trigger event change be
+ *  port will trigger when there is data available. The trigger event can be
  *  changed using the event_change_port_condition() function.
  *
  *  \param p     The port to enable events on
@@ -217,7 +217,7 @@ inline void event_change_port_condition(port p, port_condition cond, unsigned da
  *
  *  A port can wait for the data in the port to be equal or not equal to a
  *  specified value.
- *  port will trigger when there is data available. The trigger event change be
+ *  port will trigger when there is data available. The trigger event can be
  *  changed using the event_change_port_condition() function.
  *
  *  \param p     The port to enable events on
