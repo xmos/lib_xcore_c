@@ -462,7 +462,7 @@ requirements which must be adhered to ensure safe operation:
 .. Using trap handlers
 .. ...................
 
-.. TODO
+.. TODO: document use of trap handlers once implemented
 
 API
 ---
@@ -799,7 +799,7 @@ Interrupts
 .. Trap handlers
 .. .............
 
-.. TODO
+.. TODO : document trap handler API once implemented
 
 |appendix|
 
