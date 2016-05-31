@@ -10,7 +10,6 @@
 #include "xcore_c_port_configure.h"
 #include "xcore_c_timer.h"
 #include "xcore_c_event.h"
-#include "xcore_c_interrupt.h"
 #include "xcore_c_lock.h"
 #include "xcore_c_clock.h"
 

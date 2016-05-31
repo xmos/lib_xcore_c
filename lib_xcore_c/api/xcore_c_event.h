@@ -64,24 +64,6 @@ inline void event_setup_timer(timer t, unsigned value, int time)
   event_setup_timer_common(t, time);
 }
 
-/** Setup events on a timer where the events are handled by a function.
- *
- *  This sets up events in the same way as event_setup_timer() but the events
- *  are designed to be handled by an event handler function which is passed in.
- *
- *  \param t       The timer to enable events on
- *  \param handler The function to handle the events
- *  \param data    The value to be passed to the event handler function
- *  \param time    The time at which the timer should trigger an event. The default
- *                 timer ticks are at a 10ns resolution.
- */
-inline void event_setup_timer_function(timer t, event_handler handler,
-                                       void *data, int time)
-{
-  event_setup_resource_function(t, handler, data);
-  event_setup_timer_common(t, time);
-}
-
 /** Clear events for a given timer.
  *
  *  This function prevents any further events being triggered by a given timer.
@@ -90,7 +72,6 @@ inline void event_setup_timer_function(timer t, event_handler handler,
  */
 inline void event_clear_timer(timer t)
 {
-  event_deregister_function(t);
   event_disable(t);
 }
 
@@ -122,20 +103,6 @@ inline void event_setup_chanend(chanend c, unsigned value)
   event_setup_resource(c, value);
 }
 
-/** Setup events on a channel end where the events are handled by a function.
- *
- *  Same as event_setup_chanend() except that a handler function is used.
- *
- *  \param c       The channel end to enable events on
- *  \param handler The handler function to handle events
- *  \param data    The value to be passed to the event handler function
- */
-inline void event_setup_chanend_function(chanend c, event_handler handler,
-                                         void *data)
-{
-  event_setup_resource_function(c, handler, data);
-}
-
 /** Clear events for a given chanend.
  *
  *  This function prevents any further events being triggered by a given channel
@@ -145,7 +112,6 @@ inline void event_setup_chanend_function(chanend c, event_handler handler,
  */
 inline void event_clear_chanend(chanend c)
 {
-  event_deregister_function(c);
   event_disable(c);
 }
 
@@ -167,23 +133,6 @@ inline void event_setup_port(port p, unsigned value)
   asm volatile("setc res[%0], %1" :: "r" (p), "r" (PORT_COND_FULL));
 }
 
-/** Setup events on a port where the events are handler by a function.
- *
- *  Same as event_setup_port() except that a handler function is used.
- *
- *  \param p       The port to enable events on
- *  \param handler The handler function to handle events
- *  \param data    The value to be passed to the event handler function
- */
-inline void event_setup_port_function(port p, event_handler handler,
-                                      void *data)
-{
-  event_setup_resource_function(p, handler, data);
-
-  // Set the default condition to be when there is data available
-  asm volatile("setc res[%0], %1" :: "r" (p), "r" (PORT_COND_FULL));
-}
-
 /** Clear events for a given port.
  *
  *  This function prevents any further events being triggered by a given port.
@@ -192,7 +141,6 @@ inline void event_setup_port_function(port p, event_handler handler,
  */
 inline void event_clear_port(port p)
 {
-  event_deregister_function(p);
   event_disable(p);
 }
 

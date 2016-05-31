@@ -1,7 +1,5 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
-#include "xcore_c_event_defines.h"
-
 .text
 
 // Make these global so that it can be used as the default event vector
@@ -34,60 +32,6 @@ __event_target:
   nop
   add r0, r11, 0
   retsp 0
-
-
-.globl __event_function_wrapper
-.globl __event_function_wrapper.nstackwords
-.globl __event_function_wrapper.maxthreads
-.globl __event_function_wrapper.maxtimers
-.globl __event_function_wrapper.maxchanends
-.globl __event_function_wrapper.maxsync
-.type  __event_function_wrapper, @function
-.linkset __event_function_wrapper.locnoside, 1
-.linkset __event_function_wrapper.locnochandec, 1
-.set __event_function_wrapper.nstackwords, 0
-.set __event_function_wrapper.maxthreads, 0
-.set __event_function_wrapper.maxtimers, 0
-.set __event_function_wrapper.maxchanends, 0
-.set __event_function_wrapper.maxsync, 0
-
-// This code will cope with being called in single or dual issue.
-// Hence the extra nops.
-.align 4
-__event_function_wrapper:
-  nop
-  entsp 2 // Keep stack double word aligned
-
-  // The index is stored in the ED. It needs the top bits cleared on XS1
-  get r11, ed
-#ifndef __XS2A__
-  // XS1 always makes the environment vector a memory address so need to clear
-  // bit 16 and above
-  mkmsk r3, 16
-  and r3, r11, r3
-#else
-  add r3, r11, 0
-#endif
-  ldap r11, event_handler_state
-  // Calculate offset into event_handler_state table
-  ldc r2, SIZEOF_EVENT_HANDLER_FUNCTION_STATE
-  mul r3, r3, r2
-  ldaw r0, r11[r3]
-  // Load the handler function address
-  ldw r2, r0[1]
-  // Load the user data (void *)
-  ldw r1, r0[2]
-  // Load the resource ID
-  ldw r0, r0[0]
-  // Call handler
-  bla r2
-
-  // Restore link register
-  ldw lr, sp[2]
-  // Restore the stack
-  ldaw sp, sp[2]
-  // Wait for more events
-  waiteu
 
 
 .globl event_select_no_wait
