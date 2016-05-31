@@ -1,6 +1,6 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
-#include "interrupt.h"
+#include "xcore_c_interrupt.h"
 
 extern void interrupt_disable(resource r);
 extern void interrupt_enable(resource r);

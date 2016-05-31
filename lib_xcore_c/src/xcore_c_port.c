@@ -1,6 +1,6 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
-#include "port.h"
+#include "xcore_c_port.h"
 
 extern void port_set_transfer_width(port p, int transfer_width);
 extern port port_enable(int port_id);

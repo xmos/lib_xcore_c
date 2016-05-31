@@ -1,6 +1,6 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
-#include "interrupt_defines.h"
+#include "xcore_c_interrupt_defines.h"
 
 .text
 

@@ -1,11 +1,11 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
-#ifndef __port_configure_h__
-#define __port_configure_h__
+#ifndef __xcore_c_port_configure_h__
+#define __xcore_c_port_configure_h__
 
 #if !defined(__XC__) || defined(__DOXYGEN__)
 
-#include "port.h"
+#include "xcore_c_port.h"
 #include "xcore_c_clock.h"
 
 /** Configure a port to be a clocked input port in handshake mode.
@@ -228,4 +228,4 @@ inline void port_configure_out_strobed_slave(port p, port readyin,
 
 #endif // __xc__
 
-#endif // __port_configure_h__
+#endif // __xcore_c_port_configure_h__

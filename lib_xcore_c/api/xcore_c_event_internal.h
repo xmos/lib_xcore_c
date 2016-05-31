@@ -1,16 +1,16 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
-#ifndef __event_internal_h__
-#define __event_internal_h__
+#ifndef __xcore_c_event_internal_h__
+#define __xcore_c_event_internal_h__
 
 #if !defined(__XC__) || defined(__DOXYGEN__)
 
 #include <stdint.h>
 #include <assert.h>
 #include <xccompat.h>
-#include "event_defines.h"
-#include "resource.h"
-#include "port.h"
+#include "xcore_c_event_defines.h"
+#include "xcore_c_resource.h"
+#include "xcore_c_port.h"
 
 #ifndef EVENT_MAX_HANDLER_FUNCTIONS
 /**
@@ -134,4 +134,4 @@ inline void event_setup_timer_common(timer t, int time)
 
 #endif // __XC__
 
-#endif // __event_internal_h__
+#endif // __xcore_c_event_internal_h__

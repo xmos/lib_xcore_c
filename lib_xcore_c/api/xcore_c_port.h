@@ -1,7 +1,7 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
-#ifndef __port_h__
-#define __port_h__
+#ifndef __xcore_c_port_h__
+#define __xcore_c_port_h__
 
 #if !defined(__XC__) || defined(__DOXYGEN__)
 
@@ -725,4 +725,4 @@ inline int port_force_input(port p, int *n)
 
 #endif // __XC__
 
-#endif // __port_h__
+#endif // __xcore_c_port_h__

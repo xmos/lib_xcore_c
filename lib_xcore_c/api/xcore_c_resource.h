@@ -1,7 +1,7 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
-#ifndef __resource_h__
-#define __resource_h__
+#ifndef __xcore_c_resource_h__
+#define __xcore_c_resource_h__
 
 #include <stdint.h>
 #include <xccompat.h>
@@ -40,4 +40,4 @@ inline void resource_set_ev(resource r, uint32_t value)
   asm volatile("setev res[%0], r11" : : "r" (r));
 }
 
-#endif // __resource_h__
+#endif // __xcore_c_resource_h__

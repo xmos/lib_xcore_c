@@ -5,13 +5,13 @@
 
 #include <xs1.h>
 #include <xccompat.h>
-#include "channel.h"
-#include "port.h"
-#include "port_configure.h"
-#include "timer.h"
-#include "event.h"
-#include "interrupt.h"
-#include "lock.h"
+#include "xcore_c_channel.h"
+#include "xcore_c_port.h"
+#include "xcore_c_port_configure.h"
+#include "xcore_c_timer.h"
+#include "xcore_c_event.h"
+#include "xcore_c_interrupt.h"
+#include "xcore_c_lock.h"
 #include "xcore_c_clock.h"
 
 #endif // __xcore_c_h__

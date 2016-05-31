@@ -1,6 +1,6 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
-#include "event.h"
+#include "xcore_c_event.h"
 
 extern void event_disable(resource r);
 extern void event_enable(resource r);

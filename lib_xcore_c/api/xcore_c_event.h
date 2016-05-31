@@ -1,12 +1,12 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
-#ifndef __select_h__
-#define __select_h__
+#ifndef __xcore_c_event_h__
+#define __xcore_c_event_h__
 
 #if !defined(__XC__) || defined(__DOXYGEN__)
 
-#include "resource.h"
-#include "port.h"
+#include "xcore_c_resource.h"
+#include "xcore_c_port.h"
 
 /** Disable events from a given resource.
  *
@@ -32,7 +32,7 @@ inline void event_enable(resource r)
   asm volatile("eeu res[%0]" :: "r" (r));
 }
 
-#include "event_internal.h"
+#include "xcore_c_event_internal.h"
 
 /** Clear all pending events.
  *
@@ -281,4 +281,4 @@ unsigned event_select_ordered_no_wait(resource ids[], unsigned no_wait_value);
 
 #endif // __XC__
 
-#endif // __select_h__
+#endif // __xcore_c_event_h__

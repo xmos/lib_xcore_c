@@ -1,7 +1,7 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
 #include <xccompat.h>
-#include "channel.h"
+#include "xcore_c_channel.h"
 
 extern void chanend_alloc(chanend *c);
 extern void chanend_free(chanend c);

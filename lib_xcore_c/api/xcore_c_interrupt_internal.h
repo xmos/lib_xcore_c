@@ -1,12 +1,12 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
-#ifndef __interrupt_internal_h__
-#define __interrupt_internal_h__
+#ifndef __xcore_c_interrupt_internal_h__
+#define __xcore_c_interrupt_internal_h__
 
 #if !defined(__XC__) || defined(__DOXYGEN__)
 
-#include "interrupt_defines.h"
-#include "resource.h"
+#include "xcore_c_interrupt_defines.h"
+#include "xcore_c_resource.h"
 
 #ifndef INTERRUPT_MAX_HANDLER_FUNCTIONS
 /**
@@ -115,4 +115,4 @@ inline void interrupt_setup_timer_common(timer t, int time)
 
 #endif // __XC__
 
-#endif // __interrupt_internal_h__
+#endif // __xcore_c_interrupt_internal_h__

@@ -1,12 +1,12 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
-#ifndef __interrupt_h__
-#define __interrupt_h__
+#ifndef __xcore_c_interrupt_h__
+#define __xcore_c_interrupt_h__
 
 #if !defined(__XC__) || defined(__DOXYGEN__)
 
-#include "resource.h"
-#include "port.h"
+#include "xcore_c_resource.h"
+#include "xcore_c_port.h"
 
 /** Disable interrupts from a given resource.
  *
@@ -53,7 +53,7 @@ inline void interrupt_unmask_all(void)
   asm volatile("setsr 0x2"); // IEBLE is bit 1
 }
 
-#include "interrupt_internal.h"
+#include "xcore_c_interrupt_internal.h"
 
 /** Setup interrupts on a timer where the interrupts are handled by a function.
  *
@@ -213,4 +213,4 @@ inline void interrupt_change_port_time(port p, int16_t count)
 
 #endif // __XC__
 
-#endif // __interrupt_h__
+#endif // __xcore_c_interrupt_h__

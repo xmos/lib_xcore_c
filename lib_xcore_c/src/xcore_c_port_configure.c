@@ -1,6 +1,6 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
-#include "port_configure.h"
+#include "xcore_c_port_configure.h"
 
 extern void port_configure_in_handshake(port p, port readyin, port readyout,
                                          clock clk);

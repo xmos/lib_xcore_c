@@ -1,6 +1,6 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
-#include "lock.h"
+#include "xcore_c_lock.h"
 
 extern lock lock_alloc(void);
 extern void lock_free(lock l);
