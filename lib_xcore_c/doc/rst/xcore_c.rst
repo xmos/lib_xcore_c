@@ -199,7 +199,9 @@ In order to clean up, both the port and clock block should be disabled::
   clock_disable(c);
   port_disable(c);
 
-Driving clock
+.. TODO: example of driving clock from input port
+
+.. Driving clock
 
 Ready signals
 ~~~~~~~~~~~~~
@@ -343,76 +345,6 @@ available on either channel::
 The argument that is passed to ``event_select_no_wait()`` is the value that will
 be returned if no events are ready.
 
-Event handling functions
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-This library also supports the ability to install event handling functions. This
-allows the user to write code where events are not all handled within one
-``switch`` statement. It makes it possible to write libraries which are completely
-self-contained.
-
-For example, if the user writes a library to perform a real-time task based on
-a timer event the library initialisation would install a handler::
-
-  void lib_init(void *data)
-  {
-    timer tmr = timer_alloc();
-    int time = timer_get_time(tmr);
-    event_setup_timer_function(tmr, timer_handler_func, data, time + period);
-  }
-
-This code allocates a hardware timer and then gets the current time before
-registering an event handler. The call to ``event_setup_timer_function()`` takes
-four arguments.
-
-  1. The timer to configure
-
-  2. The handler function to call when events are triggered by the timer
-
-  3. A ``void*`` which is user data that is passed to the handler
-
-  4. The time at which the next event should fire
-
-*Note*: There are similar functions for ports (``event_setup_port_function()``)
-and channel ends (``event_setup_chanend_function()``).
-
-The handler function is passed the resource triggering the event and the user
-data registered with that resource::
-
-  void timer_handler_func(resource r, void *data);
-
-A table is used to register the user data with an event and this table has a
-default size of 20 entries. In order to change the number of resources that can
-have event handler functions registered then the define ``EVENT_MAX_HANDLER_FUNCTIONS``
-can be changed at compile time.
-
-The main event handling function then needs to change in order to use this style
-of event handling function. The ``event_clear_all()`` function should not be
-called, otherwise the timer event will be disabled. Instead, the function should
-now clear any events it enables::
-
-  void handle_events(chanend c, chanend d)
-  {
-    // Setup the channels to generate events
-    event_setup_chanend(c, EVENT_CHAN_C);
-    event_setup_chanend(d, EVENT_CHAN_D);
-
-    // Handle events using event_select() / event_select_no_wait()
-    ...
-
-    // Disable events local to this function
-    event_clear_chanend(c);
-    event_clear_chanend(d);
-  }
-
-After the ``handle_events()`` function has completed another equivalent function
-can be called in which the timer handler will continue to be called periodically.
-
-When the timer events are no longer required then they can be disabled using the
-``event_clear_timer()`` function (or equivalent port/chanend functions)::
-
-  event_clear_timer(tmr);
-
 Ordered events
 ~~~~~~~~~~~~~~
 
@@ -441,6 +373,11 @@ of resource IDs to define the order in which events are enabled::
     }
   }
 
+.. Using trap handlers
+.. ...................
+
+.. TODO: document use of trap handlers once implemented
+
 API
 ---
 
@@ -454,8 +391,6 @@ Supporting types
 .. doxygentypedef:: streaming_chanend
 
 .. doxygentypedef:: transacting_chanend
-
-.. doxygentypedef:: event_handler
 
 .. doxygenenum:: port_condition
 
@@ -555,10 +490,6 @@ Channels with transactions
 
 Ports
 .....
-
-.. doxygenfunction:: port_set_buffered
-
-.. doxygenfunction:: port_set_transfer_width
 
 .. doxygenfunction:: port_enable
 
@@ -708,21 +639,15 @@ Events
 
 .. doxygenfunction:: event_setup_timer
 
-.. doxygenfunction:: event_setup_timer_function
-
 .. doxygenfunction:: event_clear_timer
 
 .. doxygenfunction:: event_change_timer_time
 
 .. doxygenfunction:: event_setup_chanend
 
-.. doxygenfunction:: event_setup_chanend_function
-
 .. doxygenfunction:: event_clear_chanend
 
 .. doxygenfunction:: event_setup_port
-
-.. doxygenfunction:: event_setup_port_function
 
 .. doxygenfunction:: event_clear_port
 
@@ -740,17 +665,10 @@ Events
 
 |newpage|
 
-Interrupts
-..........
+.. Trap handlers
+.. .............
 
-TODO
-
-|newpage|
-
-Trap handlers
-.............
-
-TODO
+.. TODO : document trap handler API once implemented
 
 |appendix|
 

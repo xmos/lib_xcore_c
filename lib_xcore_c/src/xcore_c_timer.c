@@ -1,6 +1,6 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
-#include "timer.h"
+#include "xcore_c_timer.h"
 
 extern inline timer timer_alloc(void);
 extern inline void timer_free(timer t);

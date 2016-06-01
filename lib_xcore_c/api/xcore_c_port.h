@@ -1,7 +1,7 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
-#ifndef __port_h__
-#define __port_h__
+#ifndef __xcore_c_port_h__
+#define __xcore_c_port_h__
 
 #if !defined(__XC__) || defined(__DOXYGEN__)
 
@@ -38,7 +38,7 @@ inline port port_enable(int port_id)
  *
  *  \param port_id         Value that identifies which port to drive
  *
- *  \param transfer_width  Number of bits to serialise; must be 1, 2, 4, 8, or 32.
+ *  \param transfer_width  Number of bits to serialise; must be 1, 4, 8, or 32.
  *                         The number of bits must be >= to the physical port
  *                         width.
  *
@@ -69,7 +69,7 @@ inline void port_disable(port p)
  *
  *  \param p               The port to change the transfer width of
  *
- *  \param transfer_width  Number of bits to serialise; must be 1, 2, 4, 8, or 32.
+ *  \param transfer_width  Number of bits to serialise; must be 1, 4, 8, or 32.
  *                         The number of bits must be >= to the physical port
  *                         width.
  */
@@ -706,31 +706,23 @@ inline int port_endin(port p)
   return num_bits;
 }
 
-#endif // __XC__
-
 /** Force an input on a buffered port.
  *
  *  The function will perform an input on a buffered port even if the buffer is
  *  only partially full.
  *
- *  \param      p    The port to do the input on
+ *  \param p  The port to do the input on
  *
- *  \param[out] n    A variable to be filled with number of bits inputted
+ *  \param n  A variable to be filled with number of bits inputted
  *
- *  \returns         The inputted data
+ *  \returns  The inputted data
  */
-#if defined(__XC__) || defined(__DOXYGEN__)
-inline int port_force_input(port p, int &n)
-{
-  asm volatile("endin %0, res[%1]" : "=r" (n) : "r" (p));
-  return port_input(p);
-}
-#else
 inline int port_force_input(port p, int *n)
 {
-  asm volatile("endin %0, res[%1]" : "=r" (*n) : "r" (p));
+  *n = port_endin(p);
   return port_input(p);
 }
-#endif
 
-#endif // __port_h__
+#endif // __XC__
+
+#endif // __xcore_c_port_h__

@@ -1,7 +1,7 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
-#ifndef __channel_h__
-#define __channel_h__
+#ifndef __xcore_c_channel_h__
+#define __xcore_c_channel_h__
 
 #include <xccompat.h>
 
@@ -12,7 +12,7 @@
  */
 typedef chanend streaming_chanend;
 
-#include <channel_internal.h>
+#include "xcore_c_channel_internal.h"
 
 #if !defined(__XC__) || defined(__DOXYGEN__)
 /** Allocate a single channel-end.
@@ -309,6 +309,6 @@ inline void chan_input_block(chanend c, char buf[], int n)
   s_chan_check_ct_end(c);
 }
 
-#include "channel_transaction.h"
+#include "xcore_c_channel_transaction.h"
 
-#endif // __channel_h__
+#endif // __xcore_c_channel_h__

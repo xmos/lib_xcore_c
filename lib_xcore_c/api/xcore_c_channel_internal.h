@@ -1,7 +1,7 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
-#ifndef __channel_internal_h__
-#define __channel_internal_h__
+#ifndef __xcore_c_channel_internal_h__
+#define __xcore_c_channel_internal_h__
 
 /** Send an *end* control token over a streaming channel.
  *
@@ -27,4 +27,4 @@ inline void s_chan_check_ct_end(streaming_chanend c)
   asm("chkct res[%0],1"::"r"(c));
 }
 
-#endif // __channel_internal_h__
+#endif // __xcore_c_channel_internal_h__

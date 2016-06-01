@@ -1,7 +1,7 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
-#ifndef __lock_h__
-#define __lock_h__
+#ifndef __xcore_c_lock_h__
+#define __xcore_c_lock_h__
 
 #include <xccompat.h>
 
@@ -70,4 +70,4 @@ inline void lock_release(lock l)
 
 #endif // __XC__
 
-#endif // __lock_h__
+#endif // __xcore_c_lock_h__

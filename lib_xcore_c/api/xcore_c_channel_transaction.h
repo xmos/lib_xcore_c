@@ -1,7 +1,7 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
-#ifndef __channel_transaction_h__
-#define __channel_transaction_h__
+#ifndef __xcore_c_channel_transaction_h__
+#define __xcore_c_channel_transaction_h__
 
 #if defined(__XC__) || defined(__DOXYGEN__)
 #define __tc_get_reference_member(x,m) x.m
@@ -209,4 +209,4 @@ inline void t_chan_input_block(REFERENCE_PARAM(transacting_chanend, tc), char bu
 
 #endif // __XC__
 
-#endif // __channel_transaction_h__
+#endif // __xcore_c_channel_transaction_h__

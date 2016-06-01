@@ -1,7 +1,7 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
-#ifndef __timer_h__
-#define __timer_h__
+#ifndef __xcore_c_timer_h__
+#define __xcore_c_timer_h__
 
 #include <xccompat.h>
 
@@ -84,4 +84,4 @@ inline void timer_delay(timer tmr, int period)
 
 #endif // __XC__
 
-#endif // __timer_h__
+#endif // __xcore_c_timer_h__
