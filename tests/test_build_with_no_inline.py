@@ -70,8 +70,9 @@ class LibraryFunctionExtractor(c_ast.NodeVisitor):
             func_block = '  {{\n    {}\n    {}  }}\n'.format(''.join(args).rstrip(', '), function_call)
             self.function_call_blocks.append(func_block)
 
+test_app_dir = os.path.join('build_with_no_inline', 'src')
+
 def generate_test_app():
-    test_app_dir = os.path.join('build_with_no_inline', 'src')
     c_file = os.path.join(test_app_dir, 'pycparser_main.c')
     ast = parse_file(c_file,
                      use_cpp=True,
@@ -90,6 +91,9 @@ def generate_test_app():
         test_c_file.writelines(file_top)
         test_c_file.writelines(function_call_blocks)
         test_c_file.writelines(file_bottom)
+
+def delete_generated_file():
+    os.remove(os.path.join(test_app_dir, 'test.c'))
 
 def run(arch):
     test_name = os.path.splitext(os.path.basename(__file__).replace("test_", "", 1))[0]
@@ -113,3 +117,4 @@ def runtest():
     generate_test_app()
     run("XS1")
     run("XS2")
+    delete_generated_file()
