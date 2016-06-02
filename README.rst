@@ -17,6 +17,7 @@ Features
  * Support for ports and clock blocks
  * Support for timers
  * Support for events so that xC 'select' functionality can be implemented
+ * Support for hardware locks
 
 Software version and dependencies
 .................................
