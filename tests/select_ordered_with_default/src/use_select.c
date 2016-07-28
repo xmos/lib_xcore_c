@@ -11,7 +11,7 @@ typedef enum {
   EVENT_CHAN_C = EVENT_ENUM_BASE,
   EVENT_CHAN_D,
   EVENT_TIMER,
-  EVENT_DEFAULT
+  EVENT_NONE
 } event_choice_t;
 
 void test(chanend c, chanend d, timer tmr, resource ids[])
@@ -30,7 +30,7 @@ void test(chanend c, chanend d, timer tmr, resource ids[])
   // Expect N events for each of the resources used (and one lot for the default)
   int count = 0;
   while (count < events_per_resource * 4) {
-    event_choice_t choice = event_select_ordered_no_wait(ids, EVENT_DEFAULT);
+    event_choice_t choice = event_select_ordered_no_wait(ids, EVENT_NONE);
     switch (choice) {
       case EVENT_CHAN_C: {
         // Read value and clear event
@@ -62,12 +62,16 @@ void test(chanend c, chanend d, timer tmr, resource ids[])
         count += 1;
         break;
       }
-      case EVENT_DEFAULT: {
+      case EVENT_NONE: {
         if (default_event_count < events_per_resource) {
           debug_printf("Default\n");
           count += 1;
           default_event_count += 1;
         }
+        break;
+      }
+      default: {
+        debug_printf("Unexpected event!!\n");
         break;
       }
     }

@@ -8,7 +8,7 @@
 typedef enum {
   EVENT_CHAN_C = EVENT_ENUM_BASE,
   EVENT_CHAN_D,
-  EVENT_DEFAULT
+  EVENT_NONE
 } event_choice_t;
 
 void channel_example(chanend c, chanend d)
@@ -22,7 +22,7 @@ void channel_example(chanend c, chanend d)
   int default_printed = 0;
   int count = 0;
   while (count < 10) {
-    event_choice_t choice = event_select_no_wait(EVENT_DEFAULT);
+    event_choice_t choice = event_select_no_wait(EVENT_NONE);
     switch (choice) {
       case EVENT_CHAN_C: {
         // Read value and clear event
@@ -40,13 +40,17 @@ void channel_example(chanend c, chanend d)
         default_printed = 0;
         break;
       }
-      case EVENT_DEFAULT: {
+      case EVENT_NONE: {
         if (!default_printed) {
           // Only print default taken once to reduce affect of compiler changes
           // on test output
           debug_printf("Default taken\n");
           default_printed = 1;
         }
+        break;
+      }
+      default: {
+        debug_printf("Unexpected event!!\n");
         break;
       }
     }
