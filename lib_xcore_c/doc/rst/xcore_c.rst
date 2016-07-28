@@ -105,9 +105,9 @@ And a new connection established by passing this new channel-end over the
 existing link, receiving the destination link on the other tile and connecting
 the two. So, both applications can do::
 
-    chan_output_word(c, new_c);
-    chanend dest = chan_input_word(c);
-    chanend_set_dest(new_c, dest);
+    chan_output_word(c, new_c);             // Send my new-chanend to other tile.
+    chanend new_dest = chan_input_word(c);  // Recieve other tile's new-chanend...
+    chanend_set_dest(new_c, new_dest);      // ... and connect it to my new-chanend.
 
 Streaming channels
 ~~~~~~~~~~~~~~~~~~
