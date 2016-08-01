@@ -34,7 +34,7 @@ void port_example()
   port_output(q, q_value);
 
   // Setup the resources for eventing
-  event_setup_timer(t, EVENT_TIMER, time);
+  event_setup_timer(t, time, EVENT_TIMER);
   event_setup_port(p, EVENT_PORT_P);
 
   event_change_port_condition(p, PORT_COND_PINSEQ, 0x1);

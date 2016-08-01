@@ -53,12 +53,12 @@ inline void event_clear_all(void)
  *  when the event is triggered.
  *
  *  \param t     The timer to enable events on
- *  \param value The value to be returned by event_select()/event_select_no_wait()
- *               when the timer event is triggered.
  *  \param time  The time at which the timer will trigger an event. The default
  *               timer ticks are at a 10ns resolution.
+ *  \param value The value to be returned by event_select()/event_select_no_wait()
+ *               when the timer event is triggered.
  */
-inline void event_setup_timer(timer t, unsigned value, int time)
+inline void event_setup_timer(timer t, int time, unsigned value)
 {
   event_setup_resource(t, value);
   event_setup_timer_common(t, time);

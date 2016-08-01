@@ -22,7 +22,7 @@ void test(chanend c, chanend d, timer tmr, resource ids[])
   // Setup the channels to generate events
   event_setup_chanend(c, EVENT_CHAN_C);
   event_setup_chanend(d, EVENT_CHAN_D);
-  event_setup_timer(tmr, EVENT_TIMER, time);
+  event_setup_timer(tmr, time, EVENT_TIMER);
 
   int timer_event_count = 0;
   int default_event_count = 0;
