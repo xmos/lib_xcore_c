@@ -43,7 +43,7 @@ inline void event_setup_resource(resource r, unsigned value)
  *  Function shared by event_setup_timer() and event_setup_timer_function().
  *
  *  \param t     The timer to enable events for
- *  \param time  The time at which the timer should trigger an event. The
+ *  \param time  The time at which the timer will trigger an event. The
  *               default timer ticks are at a 10ns resolution.
  */
 inline void event_setup_timer_common(timer t, int time)
@@ -51,7 +51,7 @@ inline void event_setup_timer_common(timer t, int time)
   // Set the condition to be AFTER
   asm volatile("setc res[%0], 0x9" :: "r" (t));
 
-  // Set the time at which the event should fire
+  // Set the time at which the event will fire
   asm volatile("setd res[%0], %1" :: "r" (t), "r" (time));
 }
 

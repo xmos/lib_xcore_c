@@ -13,10 +13,10 @@ inline void port_set_transfer_width(port p, int transfer_width);
 
 /** Enables a port.
  *
- *  The port should be one of XS1_PORT_1A .. XS1_PORT_32A as specified on the
+ *  The port must be one of XS1_PORT_1A .. XS1_PORT_32A as specified on the
  *  datasheet and in the xs1.h include file. Either this function or
- *  port_enable_buffered() should be called once for each variable of type
- *  ``port`` before use. port_disable() should be called afterwards.
+ *  port_enable_buffered() must be called once for each variable of type
+ *  ``port`` before use. port_disable() must be called afterwards.
  *
  *  \param port_id   Value that identifies which port to drive
  *
@@ -31,10 +31,10 @@ inline port port_enable(int port_id)
 
 /** Eables a port to buffer and serialise/deserialise data.
  *
- *  The port should be one of XS1_PORT_1A .. XS1_PORT_32A as specified on the
+ *  The port must be one of XS1_PORT_1A .. XS1_PORT_32A as specified on the
  *  datasheet and in the xs1.h include file. Either this function or port_enable()
- *  should be called once for each variable of type ``port`` before use.
- *  port_disable() should be called afterwards.
+ *  must be called once for each variable of type ``port`` before use.
+ *  port_disable() must be called afterwards.
  *
  *  \param port_id         Value that identifies which port to drive
  *
@@ -331,7 +331,7 @@ inline void port_output(port p, int data)
  *
  *  \param data   Value to output
  *
- *  \param t      The port counter value at which the output should occur
+ *  \param t      The port counter value at which the output will occur
  */
 inline void port_output_at_time(port p, int data, int16_t t)
 {
@@ -615,7 +615,7 @@ inline void port_set_condition(port p, port_condition c)
 /** Set the conditional data on a port.
  *
  *  This sets the conditional data on a port.
- *  This should be used in conjunction with port_set_condition().
+ *  This is used in conjunction with port_set_condition().
  *
  *  \param p  The port to set the conditional data on
  *

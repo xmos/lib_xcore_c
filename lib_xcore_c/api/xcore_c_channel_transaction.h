@@ -34,7 +34,7 @@ typedef struct transacting_chanend_s {
  *  This called must be matched by a call to chan_init_transaction_slave()
  *  on the other end of the channel.
  *
- *  A transaction should be closed with chan_complete_transaction().
+ *  A transaction must be closed with chan_complete_transaction().
  *
  * \param c   Channel-end to initialize the transaction on
  *
@@ -58,7 +58,7 @@ inline transacting_chanend chan_init_transaction_master(chanend c)
  *  This called must be matched by a call to chan_init_transaction_master()
  *  on the other end of the channel.
  *
- *  A transaction should be closed with chan_complete_transaction().
+ *  A transaction must be closed with chan_complete_transaction().
  *
  * \param c   Channel-end to initialize the transaction on
  *

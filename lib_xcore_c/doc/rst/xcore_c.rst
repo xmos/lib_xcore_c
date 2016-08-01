@@ -194,7 +194,7 @@ The port can now be used to output or input data::
   port_output(p, 0);
   ...
 
-In order to clean up, both the port and clock block should be disabled::
+In order to clean up, both the port and clock block must be disabled/freed::
 
   clock_disable(c);
   port_disable(c);
@@ -206,7 +206,7 @@ In order to clean up, both the port and clock block should be disabled::
 Ready signals
 ~~~~~~~~~~~~~
 
-Configuring ports to use ready signals should be done using the ``port_configure_``
+Configuring ports to use ready signals is done using the ``port_configure_``
 functions provided in ``port_configure.h``. All the basic functions needed to
 implement this functionality is provided, but the order of configuring a port
 as a strobed or handshaken port is critical and therefore best done using these

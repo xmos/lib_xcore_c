@@ -37,7 +37,7 @@ inline void event_enable(resource r)
 /** Clear all pending events.
  *
  *  In order to ensure that no events set up by other code will be triggered
- *  then this function should be called before starting to configure events for
+ *  this function is called before starting to configure events for
  *  a new event loop.
  */
 inline void event_clear_all(void)
@@ -55,7 +55,7 @@ inline void event_clear_all(void)
  *  \param t     The timer to enable events on
  *  \param value The value to be returned by event_select()/event_select_no_wait()
  *               when the timer event is triggered.
- *  \param time  The time at which the timer should trigger an event. The default
+ *  \param time  The time at which the timer will trigger an event. The default
  *               timer ticks are at a 10ns resolution.
  */
 inline void event_setup_timer(timer t, unsigned value, int time)
@@ -78,11 +78,11 @@ inline void event_clear_timer(timer t)
 /** Change the time at which a timer event will fire.
  *
  *  This function modifies the time at which the timer event will be triggered.
- *  It should be used after an event caused by a timer configured using
+ *  It is used after an event caused by a timer configured using
  *  event_setup_timer() has happened.
  *
  *  \param t     The timer to change the time for
- *  \param time  The time at which the timer should trigger an event. The default
+ *  \param time  The time at which the timer will trigger an event. The default
  *               timer ticks are at a 10ns resolution.
  */
 inline void event_change_timer_time(timer t, int time)

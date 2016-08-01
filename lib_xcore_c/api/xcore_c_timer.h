@@ -11,7 +11,7 @@
  *
  *  This macro is to be called once on every variable of the type ``timer``.
  *  If there are no timers availble, then the function will return NULL.
- *  When the timer is no longer required, timer_free() should be called
+ *  When the timer is no longer required, timer_free() must be called
  *  to free the timer.
  *
  *  \returns   The initialized timer

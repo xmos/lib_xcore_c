@@ -80,7 +80,7 @@ inline void clock_set_source_clk_ref(clock clk)
 
 /** Configure a clock's source to be the xCORE clock.
  *
- *  *Note*: When using the xCORE clock as the clock input a divide of > 0 should
+ *  *Note*: When using the xCORE clock as the clock input a divide of > 0 must
  *  be used for the ports to function correclty.
  *
  *  \param clk  The clock to configure
