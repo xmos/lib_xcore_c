@@ -6,8 +6,10 @@
 
 void core0(chanend c)
 {
-  timer tmr = timer_alloc();
-  lock l = lock_alloc();
+  timer tmr;
+  timer_alloc(&tmr);
+  lock l;
+  lock_alloc(&l);
   chan_output_word(c, l);
 
   lock_acquire(l);
@@ -34,3 +36,4 @@ void core1(chanend c)
   // Signal done
   chan_output_word(c, 0);
 }
+

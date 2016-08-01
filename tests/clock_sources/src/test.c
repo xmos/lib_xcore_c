@@ -87,7 +87,8 @@ static void test_port_clock(timer tmr, port p, clock c)
  */
 void test_clock_sources()
 {
-  timer tmr = timer_alloc();
+  timer tmr;
+  timer_alloc(&tmr);
 
   // Allocate the clock to control the port
   clock c;
@@ -108,3 +109,4 @@ void test_clock_sources()
   clock_free(c);
   timer_free(tmr);
 }
+

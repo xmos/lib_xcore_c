@@ -29,7 +29,8 @@ void port_test_output(chanend c)
 
   port_output(p, 0xfeedbeef);
 
-  timer tmr = timer_alloc();
+  timer tmr;
+  timer_alloc(&tmr);
   timer_delay(tmr, 1000);
   timer_free(tmr);
 

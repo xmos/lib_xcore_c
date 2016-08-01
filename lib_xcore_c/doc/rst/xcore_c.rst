@@ -16,7 +16,8 @@ Using timers
 The library provides support for xCORE hardware timers. They are allocated
 using::
 
-  timer tmr = timer_alloc();
+  timer tmr;
+  timer_alloc(&tmr);
 
 A timer can then be read to get the current time by doing::
 
@@ -99,7 +100,8 @@ A new channel-end can be allocated using::
 
   void application_0(chanend c)
   {
-    chanend new_c = chanend_alloc();
+    chanend new_c;
+    chanend_alloc(&new_c);
 
 And a new connection established by passing this new channel-end over the
 existing link, receiving the destination link on the other tile and connecting
@@ -236,7 +238,8 @@ Using hardware locks
 The library provides support for xCORE hardware locks. They are allocated
 using::
 
-  lock l = lock_alloc();
+  lock l;
+  lock_alloc(&l);
 
 To enter a mutex region the lock is then acquired::
 

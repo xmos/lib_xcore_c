@@ -6,7 +6,8 @@
 
 void fast(chanend c)
 {
-  timer tmr = timer_alloc();
+  timer tmr;
+  timer_alloc(&tmr);
 
   // Wait a short time, so that this core is ahead
   timer_delay(tmr, 100);
@@ -32,7 +33,8 @@ void fast(chanend c)
 
 void slow(chanend c)
 {
-  timer tmr = timer_alloc();
+  timer tmr;
+  timer_alloc(&tmr);
 
   // Wait a long time, so that this core is behind
   timer_delay(tmr, 2000);
@@ -52,3 +54,4 @@ void slow(chanend c)
   // Consume the disconnect token
   s_chan_check_ct_end(c);
 }
+

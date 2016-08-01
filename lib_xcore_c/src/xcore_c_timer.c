@@ -2,7 +2,7 @@
 
 #include "xcore_c_timer.h"
 
-extern inline timer timer_alloc(void);
+extern inline void timer_alloc(timer *t);
 extern inline void timer_free(timer t);
 extern inline int timer_get_time(timer t);
 extern timer timer_when_timerafter(timer tmr, int time);

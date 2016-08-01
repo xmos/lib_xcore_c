@@ -18,13 +18,11 @@ typedef int lock;
  *  then the function will return NULL. When the lock is no longer required,
  *  lock_free() must be called to free the lock.
  *
- *  \returns   The lock or NULL if there are no locks available.
+ *  \param l   Lock variable representing the initialised lock
  */
-inline lock lock_alloc(void)
+inline void lock_alloc(lock *l)
 {
-  lock l;
-  asm volatile("getr %0, 5" : "=r" (l));
-  return l;
+  asm volatile("getr %0, 5" : "=r" (*l));
 }
 
 /** Deallocate a lock.

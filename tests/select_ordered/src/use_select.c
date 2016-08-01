@@ -66,10 +66,13 @@ void channel_first(chanend c, chanend d)
   // No need to clear all events first as the event_select_ordered will do that
   debug_printf("Running with order [c, d, timer]\n");
 
-  timer tmr = timer_alloc();
+  timer tmr;
+  timer_alloc(&tmr);
 
   resource ids[4] = {c, d, tmr, 0};
   test(c, d, tmr, ids);
+
+  timer_free(tmr);
 }
 
 void timer_first(chanend c, chanend d)
@@ -77,8 +80,12 @@ void timer_first(chanend c, chanend d)
   // No need to clear all events first as the event_select_ordered will do that
   debug_printf("Running with order [timer, d, c]\n");
 
-  timer tmr = timer_alloc();
+  timer tmr;
+  timer_alloc(&tmr);
 
   resource ids[4] = {tmr, d, c, 0};
   test(c, d, tmr, ids);
+
+  timer_free(tmr);
 }
+

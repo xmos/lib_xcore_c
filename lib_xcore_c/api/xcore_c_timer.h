@@ -14,13 +14,11 @@
  *  When the timer is no longer required, timer_free() must be called
  *  to free the timer.
  *
- *  \returns   The initialized timer
+ *  \param t   Timer variable representing the initialised timer
  */
-inline timer timer_alloc(void)
+inline void timer_alloc(timer *t)
 {
-  timer t;
-  asm volatile("getr %0, 1" : "=r" (t));
-  return t;
+  asm volatile("getr %0, 1" : "=r" (*t));
 }
 
 /** Deallocate a timer.

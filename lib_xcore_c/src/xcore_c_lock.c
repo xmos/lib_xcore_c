@@ -2,7 +2,7 @@
 
 #include "xcore_c_lock.h"
 
-extern lock lock_alloc(void);
+extern void lock_alloc(lock *l);
 extern void lock_free(lock l);
 extern void lock_acquire(lock l);
 extern void lock_release(lock l);

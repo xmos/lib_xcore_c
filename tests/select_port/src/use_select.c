@@ -25,7 +25,8 @@ void port_example()
   port q;
   port_alloc(&q, XS1_PORT_1B);
 
-  timer t = timer_alloc();
+  timer t;
+  timer_alloc(&t);
   int time = timer_get_time(t);
   time += period;
 
