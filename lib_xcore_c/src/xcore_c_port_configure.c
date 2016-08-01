@@ -3,7 +3,7 @@
 #include "xcore_c_port_configure.h"
 
 extern void port_configure_in_handshake(port p, port readyin, port readyout,
-                                         clock clk);
+                                        clock clk);
 extern void port_configure_out_handshake(port p, port readyin, port readyout,
                                          clock clk, unsigned initial);
 extern void port_configure_in_strobed_master(port p, port readyout,

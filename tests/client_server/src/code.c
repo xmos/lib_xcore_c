@@ -19,7 +19,7 @@ void get_addresses(chanend c, unsigned *local_server, unsigned *remote_server)
   *remote_server = s_chan_input_word(c);
   s_chan_check_ct(c, XS1_CT_END);
   debug_printf("%x:%d: get_addresses: local %x, remote: %x\n",
-    tile_id, core_id, *local_server, *remote_server);
+               tile_id, core_id, *local_server, *remote_server);
 }
 
 /*
@@ -33,7 +33,7 @@ void chanend_server(chanend c)
   unsigned tile_id = get_local_tile_id();
   unsigned core_id = get_logical_core_id();
 
-  while(1) {
+  while (1) {
     chanend sender = s_chan_input_word(c);
     int command = s_chan_input_word(c);
     s_chan_check_ct(c, XS1_CT_END);
@@ -71,7 +71,8 @@ int send_command(chanend dst, int command)
   chanend_free(c);
   if (command == ~response) {
     debug_printf("Send cmd %d to %x response ok\n", command, dst);
-  } else {
+  }
+  else {
     debug_printf("Send cmd %d to %x response not ok\n", command, dst);
   }
   return response;

@@ -18,12 +18,14 @@ int main()
   par {
     channel_first(c, d);
 
-    for (int i = 0; i < events_per_resource; i++) {
+    for (int i = 0; i < events_per_resource; i++)
+    {
       // Provide test data
       c <: 555 + i;
     }
 
-    for (int i = 0; i < events_per_resource; i++) {
+    for (int i = 0; i < events_per_resource; i++)
+    {
       // Provide test data
       d <: 333 + i;
     }
@@ -31,12 +33,14 @@ int main()
   par {
     timer_first(c, d);
 
-    for (int i = 0; i < events_per_resource; i++) {
+    for (int i = 0; i < events_per_resource; i++)
+    {
       // Provide test data
       c <: 555 + i;
     }
 
-    for (int i = 0; i < events_per_resource; i++) {
+    for (int i = 0; i < events_per_resource; i++)
+    {
       // Provide test data
       d <: 333 + i;
     }

@@ -11,8 +11,8 @@ extern const size_t array_len;
 void test_int(chanend c);
 void test_char(chanend c);
 extern "C" {
-void print_array_int(const char *prefix, int data[], size_t num_words);
-void print_array_char(const char *prefix, char data[], size_t num_bytes);
+  void print_array_int(const char *prefix, int data[], size_t num_words);
+  void print_array_char(const char *prefix, char data[], size_t num_bytes);
 }
 
 transaction in_array_int(chanend c, int data[], size_t size)
@@ -44,13 +44,15 @@ void xc_test_char(chanend c)
   char data[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'};
 
   slave {
-    for (size_t i = 0; i < array_len; i++) {
+    for (size_t i = 0; i < array_len; i++)
+    {
       c <: data[i];
     }
   }
 
   master {
-    for (size_t i = 0; i < array_len; i++) {
+    for (size_t i = 0; i < array_len; i++)
+    {
       c :> data[i];
     }
   }

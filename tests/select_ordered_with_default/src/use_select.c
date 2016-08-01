@@ -54,7 +54,8 @@ void test(chanend c, chanend d, timer tmr, resource ids[])
         if (timer_event_count >= events_per_resource) {
           // Allow the other resources to have time to finish
           time += 10000000;
-        } else {
+        }
+        else {
           // Give enough time for the default to fire
           time += 1000;
         }
