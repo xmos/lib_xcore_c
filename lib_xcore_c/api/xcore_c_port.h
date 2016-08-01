@@ -11,54 +11,52 @@
 inline void port_set_buffered(port p);
 inline void port_set_transfer_width(port p, int transfer_width);
 
-/** Enables a port.
+/** Allocates a port.
  *
- *  The port must be one of XS1_PORT_1A .. XS1_PORT_32A as specified on the
+ *  The port_id must be one of XS1_PORT_1A .. XS1_PORT_32A as specified on the
  *  datasheet and in the xs1.h include file. Either this function or
- *  port_enable_buffered() must be called once for each variable of type
- *  ``port`` before use. port_disable() must be called afterwards.
+ *  port_alloc_buffered() must be called once for each variable of type
+ *  ``port`` before use. port_free() must be called afterwards.
+ *
+ *  \param p         Port variable representing the initialised port
  *
  *  \param port_id   Value that identifies which port to drive
- *
- *  \returns         Port variable representing the initialised port
  */
-inline port port_enable(int port_id)
+inline void port_alloc(port *p, int port_id)
 {
-  port p = port_id;
-  asm volatile("setc res[%0], 8" :: "r" (p));
-  return p;
+  asm volatile("setc res[%0], 8" :: "r" (port_id));
+  *p = port_id;
 }
 
-/** Eables a port to buffer and serialise/deserialise data.
+/** Allocates a port to buffer and serialise/deserialise data.
  *
- *  The port must be one of XS1_PORT_1A .. XS1_PORT_32A as specified on the
- *  datasheet and in the xs1.h include file. Either this function or port_enable()
+ *  The port_id must be one of XS1_PORT_1A .. XS1_PORT_32A as specified on the
+ *  datasheet and in the xs1.h include file. Either this function or port_alloc()
  *  must be called once for each variable of type ``port`` before use.
- *  port_disable() must be called afterwards.
+ *  port_free() must be called afterwards.
+ *
+ *  \param p               Port variable representing the initialised port
  *
  *  \param port_id         Value that identifies which port to drive
  *
  *  \param transfer_width  Number of bits to serialise; must be 1, 4, 8, or 32.
  *                         The number of bits must be >= to the physical port
  *                         width.
- *
- *  \returns               Port variable representing the initialised port
  */
-inline port port_enable_buffered(int port_id, int transfer_width)
+inline void port_alloc_buffered(port *p, int port_id, int transfer_width)
 {
-  port p = port_enable(port_id);
-  port_set_buffered(p);
-  port_set_transfer_width(p, transfer_width);
-  return p;
+  port_alloc(p, port_id);
+  port_set_buffered(*p);
+  port_set_transfer_width(*p, transfer_width);
 }
 
-/** Disable the port.
+/** Deallocate the port.
  *
  *  This function switches off the port.
  *
- *  \param p      Port to disable
+ *  \param p      Port to free
  */
-inline void port_disable(port p)
+inline void port_free(port p)
 {
   asm volatile("setc res[%0], 0" :: "r" (p));
 }

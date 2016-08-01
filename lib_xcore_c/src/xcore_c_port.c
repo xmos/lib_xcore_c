@@ -3,9 +3,9 @@
 #include "xcore_c_port.h"
 
 extern void port_set_transfer_width(port p, int transfer_width);
-extern port port_enable(int port_id);
-extern port port_enable_buffered(int port_id, int transfer_width);
-extern void port_disable(port p);
+extern void port_alloc(port *p, int port_id);
+extern void port_alloc_buffered(port *p, int port_id, int transfer_width);
+extern void port_free(port p);
 extern void port_set_transfer_width(port p, int transfer_width);
 extern void port_set_unbuffered(port p);
 extern void port_set_buffered(port p);

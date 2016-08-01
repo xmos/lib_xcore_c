@@ -20,8 +20,10 @@ void port_example()
   static const int period = 5000;
   event_clear_all();
 
-  port p = port_enable(XS1_PORT_1A);
-  port q = port_enable(XS1_PORT_1B);
+  port p;
+  port_alloc(&p, XS1_PORT_1A);
+  port q;
+  port_alloc(&q, XS1_PORT_1B);
 
   timer t = timer_alloc();
   int time = timer_get_time(t);
@@ -68,4 +70,6 @@ void port_example()
 
   // Release the resources
   timer_free(t);
+  port_free(q);
+  port_free(p);
 }

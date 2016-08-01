@@ -60,11 +60,13 @@ static void test_xcore_clock(timer tmr, port p, clock c)
  */
 static void test_port_clock(timer tmr, port p, clock c)
 {
-  clock divided_c = clock_enable(XS1_CLKBLK_2);
+  clock divided_c;
+  clock_alloc(&divided_c, XS1_CLKBLK_2);
   clock_set_divide(divided_c, 2);
 
   // Enable a port to use as a clock source
-  port p_clk_src = port_enable(XS1_PORT_1B);
+  port p_clk_src;
+  port_alloc(&p_clk_src, XS1_PORT_1B);
   port_set_clock(p_clk_src, divided_c);
   port_set_mode_clock_port(p_clk_src);
 
@@ -76,8 +78,8 @@ static void test_port_clock(timer tmr, port p, clock c)
   time_port_rate(tmr, p, c);
 
   clock_stop(divided_c);
-  clock_disable(divided_c);
-  port_disable(p_clk_src);
+  clock_free(divided_c);
+  port_free(p_clk_src);
 }
 
 /*
@@ -88,10 +90,12 @@ void test_clock_sources()
   timer tmr = timer_alloc();
 
   // Allocate the clock to control the port
-  clock c = clock_enable(XS1_CLKBLK_1);
+  clock c;
+  clock_alloc(&c, XS1_CLKBLK_1);
 
   // Enable a port to use as a clock source
-  port p = port_enable(XS1_PORT_1A);
+  port p;
+  port_alloc(&p, XS1_PORT_1A);
   port_set_buffered(p);
   port_set_transfer_width(p, 32);
   port_set_clock(p, c);
@@ -100,7 +104,7 @@ void test_clock_sources()
   test_xcore_clock(tmr, p, c);
   test_port_clock(tmr, p, c);
 
-  port_disable(p);
-  clock_disable(c);
+  port_free(p);
+  clock_free(c);
   timer_free(tmr);
 }

@@ -2,8 +2,8 @@
 
 #include "xcore_c_clock.h"
 
-extern clock clock_enable(int clock_id);
-extern void clock_disable(clock clk);
+extern void clock_alloc(clock *clk, int clock_id);
+extern void clock_free(clock clk);
 extern void clock_start(clock clk);
 extern void clock_stop(clock clk);
 extern void clock_set_source_port(clock clk, port p);

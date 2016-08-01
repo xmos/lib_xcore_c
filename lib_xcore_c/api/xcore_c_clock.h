@@ -9,24 +9,26 @@
 #include <xccompat.h>
 #include <xs1.h>
 
-/** Enable a clock
+/** Allocates a clock
  *
  *  This function enables a specified clock block and returns a clock
  *  variable denoting the clock.
  *
+ *  \param clk        Clock variable representing the initialised clock
+ *
  *  \param clock_id   The id of the clock to enable
  */
-inline clock clock_enable(int clock_id)
+inline void clock_alloc(clock *clk, int clock_id)
 {
   asm volatile("setc res[%0], 8" :: "r" (clock_id));
-  return (clock)clock_id;
+  *clk = clock_id;
 }
 
-/** Disable a clock
+/** Deallocate a clock
  *
  *  \param clk  The clock to disable
  */
-inline void clock_disable(clock clk)
+inline void clock_free(clock clk)
 {
   asm volatile("setc res[%0], 0" :: "r" (clk));
 }

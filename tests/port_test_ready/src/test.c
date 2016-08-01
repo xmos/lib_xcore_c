@@ -12,12 +12,15 @@
  */
 void port_test_output(chanend c)
 {
-  port p = port_enable(XS1_PORT_1A);
+  port p;
+  port_alloc(&p, XS1_PORT_1A);
   port_set_buffered(p);
   port_set_transfer_width(p, 32);
 
-  port p_ready = port_enable(XS1_PORT_1B);
-  clock clk = clock_enable(XS1_CLKBLK_1);
+  port p_ready;
+  port_alloc(&p_ready, XS1_PORT_1B);
+  clock clk;
+  clock_alloc(&clk, XS1_CLKBLK_1);
   clock_start(clk);
 
   port_configure_out_strobed_master(p, p_ready, clk, 0);
@@ -34,9 +37,9 @@ void port_test_output(chanend c)
 
   chan_input_word(c); // Wait for ack
 
-  port_disable(p);
-  port_disable(p_ready);
-  clock_disable(clk);
+  port_free(p);
+  port_free(p_ready);
+  clock_free(clk);
 
   // Get information about the tile/core running the server for debug messages
   unsigned tile_id = get_local_tile_id();
@@ -50,12 +53,15 @@ void port_test_output(chanend c)
  */
 void port_test_input(chanend c)
 {
-  port p = port_enable(XS1_PORT_1C);
+  port p;
+  port_alloc(&p, XS1_PORT_1C);
   port_set_buffered(p);
   port_set_transfer_width(p, 32);
 
-  port p_ready = port_enable(XS1_PORT_1D);
-  clock clk = clock_enable(XS1_CLKBLK_2);
+  port p_ready;
+  port_alloc(&p_ready, XS1_PORT_1D);
+  clock clk;
+  clock_alloc(&clk, XS1_CLKBLK_2);
   clock_start(clk);
 
   port_configure_in_strobed_slave(p, p_ready, clk);
@@ -74,12 +80,13 @@ void port_test_input(chanend c)
 
   chan_output_word(c, 0); // Send ack
 
-  port_disable(p);
-  port_disable(p_ready);
-  clock_disable(clk);
+  port_free(p);
+  port_free(p_ready);
+  clock_free(clk);
 
   // Get information about the tile/core running the server for debug messages
   unsigned tile_id = get_local_tile_id();
   unsigned core_id = get_logical_core_id();
   debug_printf("%x:%d: input done\n", tile_id, core_id);
 }
+

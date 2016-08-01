@@ -173,13 +173,15 @@ This example will show how to use the library to configure a clock block and
 port. The first thing to do is to configure the clock block. For example, if using
 clock block 1 to be clocked from a divided version of the reference clock::
 
-  clock c = clock_enable(XS1_CLKBLK_1);
+  clock c;
+  clock_alloc(&c, XS1_CLKBLK_1);
   clock_set_source_clk_ref(c);
   clock_set_divide(c, 1); // Configure to 50MHz (100Mhz / 2*1)
 
 The port to be used can then be enabled, configured and connected to the clock::
 
-  port p = port_enable(XS1_PORT_1A);
+  port p;
+  port_alloc(&p, XS1_PORT_1A);
   port_set_clock(p, c);
 
 Starting the clock will reset the port counters on all connected ports. This is
@@ -196,8 +198,8 @@ The port can now be used to output or input data::
 
 In order to clean up, both the port and clock block must be disabled/freed::
 
-  clock_disable(c);
-  port_disable(c);
+  clock_free(c);
+  port_free(c);
 
 .. TODO: example of driving clock from input port
 
@@ -215,9 +217,12 @@ wrapper functions.
 For example, to create a data port which is controlled by a strobe then the
 following code sequence could be used::
 
-  port p = port_enable(XS1_PORT_4A);
-  port p_ready = port_enable(XS1_PORT_1A);
-  clock clk = clock_enable(XS1_CLKBLK_1);
+  port p;
+  port_alloc(&p, XS1_PORT_4A);
+  port p_ready;
+  port_alloc(&p_ready, XS1_PORT_1A);
+  clock clk;
+  clock_alloc(&clk, XS1_CLKBLK_1);
   clock_start(clk);
 
   port_configure_in_strobed_slave(p, p_ready, clk);
@@ -491,11 +496,11 @@ Channels with transactions
 Ports
 .....
 
-.. doxygenfunction:: port_enable
+.. doxygenfunction:: port_alloc
 
-.. doxygenfunction:: port_enable_buffered
+.. doxygenfunction:: port_alloc_buffered
 
-.. doxygenfunction:: port_disable
+.. doxygenfunction:: port_free
 
 .. doxygenfunction:: port_set_transfer_width
 
@@ -597,9 +602,9 @@ Port configuration helpers
 Clock blocks
 ............
 
-.. doxygenfunction:: clock_enable
+.. doxygenfunction:: clock_alloc
 
-.. doxygenfunction:: clock_disable
+.. doxygenfunction:: clock_free
 
 .. doxygenfunction:: clock_start
 

@@ -6,7 +6,8 @@
 
 void port_test_output(chanend c)
 {
-  port p = port_enable(XS1_PORT_1A);
+  port p;
+  port_alloc(&p, XS1_PORT_1A);
 
   port_output(p, 0);
   chan_input_word(c); // Wait for ack
@@ -19,7 +20,7 @@ void port_test_output(chanend c)
   port_output(p, 0);
   chan_input_word(c); // Wait for ack
 
-  port_disable(p);
+  port_free(p);
 
   // Get information about the tile/core running the server for debug messages
   unsigned tile_id = get_local_tile_id();
@@ -32,7 +33,8 @@ void port_test_output(chanend c)
  */
 void port_test_input(chanend c)
 {
-  port p = port_enable(XS1_PORT_1B);
+  port p;
+  port_alloc(&p, XS1_PORT_1B);
 
   port_input(p);
   chan_output_word(c, 0); // Send ack
@@ -57,10 +59,11 @@ void port_test_input(chanend c)
   }
   chan_output_word(c, 0); // Send ack
 
-  port_disable(p);
+  port_free(p);
 
   // Get information about the tile/core running the server for debug messages
   unsigned tile_id = get_local_tile_id();
   unsigned core_id = get_logical_core_id();
   debug_printf("%x:%d: input done\n", tile_id, core_id);
 }
+
