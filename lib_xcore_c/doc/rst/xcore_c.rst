@@ -47,23 +47,23 @@ Local channels
 Local channel connections on a tile are fully supported by the library. A channel
 connection is created using::
 
-  chanend c1, c2;
-  chan_alloc(&c1, &c2);
+  channel c;
+  chan_alloc(&c);
 
 Data can then be sent and received using::
 
-  chan_output_word(c1, 1);
-  chan_output_byte(c1, 2);
+  chan_output_word(c.left, 1);
+  chan_output_byte(c.left, 2);
 
 with a corresponding block of code on another core to consume the data::
 
-  int i = chan_input_word(c2);
-  char j = chan_input_byte(c2);
+  int i = chan_input_word(c.right);
+  char j = chan_input_byte(c.right);
 
 When the channel is finished with then it is closed and the resources released
 using::
 
-  chan_free(c1, c2);
+  chan_free(c);
 
 Inter-tile channels
 ~~~~~~~~~~~~~~~~~~~
@@ -114,26 +114,26 @@ the two. So, both applications can do::
 Streaming channels
 ~~~~~~~~~~~~~~~~~~
 
-Streaming channels can be used in a similar manner to standard channel-ends. A
+Streaming channels can be used in a similar manner to standard channels. A
 streaming channel is created using::
 
-  streaming_chanend c1, c2;
-  s_chan_alloc(&c1, &c2);
+  streaming_chanend c;
+  s_chan_alloc(&c);
 
 Data can then be sent and received using::
 
-  s_chan_output_word(c1, 1);
-  s_chan_output_byte(c1, 2);
+  s_chan_output_word(c.left, 1);
+  s_chan_output_byte(c.left, 2);
 
 with a corresponding block of code on another core to consume the data::
 
-  int i = s_chan_input_word(c2);
-  char j = s_chan_input_byte(c2);
+  int i = s_chan_input_word(c.right);
+  char j = s_chan_input_byte(c.right);
 
 When the channel is finished with then it is closed and the resources released
 using::
 
-  s_chan_free(c1, c2);
+  s_chan_free(c);
 
 Channel transactions
 ~~~~~~~~~~~~~~~~~~~~

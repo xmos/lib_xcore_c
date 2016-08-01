@@ -11,7 +11,7 @@
  */
 inline void s_chan_output_ct_end(streaming_chanend c)
 {
-  asm("outct res[%0],1"::"r"(c));
+  asm("outct res[%0],1"::"r"(c)); // XS1_CT_END
 }
 
 /** Receive an *end* control token on a streaming channel.
@@ -24,7 +24,7 @@ inline void s_chan_output_ct_end(streaming_chanend c)
  */
 inline void s_chan_check_ct_end(streaming_chanend c)
 {
-  asm("chkct res[%0],1"::"r"(c));
+  asm("chkct res[%0],1"::"r"(c)); // XS1_CT_END
 }
 
 #endif // __xcore_c_channel_internal_h__

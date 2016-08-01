@@ -5,7 +5,10 @@
 
 #include <xs1.h>
 #include <xccompat.h>
+#include <xcore_c_chanend.h>
 #include "xcore_c_channel.h"
+#include "xcore_c_channel_streaming.h"
+#include "xcore_c_channel_transaction.h"
 #include "xcore_c_port.h"
 #include "xcore_c_port_configure.h"
 #include "xcore_c_timer.h"
