@@ -5,6 +5,21 @@
 
 void channel_example(chanend c, chanend d);
 
+void send_data(chanend c, int v) {
+  timer tmr;
+  int time;
+  tmr :> time;
+  for (int i = 0; i < 5; i++) {
+    // Provide test data
+    c <: v + i;
+    time += 20000;
+    select {
+      case tmr when timerafter(time) :> void:
+        break;
+    }
+  }
+}
+
 /*
  * Create a channel tester which receives data from two other cores
  * simultaneously
@@ -13,19 +28,9 @@ int main()
 {
   chan c, d;
   par {
+    send_data(c, 555);
+    send_data(d, 333);
     channel_example(c, d);
-
-    for (int i = 0; i < 5; i++) {
-      // Provide test data
-      c <: 555 + i;
-      delay_ticks(20000);
-    }
-
-    for (int i = 0; i < 5; i++) {
-      // Provide test data
-      d <: 333 + i;
-      delay_ticks(20000);
-    }
   }
   return 0;
 }
