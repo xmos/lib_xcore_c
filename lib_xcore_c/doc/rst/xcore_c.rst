@@ -105,9 +105,9 @@ And a new connection established by passing this new channel-end over the
 existing link, receiving the destination link on the other tile and connecting
 the two. So, both applications can do::
 
-    chan_output_word(c, new_c);
-    chanend dest = chan_input_word(c);
-    chanend_set_dest(new_c, dest);
+    chan_output_word(c, new_c);             // Send my new-chanend to other tile.
+    chanend new_dest = chan_input_word(c);  // Recieve other tile's new-chanend...
+    chanend_set_dest(new_c, new_dest);      // ... and connect it to my new-chanend.
 
 Streaming channels
 ~~~~~~~~~~~~~~~~~~
@@ -308,19 +308,19 @@ Event handling with a default
 In xC a ``select`` can have a ``default`` case which is executed if no events
 have triggered. This library provides the user with the ability to do this by
 using the ``event_select_no_wait()`` function. For example, the above example
-could be changed to add to the ``enum`` a default value::
+could be changed to add to the ``enum`` a no-event value::
 
   typedef enum {
     EVENT_CHAN_C = EVENT_ENUM_BASE,
     EVENT_CHAN_D,
-    EVENT_DEFAULT
+    EVENT_NONE
   } event_choice_t;
 
 And then to test for events but perform some background task if there is no data
 available on either channel::
 
     while (1) {
-      event_choice_t choice = event_select_no_wait(EVENT_DEFAULT);
+      event_choice_t choice = event_select_no_wait(EVENT_NONE);
       switch (choice) {
         case EVENT_CHAN_C: {
           // Read value and clear event
@@ -334,7 +334,7 @@ available on either channel::
           ...
           break;
         }
-        case EVENT_DEFAULT: {
+        case EVENT_NONE: {
           // Run background task
           ...
           break;
@@ -353,8 +353,8 @@ then timers, then channels. If there are multiple resources of the same type
 that are ready then the resource with the lowest resource ID will be selected.
 
 If the user wants to enforce a different ordering from that provided by the
-hardware then they can use ``event_select_ordered()`` (or
-``event_select_ordered_no_wait()`` to have a default).
+hardware then they can use ``event_select_ordered()`` (or the now wait equivalent
+``event_select_ordered_no_wait()``).
 
 Events are set up in as detailed above and a list is created with all the active
 resources. For example, if using two channels (``c``, ``d``) and a timer (``tmr``)
