@@ -16,7 +16,7 @@ void fast(chanend c)
   // Get a time a long way in the future that both cores will then wait until
   int time = timer_get_time(tmr);
   time += 10000;
-  s_chan_output_word(c, time);
+  s_chan_out_word(c, time);
 
   timer_wait_until(tmr, time);
 
@@ -28,7 +28,7 @@ void fast(chanend c)
   timer_free(tmr);
 
   // Disconnect the channels
-  s_chan_output_ct_end(c);
+  s_chan_out_ct_end(c);
 }
 
 void slow(chanend c)
@@ -41,7 +41,7 @@ void slow(chanend c)
   debug_printf("Slow started\n");
 
   // Get the time from the other core to wait until
-  int time = s_chan_input_word(c);
+  int time = s_chan_in_word(c);
 
   timer_wait_until(tmr, time);
 

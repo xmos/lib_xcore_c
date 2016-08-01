@@ -26,7 +26,7 @@ void channel_example(chanend c, chanend d)
     switch (choice) {
       case EVENT_CHAN_C: {
         // Read value and clear event
-        int x = chan_input_word(c);
+        int x = chan_in_word(c);
         debug_printf("Received %d on channel c\n", x);
         count += 1;
         default_printed = 0;
@@ -34,7 +34,7 @@ void channel_example(chanend c, chanend d)
       }
       case EVENT_CHAN_D: {
         // Read value and clear event
-        int x = chan_input_word(d);
+        int x = chan_in_word(d);
         debug_printf("Received %d on channel d\n", x);
         count += 1;
         default_printed = 0;

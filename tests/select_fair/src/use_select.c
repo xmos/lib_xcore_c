@@ -27,7 +27,7 @@ void channel_example_fair(chanend c, chanend d)
     switch (choice) {
       case EVENT_CHAN_C: {
         // Read value and clear event
-        int x = chan_input_word(c);
+        int x = chan_in_word(c);
         event_disable(c);
         event_enable(d);
         debug_printf("Received %d on channel c\n", x);
@@ -35,7 +35,7 @@ void channel_example_fair(chanend c, chanend d)
       }
       case EVENT_CHAN_D: {
         // Read value and clear event
-        int x = chan_input_word(d);
+        int x = chan_in_word(d);
         event_disable(d);
         event_enable(c);
         debug_printf("Received %d on channel d\n", x);

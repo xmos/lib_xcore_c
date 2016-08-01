@@ -14,9 +14,9 @@ void get_addresses(chanend c, unsigned *local_server, unsigned *remote_server)
   *local_server = c;
 
   // Exchange channel IDs with the other end of a channel
-  s_chan_output_word(c, c);
-  s_chan_output_ct(c, XS1_CT_END);
-  *remote_server = s_chan_input_word(c);
+  s_chan_out_word(c, c);
+  s_chan_out_ct(c, XS1_CT_END);
+  *remote_server = s_chan_in_word(c);
   s_chan_check_ct(c, XS1_CT_END);
   debug_printf("%x:%d: get_addresses: local %x, remote: %x\n",
                tile_id, core_id, *local_server, *remote_server);
@@ -34,16 +34,16 @@ void chanend_server(chanend c)
   unsigned core_id = get_logical_core_id();
 
   while (1) {
-    chanend sender = s_chan_input_word(c);
-    int command = s_chan_input_word(c);
+    chanend sender = s_chan_in_word(c);
+    int command = s_chan_in_word(c);
     s_chan_check_ct(c, XS1_CT_END);
 
     debug_printf("%x:%d: received %d from %x\n", tile_id, core_id, command, sender);
 
     // Send a response (simply invert the data)
     chanend_set_dest(c, sender);
-    s_chan_output_word(c, ~command);
-    s_chan_output_ct(c, XS1_CT_END);
+    s_chan_out_word(c, ~command);
+    s_chan_out_ct(c, XS1_CT_END);
 
     if (command == SHUT_DOWN) {
       debug_printf("%x:%d: shutting down\n", tile_id, core_id);
@@ -61,11 +61,11 @@ int send_command(chanend dst, int command)
   chanend c;
   chanend_alloc(&c);
   chanend_set_dest(c, dst);
-  s_chan_output_word(c, c);
-  s_chan_output_word(c, command);
-  s_chan_output_ct(c, XS1_CT_END);
+  s_chan_out_word(c, c);
+  s_chan_out_word(c, command);
+  s_chan_out_ct(c, XS1_CT_END);
 
-  int response = s_chan_input_word(c);
+  int response = s_chan_in_word(c);
   s_chan_check_ct(c, XS1_CT_END);
 
   chanend_free(c);

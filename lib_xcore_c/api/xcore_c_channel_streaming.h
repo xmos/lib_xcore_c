@@ -42,8 +42,8 @@ inline void s_chan_alloc(streaming_channel *c)
  */
 inline void s_chan_free(streaming_channel c)
 {
-  s_chan_output_ct_end(c.left);
-  s_chan_output_ct_end(c.right);
+  s_chan_out_ct_end(c.left);
+  s_chan_out_ct_end(c.right);
   s_chan_check_ct_end(c.left);
   s_chan_check_ct_end(c.right);
   chanend_free(c.left);
@@ -58,7 +58,7 @@ inline void s_chan_free(streaming_channel c)
  *
  *  \param data The word to be output
  */
-inline void s_chan_output_word(streaming_chanend c, int data)
+inline void s_chan_out_word(streaming_chanend c, int data)
 {
   asm volatile("out res[%0], %1" :: "r" (c), "r" (data));
 }
@@ -69,7 +69,7 @@ inline void s_chan_output_word(streaming_chanend c, int data)
  *
  *  \param data The byte to be output
  */
-inline void s_chan_output_byte(streaming_chanend c, char data)
+inline void s_chan_out_byte(streaming_chanend c, char data)
 {
   asm volatile("outt res[%0], %1" :: "r" (c), "r" (data));
 }
@@ -80,14 +80,29 @@ inline void s_chan_output_byte(streaming_chanend c, char data)
  *
  *  \param buf  A pointer to the buffer containing the data to send
  *
+ *  \param n    The number of words to send
+ */
+inline void s_chan_out_buf_word(streaming_chanend c, int buf[], int n)
+{
+  for (int i = 0; i < n; i++) {
+    s_chan_out_word(c, buf[i]);
+  }
+}
+
+/** Output a block of data over a streaming channel-end.
+ *
+ *  \param c    The streaming channel-end
+ *
+ *  \param buf  A pointer to the buffer containing the data to send
+ *
  *  \param n    The number of bytes to send
  */
-inline void s_chan_output_block(streaming_chanend c, char buf[], int n)
+inline void s_chan_out_buf_byte(streaming_chanend c, char buf[], int n)
 {
   // Note we could do this more efficiently depending on the size of n
   // and the alignment of buf
   for (int i = 0; i < n; i++) {
-    s_chan_output_byte(c, buf[i]);
+    s_chan_out_byte(c, buf[i]);
   }
 }
 
@@ -97,7 +112,7 @@ inline void s_chan_output_block(streaming_chanend c, char buf[], int n)
  *
  *  \returns    The inputted integer
  */
-inline int s_chan_input_word(streaming_chanend c)
+inline int s_chan_in_word(streaming_chanend c)
 {
   int data;
   asm volatile("in %0, res[%1]" : "=r" (data): "r" (c));
@@ -110,7 +125,7 @@ inline int s_chan_input_word(streaming_chanend c)
  *
  *  \returns    The inputted byte
  */
-inline char s_chan_input_byte(streaming_chanend c)
+inline char s_chan_in_byte(streaming_chanend c)
 {
   char data;
   asm volatile("int %0, res[%1]" : "=r" (data): "r" (c));
@@ -123,14 +138,31 @@ inline char s_chan_input_byte(streaming_chanend c)
  *
  *  \param buf  A pointer to the memory region to fill
  *
- *  \param n    The number of bytes to receive
+ *  \param n    The number of words to receive
  */
-inline void s_chan_input_block(streaming_chanend c, char buf[], int n)
+inline void s_chan_in_buf_word(streaming_chanend c, int buf[], int n)
 {
   // Note we could do this more efficiently depending on the size of n
   // and the alignment of buf
   for (int i = 0; i < n; i++) {
-    buf[i] = s_chan_input_byte(c);
+    buf[i] = s_chan_in_word(c);
+  }
+}
+
+/** Input a block of data from a streaming channel-end.
+ *
+ *  \param c    The streaming channel-end
+ *
+ *  \param buf  A pointer to the memory region to fill
+ *
+ *  \param n    The number of bytes to receive
+ */
+inline void s_chan_in_buf_byte(streaming_chanend c, char buf[], int n)
+{
+  // Note we could do this more efficiently depending on the size of n
+  // and the alignment of buf
+  for (int i = 0; i < n; i++) {
+    buf[i] = s_chan_in_byte(c);
   }
 }
 
@@ -141,7 +173,7 @@ inline void s_chan_input_block(streaming_chanend c, char buf[], int n)
  *  \param ct   Control token to be output. Legal control tokens that can be
  *              used are 0 or any value in the range 3..191 inclusive.
  */
-inline void s_chan_output_ct(streaming_chanend c, int ct)
+inline void s_chan_out_ct(streaming_chanend c, int ct)
 {
   asm volatile("outct res[%0], %1" :: "r" (c), "r" (ct));
 }

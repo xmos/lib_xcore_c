@@ -52,13 +52,13 @@ connection is created using::
 
 Data can then be sent and received using::
 
-  chan_output_word(c.left, 1);
-  chan_output_byte(c.left, 2);
+  chan_out_word(c.left, 1);
+  chan_out_byte(c.left, 2);
 
 with a corresponding block of code on another core to consume the data::
 
-  int i = chan_input_word(c.right);
-  char j = chan_input_byte(c.right);
+  int i = chan_in_word(c.right);
+  char j = chan_in_byte(c.right);
 
 When the channel is finished with then it is closed and the resources released
 using::
@@ -107,8 +107,8 @@ And a new connection established by passing this new channel-end over the
 existing link, receiving the destination link on the other tile and connecting
 the two. So, both applications can do::
 
-    chan_output_word(c, new_c);             // Send my new-chanend to other tile.
-    chanend new_dest = chan_input_word(c);  // Recieve other tile's new-chanend...
+    chan_out_word(c, new_c);             // Send my new-chanend to other tile.
+    chanend new_dest = chan_in_word(c);  // Recieve other tile's new-chanend...
     chanend_set_dest(new_c, new_dest);      // ... and connect it to my new-chanend.
 
 Streaming channels
@@ -122,13 +122,13 @@ streaming channel is created using::
 
 Data can then be sent and received using::
 
-  s_chan_output_word(c.left, 1);
-  s_chan_output_byte(c.left, 2);
+  s_chan_out_word(c.left, 1);
+  s_chan_out_byte(c.left, 2);
 
 with a corresponding block of code on another core to consume the data::
 
-  int i = s_chan_input_word(c.right);
-  char j = s_chan_input_byte(c.right);
+  int i = s_chan_in_word(c.right);
+  char j = s_chan_in_byte(c.right);
 
 When the channel is finished with then it is closed and the resources released
 using::
@@ -155,7 +155,7 @@ The C code to receive this data is of the form::
   transacting_chanend tc = chan_init_transaction_slave(c);
   int data[10];
   for (int i = 0; i < 10; i++) {
-    data[i] = t_chan_input_word(tc);
+    data[i] = t_chan_in_word(tc);
   }
   chan_complete_transaction(tc);
 
@@ -297,13 +297,13 @@ to wait for events to be triggered by either resource::
       switch (choice) {
         case EVENT_CHAN_C: {
           // Read value and clear event
-          int x = chan_input_word(c);
+          int x = chan_in_word(c);
           ...
           break;
         }
         case EVENT_CHAN_D: {
           // Read value and clear event
-          int x = chan_input_word(d);
+          int x = chan_in_word(d);
           ...
           break;
         }
@@ -332,13 +332,13 @@ available on either channel::
       switch (choice) {
         case EVENT_CHAN_C: {
           // Read value and clear event
-          int x = chan_input_word(c);
+          int x = chan_in_word(c);
           ...
           break;
         }
         case EVENT_CHAN_D: {
           // Read value and clear event
-          int x = chan_input_word(d);
+          int x = chan_in_word(d);
           ...
           break;
         }
@@ -430,17 +430,21 @@ Channels
 
 .. doxygenfunction:: chan_free
 
-.. doxygenfunction:: chan_output_word
+.. doxygenfunction:: chan_out_word
 
-.. doxygenfunction:: chan_output_byte
+.. doxygenfunction:: chan_out_byte
 
-.. doxygenfunction:: chan_output_block
+.. doxygenfunction:: chan_out_buf_word
 
-.. doxygenfunction:: chan_input_word
+.. doxygenfunction:: chan_out_buf_byte
 
-.. doxygenfunction:: chan_input_byte
+.. doxygenfunction:: chan_in_word
 
-.. doxygenfunction:: chan_input_block
+.. doxygenfunction:: chan_in_byte
+
+.. doxygenfunction:: chan_in_buf_word
+
+.. doxygenfunction:: chan_in_buf_byte
 
 |newpage|
 
@@ -451,25 +455,29 @@ Streaming channels
 
 .. doxygenfunction:: s_chan_free
 
-.. doxygenfunction:: s_chan_output_ct
+.. doxygenfunction:: s_chan_out_ct
 
-.. doxygenfunction:: s_chan_output_ct_end
+.. doxygenfunction:: s_chan_out_ct_end
 
 .. doxygenfunction:: s_chan_check_ct
 
 .. doxygenfunction:: s_chan_check_ct_end
 
-.. doxygenfunction:: s_chan_output_word
+.. doxygenfunction:: s_chan_out_word
 
-.. doxygenfunction:: s_chan_output_byte
+.. doxygenfunction:: s_chan_out_byte
 
-.. doxygenfunction:: s_chan_output_block
+.. doxygenfunction:: s_chan_out_buf_word
 
-.. doxygenfunction:: s_chan_input_word
+.. doxygenfunction:: s_chan_out_buf_byte
 
-.. doxygenfunction:: s_chan_input_byte
+.. doxygenfunction:: s_chan_in_word
 
-.. doxygenfunction:: s_chan_input_block
+.. doxygenfunction:: s_chan_in_byte
+
+.. doxygenfunction:: s_chan_in_buf_word
+
+.. doxygenfunction:: s_chan_in_buf_byte
 
 |newpage|
 
@@ -482,17 +490,21 @@ Channels with transactions
 
 .. doxygenfunction:: chan_complete_transaction
 
-.. doxygenfunction:: t_chan_output_word
+.. doxygenfunction:: t_chan_out_word
 
-.. doxygenfunction:: t_chan_output_byte
+.. doxygenfunction:: t_chan_out_byte
 
-.. doxygenfunction:: t_chan_output_block
+.. doxygenfunction:: t_chan_out_buf_word
 
-.. doxygenfunction:: t_chan_input_word
+.. doxygenfunction:: t_chan_out_buf_byte
 
-.. doxygenfunction:: t_chan_input_byte
+.. doxygenfunction:: t_chan_in_word
 
-.. doxygenfunction:: t_chan_input_block
+.. doxygenfunction:: t_chan_in_byte
+
+.. doxygenfunction:: t_chan_in_buf_word
+
+.. doxygenfunction:: t_chan_in_buf_byte
 
 |newpage|
 

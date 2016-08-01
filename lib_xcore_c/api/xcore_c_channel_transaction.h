@@ -45,7 +45,7 @@ inline transacting_chanend chan_init_transaction_master(chanend c)
   transacting_chanend tc;
   tc.c = c;
   tc.last_out = 0;
-  s_chan_output_ct_end(c);
+  s_chan_out_ct_end(c);
   return tc;
 }
 
@@ -89,11 +89,11 @@ inline transacting_chanend chan_init_transaction_slave(chanend c)
 inline chanend chan_complete_transaction(REFERENCE_PARAM(transacting_chanend, tc))
 {
   if (__tc_get_reference_member(tc,last_out)) {
-    s_chan_output_ct_end(__tc_get_reference_member(tc, c));
+    s_chan_out_ct_end(__tc_get_reference_member(tc, c));
     s_chan_check_ct_end(__tc_get_reference_member(tc, c));
   } else {
     s_chan_check_ct_end(__tc_get_reference_member(tc, c));
-    s_chan_output_ct_end(__tc_get_reference_member(tc, c));
+    s_chan_out_ct_end(__tc_get_reference_member(tc, c));
   }
   return __tc_get_reference_member(tc, c);
 }
@@ -107,7 +107,7 @@ inline chanend chan_complete_transaction(REFERENCE_PARAM(transacting_chanend, tc
   do { \
     if (__tc_get_reference_member(tc,last_out)) { \
       __tc_get_reference_member(tc,last_out) = 0; \
-      s_chan_output_ct_end(__tc_get_reference_member(tc, c)); \
+      s_chan_out_ct_end(__tc_get_reference_member(tc, c)); \
     } \
   } while (0)
 
@@ -125,10 +125,10 @@ inline chanend chan_complete_transaction(REFERENCE_PARAM(transacting_chanend, tc
  *
  * \param data Word to be output
  */
-inline void t_chan_output_word(REFERENCE_PARAM(transacting_chanend, tc), int data)
+inline void t_chan_out_word(REFERENCE_PARAM(transacting_chanend, tc), int data)
 {
   __t_chan_change_to_output(tc);
-  s_chan_output_word(__tc_get_reference_member(tc, c), data);
+  s_chan_out_word(__tc_get_reference_member(tc, c), data);
 }
 
 /** Output an byte over a transacting channel-end.
@@ -137,10 +137,24 @@ inline void t_chan_output_word(REFERENCE_PARAM(transacting_chanend, tc), int dat
  *
  * \param data Byte to be output
  */
-inline void t_chan_output_byte(REFERENCE_PARAM(transacting_chanend, tc), char data)
+inline void t_chan_out_byte(REFERENCE_PARAM(transacting_chanend, tc), char data)
 {
   __t_chan_change_to_output(tc);
-  s_chan_output_byte(__tc_get_reference_member(tc, c), data);
+  s_chan_out_byte(__tc_get_reference_member(tc, c), data);
+}
+
+/** Output a block of data over a transacting channel-end.
+ *
+ * \param c    Transacting channel-end
+ *
+ * \param buf  Pointer to the buffer containing the data to send
+ *
+ * \param n    Number of words to send
+ */
+inline void t_chan_out_buf_word(REFERENCE_PARAM(transacting_chanend, tc), int buf[], int n)
+{
+  __t_chan_change_to_output(tc);
+  s_chan_out_buf_word(__tc_get_reference_member(tc, c), buf, n);
 }
 
 /** Output a block of data over a transacting channel-end.
@@ -151,10 +165,10 @@ inline void t_chan_output_byte(REFERENCE_PARAM(transacting_chanend, tc), char da
  *
  * \param n    Number of bytes to send
  */
-inline void t_chan_output_block(REFERENCE_PARAM(transacting_chanend, tc), char buf[], int n)
+inline void t_chan_out_buf_byte(REFERENCE_PARAM(transacting_chanend, tc), char buf[], int n)
 {
   __t_chan_change_to_output(tc);
-  s_chan_output_block(__tc_get_reference_member(tc, c), buf, n);
+  s_chan_out_buf_byte(__tc_get_reference_member(tc, c), buf, n);
 }
 
 /** Input a word from a transacting channel-end.
@@ -163,10 +177,10 @@ inline void t_chan_output_block(REFERENCE_PARAM(transacting_chanend, tc), char b
  *
  * \returns    Inputted integer
  */
-inline int t_chan_input_word(REFERENCE_PARAM(transacting_chanend, tc))
+inline int t_chan_in_word(REFERENCE_PARAM(transacting_chanend, tc))
 {
   __t_chan_change_to_input(tc);
-  return s_chan_input_word(__tc_get_reference_member(tc, c));
+  return s_chan_in_word(__tc_get_reference_member(tc, c));
 }
 
 /** Input a byte from a transacting channel-end.
@@ -175,10 +189,24 @@ inline int t_chan_input_word(REFERENCE_PARAM(transacting_chanend, tc))
  *
  * \returns    Inputted byte
  */
-inline char t_chan_input_byte(REFERENCE_PARAM(transacting_chanend, tc))
+inline char t_chan_in_byte(REFERENCE_PARAM(transacting_chanend, tc))
 {
   __t_chan_change_to_input(tc);
-  return s_chan_input_byte(__tc_get_reference_member(tc, c));
+  return s_chan_in_byte(__tc_get_reference_member(tc, c));
+}
+
+/** Input a block of data from a transacting channel-end.
+ *
+ * \param tc   Transacting channel-end
+ *
+ * \param buf  Pointer to the memory region to fill
+ *
+ * \param n    The number of words to receive
+ */
+inline void t_chan_in_buf_word(REFERENCE_PARAM(transacting_chanend, tc), int buf[], int n)
+{
+  __t_chan_change_to_input(tc);
+  s_chan_in_buf_word(__tc_get_reference_member(tc, c), buf, n);
 }
 
 /** Input a block of data from a transacting channel-end.
@@ -189,10 +217,10 @@ inline char t_chan_input_byte(REFERENCE_PARAM(transacting_chanend, tc))
  *
  * \param n    The number of bytes to receive
  */
-inline void t_chan_input_block(REFERENCE_PARAM(transacting_chanend, tc), char buf[], int n)
+inline void t_chan_in_buf_byte(REFERENCE_PARAM(transacting_chanend, tc), char buf[], int n)
 {
   __t_chan_change_to_input(tc);
-  s_chan_input_block(__tc_get_reference_member(tc, c), buf, n);
+  s_chan_in_buf_byte(__tc_get_reference_member(tc, c), buf, n);
 }
 
 #endif // __XC__

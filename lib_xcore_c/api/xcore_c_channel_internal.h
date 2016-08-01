@@ -9,7 +9,7 @@
  *
  * \param c   Streaming channel-end on which to send the *end* control token
  */
-inline void s_chan_output_ct_end(streaming_chanend c)
+inline void s_chan_out_ct_end(streaming_chanend c)
 {
   asm("outct res[%0],1"::"r"(c)); // XS1_CT_END
 }

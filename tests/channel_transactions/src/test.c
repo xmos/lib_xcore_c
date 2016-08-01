@@ -30,7 +30,7 @@ void test_int(chanend c)
   int data[array_len];
   transacting_chanend tc = chan_init_transaction_slave(c);
   for (size_t i = 0; i < array_len; i++) {
-    data[i] = t_chan_input_word(&tc);
+    data[i] = t_chan_in_word(&tc);
   }
   chan_complete_transaction(&tc);
 
@@ -44,7 +44,7 @@ void test_int(chanend c)
   // Send it back
   tc = chan_init_transaction_master(c);
   for (size_t i = 0; i < array_len; i++) {
-    t_chan_output_word(&tc, data[i]);
+    t_chan_out_word(&tc, data[i]);
   }
   chan_complete_transaction(&tc);
 }
@@ -54,7 +54,7 @@ void test_char(chanend c)
   // First receive the data as a slave transaction
   char data[array_len];
   transacting_chanend tc = chan_init_transaction_master(c);
-  t_chan_input_block(&tc, data, array_len);
+  t_chan_in_buf_byte(&tc, data, array_len);
   chan_complete_transaction(&tc);
 
   print_array_char("C received: ", data, array_len);
@@ -66,6 +66,6 @@ void test_char(chanend c)
 
   // Send it back
   tc = chan_init_transaction_slave(c);
-  t_chan_output_block(&tc, data, array_len);
+  t_chan_out_buf_byte(&tc, data, array_len);
   chan_complete_transaction(&tc);
 }
