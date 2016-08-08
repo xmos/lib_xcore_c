@@ -39,6 +39,13 @@ typedef struct transacting_chanend {
   return XS1_ET_NONE
 
 #if !defined(__XC__) || defined(__DOXYGEN__)
+inline chanend _chanend_alloc(void)
+{
+  chanend c;
+  asm("getr %0, 2" : "=r" (c));
+  return c;
+}
+
 inline void _chanend_free(chanend c)
 {
   asm volatile("freer res[%0]" :: "r" (c));

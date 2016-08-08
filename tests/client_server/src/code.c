@@ -3,6 +3,7 @@
 #include "xcore_c.h"
 #include "code.h"
 #include "debug_print.h"
+#include "xassert.h"
 
 #define SHUT_DOWN 0
 
@@ -60,7 +61,10 @@ void chanend_server(chanend c)
  */
 int send_command(chanend dst, int command)
 {
-  chanend c = chanend_alloc();
+  chanend c = 0;
+  chanend_alloc(&c);
+  xassert(c);
+
   chanend_set_dest(c, dst);
   s_chan_out_word(c, c);
   s_chan_out_word(c, command);
@@ -71,6 +75,8 @@ int send_command(chanend dst, int command)
   s_chan_check_ct(c, XS1_CT_END);
 
   chanend_free(&c);
+  xassert(!c);
+
   if (command == ~response) {
     debug_printf("Send cmd %d to %x response ok\n", command, dst);
   }

@@ -14,16 +14,23 @@
  *  When the channel end is no longer required, chanend_free() must be called
  *  to deallocate it.
  *
- *  \return     chan-end ID or zero if none are available.
+ *  \param c    chan-end ID or zero if none are available.
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_LOAD_STORE         invalid *c argument.
  */
-inline chanend chanend_alloc(void)
+inline unsigned chanend_alloc(chanend* c)
 {
-  chanend c;
-  asm("getr %0, 2" : "=r" (c));
-  return c;
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                *c = _chanend_alloc(); \
+                              } while (0) );
 }
 
 /** Deallocate a single channel-end.
+ *
+ *  This function frees the hardware chan-end.
+ *  The last transfer on the chan-end must have been a CT_END token.
  *
  *  \param c    chan-end to free.
  *

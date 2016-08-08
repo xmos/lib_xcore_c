@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "xcore_c.h"
 #include "debug_print.h"
+#include "xassert.h"
 
 const size_t array_len = 10;
 
@@ -30,12 +31,12 @@ void test_int(chanend c)
   int data[array_len];
   transacting_chanend tc;
   chan_init_transaction_slave(&c, &tc);
-  //xassert(!c && tc);
+  xassert(!c && tc.c);
   for (size_t i = 0; i < array_len; i++) {
     t_chan_in_word(&tc, &data[i]);
   }
   chan_complete_transaction(&tc, &c);
-  //xassert(c && !tc);
+  xassert(c && !tc.c);
 
   print_array_int("C received: ", data, array_len);
 
@@ -46,12 +47,12 @@ void test_int(chanend c)
 
   // Send it back
   chan_init_transaction_master(&c, &tc);
-  //xassert(!c && tc);
+  xassert(!c && tc.c);
   for (size_t i = 0; i < array_len; i++) {
     t_chan_out_word(&tc, data[i]);
   }
   chan_complete_transaction(&tc, &c);
-  //xassert(c && !tc);
+  xassert(c && !tc.c);
 }
 
 void test_char(chanend c)

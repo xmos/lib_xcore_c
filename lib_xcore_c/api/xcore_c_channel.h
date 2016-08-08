@@ -20,15 +20,21 @@ typedef streaming_channel channel;
  *  called to deallocate it.
  *  N.B. The chan-ends must be accessed on the same tile.
  *
- *  \return     channel variable holding the two initialised and
+ *  \param c    channel variable holding the two initialised and
  *              joined chan-ends or 0s.
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_LOAD_STORE         invalid *c argument.
  */
-inline channel chan_alloc(void)
+inline unsigned chan_alloc(channel *c)
 {
-  return (channel) s_chan_alloc();
+  return s_chan_alloc((streaming_channel*)c);
 }
 
 /** Deallocate a channel.
+ *
+ *  This function frees the two hardware chan-ends.
  *
  *  \param c  channel to free
  *

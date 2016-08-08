@@ -23,32 +23,38 @@ typedef struct streaming_channel {
  *  called to deallocate it.
  *  N.B. The chan-ends must be accessed on the same tile.
  *
- *  \return     streaming_channel variable holding the two initialised and
+ *  \param c    streaming_channel variable holding the two initialised and
  *              joined chan-ends or 0s.
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_LOAD_STORE         invalid *c argument.
  */
-inline streaming_channel s_chan_alloc(void)
+inline unsigned s_chan_alloc(streaming_channel *c)
 {
-  streaming_channel c;
-  if ((c.left = chanend_alloc())) {
-    if ((c.right = chanend_alloc())) {
-      // exception safe calls to _chanend_set_dest()
-      _chanend_set_dest(c.left, c.right);
-      _chanend_set_dest(c.right, c.left);
-    }
-    else {
-      _chanend_free(c.left);
-      c.left = 0;
-      //c.right = 0;
-    }
-  }
-  else {
-    //c.left = 0;
-    c.right = 0;
-  }
-  return c;
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                if ((c->left = _chanend_alloc())) {
+                                  if ((c->right = _chanend_alloc())) {
+                                    // exception safe calls to _chanend_set_dest()
+                                    _chanend_set_dest(c->left, c->right);
+                                    _chanend_set_dest(c->right, c->left);
+                                  }
+                                  else {
+                                    _chanend_free(c->left);
+                                    c->left = 0;
+                                    c->right = 0;
+                                  }
+                                }
+                                else {
+                                  c->left = 0;
+                                  c->right = 0;
+                                }
+                              } while (0) );
 }
 
 /** Deallocate a streaming_channel.
+ *
+ *  This function frees the two hardware chan-ends.
  *
  *  \param c    streaming_channel to free.
  *
