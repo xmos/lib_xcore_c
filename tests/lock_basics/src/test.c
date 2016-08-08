@@ -3,13 +3,16 @@
 #include <stdio.h>
 #include "xcore_c.h"
 #include "debug_print.h"
+#include "xassert.h"
 
 void core0(chanend c)
 {
   timer tmr;
   timer_alloc(&tmr);
-  lock l;
+  xassert(tmr);
+  lock l = 0;
   lock_alloc(&l);
+  xassert(l);
   chan_out_word(c, l);
 
   lock_acquire(l);
@@ -22,8 +25,10 @@ void core0(chanend c)
   int dummy;
   chan_in_word(c, &dummy);
 
-  lock_free(l);
-  timer_free(tmr);
+  lock_free(&l);
+  xassert(!l);
+  timer_free(&tmr);
+  xassert(!tmr);
 }
 
 void core1(chanend c)

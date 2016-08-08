@@ -6,8 +6,7 @@
 #if !defined(__XC__) || defined(__DOXYGEN__)
 
 #include <stdint.h>
-#include <xccompat.h>
-#include <xs1.h>
+#include "xcore_c_impl.h"
 
 /** Allocates a clock
  *
@@ -16,21 +15,36 @@
  *
  *  \param clk        Clock variable representing the initialised clock
  *
- *  \param clock_id   The id of the clock to enable
+ *  \param clock_id   The id of the clock to allocate
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid clock.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the clock.
  */
-inline void clock_alloc(clock *clk, int clock_id)
+inline unsigned clock_alloc(clock *clk, int clock_id)
 {
-  asm volatile("setc res[%0], 8" :: "r" (clock_id));
-  *clk = clock_id;
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                asm volatile("setc res[%0], 8" :: "r" (clock_id)); \
+                                *clk = clock_id; \
+                              } while (0) );
 }
 
 /** Deallocate a clock
  *
- *  \param clk  The clock to disable
+ *  \param clk  The clock to be freed
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid clock.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the clock.
  */
-inline void clock_free(clock clk)
+inline unsigned clock_free(clock *clk)
 {
-  asm volatile("setc res[%0], 0" :: "r" (clk));
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                asm volatile("setc res[%0], 0" :: "r" (*clk)); \
+                                *clk = 0;
+                              } while (0) );
 }
 
 /** Start a clock
@@ -38,10 +52,17 @@ inline void clock_free(clock clk)
  *  This function starts a clock running.
  *
  *  \param clk  The clock to start running
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid clock.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the clock.
  */
-inline void clock_start(clock clk)
+inline unsigned clock_start(clock clk)
 {
-  asm volatile("setc res[%0], 0xf" :: "r" (clk));
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                asm volatile("setc res[%0], 0xf" :: "r" (clk)); \
+                              } while (0) );
 }
 
 /** Stop a clock
@@ -49,10 +70,17 @@ inline void clock_start(clock clk)
  *  This function waits until the clock is low and then pauses a clock.
  *
  *  \param clk  The clock to stop
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid clock.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the clock.
  */
-inline void clock_stop(clock clk)
+inline unsigned clock_stop(clock clk)
 {
-  asm volatile("setc res[%0], 0x7" :: "r" (clk));
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                asm volatile("setc res[%0], 0x7" :: "r" (clk)); \
+                              } while (0) );
 }
 
 /** Configure a clock's source to a 1-bit port
@@ -65,19 +93,35 @@ inline void clock_stop(clock clk)
  *
  *  \param p  The 1-bit port to set as the clock input. Attempting to set a
  *            port which is not 1-bit as the input will cause an exception.
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid clock or port,
+ *                                    or the clock is running.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the clock.
  */
-inline void clock_set_source_port(clock clk, port p)
+inline unsigned clock_set_source_port(clock clk, port p)
 {
-  asm volatile("setclk res[%0], %1" :: "r" (clk), "r" (p));
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                asm volatile("setclk res[%0], %1" :: "r" (clk), "r" (p)); \
+                              } while (0) );
 }
 
 /** Configure a clock's source to be the 100MHz reference clock
  *
  *  \param clk  The clock to configure
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid clock,
+ *                                    or the clock is running.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the clock.
  */
-inline void clock_set_source_clk_ref(clock clk)
+inline unsigned clock_set_source_clk_ref(clock clk)
 {
-  asm volatile("setclk res[%0], %1" :: "r" (clk), "r" (0x1));
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                asm volatile("setclk res[%0], %1" :: "r" (clk), "r" (0x1)); \
+                              } while (0) );
 }
 
 /** Configure a clock's source to be the xCORE clock.
@@ -86,10 +130,18 @@ inline void clock_set_source_clk_ref(clock clk)
  *  be used for the ports to function correclty.
  *
  *  \param clk  The clock to configure
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid clock,
+ *                                    or the clock is running.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the clock.
  */
-inline void clock_set_source_clk_xcore(clock clk)
+inline unsigned clock_set_source_clk_xcore(clock clk)
 {
-  asm volatile("setclk res[%0], %1" :: "r" (clk), "r" (0x101));
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                asm volatile("setclk res[%0], %1" :: "r" (clk), "r" (0x101)); \
+                              } while (0) );
 }
 
 /** Configure the divider for a clock.
@@ -107,24 +159,39 @@ inline void clock_set_source_clk_xcore(clock clk)
  *  \param clk    The clock to configure
  *
  *  \param divide The divide value
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid clock,
+ *                                    or the clock is running.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the clock.
  */
-inline void clock_set_divide(clock clk, uint8_t divide)
+inline unsigned clock_set_divide(clock clk, uint8_t divide)
 {
-  asm volatile("setd res[%0], %1" :: "r" (clk), "r" (divide));
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                asm volatile("setd res[%0], %1" :: "r" (clk), "r" (divide)); \
+                              } while (0) );
 }
 
 /** Sets a clock to use a 1-bit port for the ready-in signal.
  *
- * If the port is not a 1-bit port then an exception is raised. The ready-in
- * port controls when data is sampled from the pins.
+ *  If the port is not a 1-bit port then an exception is raised. The ready-in
+ *  port controls when data is sampled from the pins.
  *
- * \param clk          The clock to configure.
+ *  \param clk          The clock to configure.
  *
- * \param ready_source The 1-bit port to use for the ready-in signal.
+ *  \param ready_source The 1-bit port to use for the ready-in signal.
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid clock.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the clock.
  */
-inline void clock_set_ready_src(clock clk, port ready_source)
+inline unsigned clock_set_ready_src(clock clk, port ready_source)
 {
-  asm volatile("setrdy res[%0], %1" :: "r" (clk), "r" (ready_source));
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                asm volatile("setrdy res[%0], %1" :: "r" (clk), "r" (ready_source)); \
+                              } while (0) );
 }
 
 #endif // __XC__

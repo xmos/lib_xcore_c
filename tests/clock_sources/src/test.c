@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "xcore_c.h"
 #include "debug_print.h"
+#include "xassert.h"
 
 /*
  * Time the number of reference clock ticks that it takes to drive a number of
@@ -21,11 +22,13 @@ static void time_port_rate(timer tmr, port p, clock c)
   port_output(p, 0); // Pre-fill the transfer reg
   port_output(p, 0); // Start running after a clock edge has moved data from the
                      // transfer register
-  int start_time = timer_get_time(tmr);
+  int start_time;
+  timer_get_time(tmr, &start_time);
   for (int i = 0; i < num_writes; ++i) {
     port_output(p, i);
   }
-  int end_time = timer_get_time(tmr);
+  int end_time;
+  timer_get_time(tmr, &end_time);
 
   clock_stop(c);
 
@@ -62,6 +65,7 @@ static void test_port_clock(timer tmr, port p, clock c)
 {
   clock divided_c;
   clock_alloc(&divided_c, XS1_CLKBLK_2);
+  xassert(divided_c);
   clock_set_divide(divided_c, 2);
 
   // Enable a port to use as a clock source
@@ -78,7 +82,8 @@ static void test_port_clock(timer tmr, port p, clock c)
   time_port_rate(tmr, p, c);
 
   clock_stop(divided_c);
-  clock_free(divided_c);
+  clock_free(&divided_c);
+  xassert(!divided_c);
   port_free(p_clk_src);
 }
 
@@ -89,11 +94,11 @@ void test_clock_sources()
 {
   timer tmr;
   timer_alloc(&tmr);
-
+  xassert(tmr);
   // Allocate the clock to control the port
   clock c;
   clock_alloc(&c, XS1_CLKBLK_1);
-
+  xassert(c);
   // Enable a port to use as a clock source
   port p;
   port_alloc(&p, XS1_PORT_1A);
@@ -106,7 +111,9 @@ void test_clock_sources()
   test_port_clock(tmr, p, c);
 
   port_free(p);
-  clock_free(c);
-  timer_free(tmr);
+  clock_free(&c);
+  xassert(!c);
+  timer_free(&tmr);
+  xassert(!tmr);
 }
 

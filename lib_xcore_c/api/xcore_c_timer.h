@@ -3,81 +3,120 @@
 #ifndef __xcore_c_timer_h__
 #define __xcore_c_timer_h__
 
-#include <xccompat.h>
+#include "xcore_c_impl.h"
 
 #if !defined(__XC__) || defined(__DOXYGEN__)
 
 /** Allocates and initialise a timer.
  *
+ *  This function allocates a hardware timer.
+ *  If there are no timers availble, then the function will return 0.
  *  This macro is to be called once on every variable of the type ``timer``.
- *  If there are no timers availble, then the function will return NULL.
  *  When the timer is no longer required, timer_free() must be called
- *  to free the timer.
+ *  to deallocate it.
  *
- *  \param t   Timer variable representing the initialised timer
+ *  \param t    Timer variable representing the initialised timer
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_LOAD_STORE         invalid *t argument.
  */
-inline void timer_alloc(timer *t)
+inline unsigned timer_alloc(timer *t)
 {
-  asm volatile("getr %0, 1" : "=r" (*t));
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                asm volatile("getr %0, 1" : "=r" (*t)); \
+                              } while (0) );
 }
 
 /** Deallocate a timer.
  *
- *  This function is to be called once on every variable of the type ``timer``.
+ *  This function frees the hardware timer.
  *
- *  \param t  The timer to be freed
+ *  \param t    The timer to be freed
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated timer.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the timer.
+ *  \exception  ET_LOAD_STORE         invalid *t argument.
  */
-inline void timer_free(timer t)
+inline unsigned timer_free(timer *t)
 {
-  asm volatile("freer res[%0]" :: "r" (t));
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                asm volatile("freer res[%0]" :: "r" (*t)); \
+                                *t = 0; \
+                              } while (0) );
 }
 
 /** Get the current time from the timer.
  *
  *  \param t    The timer on which to input
  *
- *  \returns    The time value (a 32-bit value)
+ *  \param now  The time value (a 32-bit value)
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated timer.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the timer.
+ *  \exception  ET_LOAD_STORE         invalid *now argument.
  */
-inline int timer_get_time(timer t)
+inline unsigned timer_get_time(timer t, int *now)
 {
-  int i;
-  asm volatile("in %0, res[%1]" : "=r" (i): "r" (t));
-  return i;
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                asm volatile("in %0, res[%1]" : "=r" (*now): "r" (t)); \
+                              } while (0) );
 }
 
-/** Pause until after a specified time.
+/** Wait until after a specified time.
  *
- *  \param tmr  The timer to use for timing
+ *  \param t  The timer to use for timing
  *
- *  \param time The time to wait until
+ *  \param until The time to wait until
  *
+ *  \param now  The time we actually waited until
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated timer.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the timer.
+ *  \exception  ET_LOAD_STORE         invalid *now argument.
  */
-inline int timer_wait_until(timer tmr, int time)
+inline unsigned timer_wait_until(timer t, int until, int *now)
 {
-  asm volatile("setd res[%0], %1" :: "r" (tmr), "r" (time));
-  asm volatile("setc res[%0], 0x9" :: "r" (tmr));
-  int i = timer_get_time(tmr);
-
-  // Clear the condition so that a timer_get_time() will work by default
-  asm volatile("setc res[%0], 0x1" :: "r" (tmr));
-  return i;
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                asm volatile("setd res[%0], %1" :: "r" (t), "r" (until)); \
+                                asm volatile("setc res[%0], 0x9" :: "r" (t)); \
+                                asm volatile("in %0, res[%1]" : "=r" (*now): "r" (t)); \
+                                /* Clear the condition so that a timer_get_time() will work by default */ \
+                                asm volatile("setc res[%0], 0x1" :: "r" (t)); \
+                              } while (0) );
 }
 
 /** Delay for a specified time using a specific timer.
-
- *  This function pauses until the time is
- *  reached.
  *
- *  \param tmr       The timer resource to use
+ *  \param t    The timer resource to use
  *
- *  \param period    The amount of time to wait (in reference time ticks,
- *                   usually 10ns steps)
+ *  \param period The amount of time to wait (in reference time ticks, usually 10ns steps)
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated timer.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the timer.
+ *  \exception  ET_LOAD_STORE         invalid *now argument.
  */
-inline void timer_delay(timer tmr, int period)
+inline unsigned timer_delay(timer t, int period)
 {
-  int time = timer_get_time(tmr);
-  time += period;
-  timer_wait_until(tmr, time);
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                int start; \
+                                asm volatile("in %0, res[%1]" : "=r" (start): "r" (t)); \
+                                int until = start + period; \
+                                asm volatile("setd res[%0], %1" :: "r" (t), "r" (until)); \
+                                asm volatile("setc res[%0], 0x9" :: "r" (t)); \
+                                int dummy; \
+                                asm volatile("in %0, res[%1]" : "=r" (dummy): "r" (t)); \
+                                /* Clear the condition so that a timer_get_time() will work by default */ \
+                                asm volatile("setc res[%0], 0x1" :: "r" (t)); \
+                              } while (0) );
 }
 
 #endif // __XC__

@@ -27,7 +27,8 @@ void port_example()
 
   timer t;
   timer_alloc(&t);
-  int time = timer_get_time(t);
+  int time;
+  timer_get_time(t, &time);
   time += period;
 
   int q_value = 0;
@@ -44,7 +45,8 @@ void port_example()
     switch (choice) {
       case EVENT_TIMER: {
         // Read the timer to clear the event
-        timer_get_time(t);
+        int dummy;
+        timer_get_time(t, &dummy);
 
         // Set up the next timer event
         time += period;
@@ -70,7 +72,7 @@ void port_example()
   }
 
   // Release the resources
-  timer_free(t);
+  timer_free(&t);
   port_free(q);
   port_free(p);
 }

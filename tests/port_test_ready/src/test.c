@@ -33,7 +33,7 @@ void port_test_output(chanend c)
   timer tmr;
   timer_alloc(&tmr);
   timer_delay(tmr, 1000);
-  timer_free(tmr);
+  timer_free(&tmr);
 
   port_output(p, 0x12345678);
 
@@ -41,7 +41,7 @@ void port_test_output(chanend c)
 
   port_free(p);
   port_free(p_ready);
-  clock_free(clk);
+  clock_free(&clk);
 
   // Get information about the tile/core running the server for debug messages
   unsigned tile_id = get_local_tile_id();
@@ -84,7 +84,7 @@ void port_test_input(chanend c)
 
   port_free(p);
   port_free(p_ready);
-  clock_free(clk);
+  clock_free(&clk);
 
   // Get information about the tile/core running the server for debug messages
   unsigned tile_id = get_local_tile_id();

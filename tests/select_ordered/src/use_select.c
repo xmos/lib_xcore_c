@@ -15,7 +15,8 @@ typedef enum {
 
 void test(chanend c, chanend d, timer tmr, resource ids[])
 {
-  int time = timer_get_time(tmr);
+  int time;
+  timer_get_time(tmr, &time);
   time += 10;
 
   // Setup the channels to generate events
@@ -45,7 +46,7 @@ void test(chanend c, chanend d, timer tmr, resource ids[])
       }
       case EVENT_TIMER: {
         // Read value and clear event
-        time = timer_get_time(tmr);
+        timer_get_time(tmr, &time);
         timer_event_count++;
         debug_printf("Timer event %d\n", timer_event_count);
         if (timer_event_count >= events_per_resource) {
@@ -74,7 +75,7 @@ void channel_first(chanend c, chanend d)
   resource ids[4] = {c, d, tmr, 0};
   test(c, d, tmr, ids);
 
-  timer_free(tmr);
+  timer_free(&tmr);
 }
 
 void timer_first(chanend c, chanend d)
@@ -88,6 +89,6 @@ void timer_first(chanend c, chanend d)
   resource ids[4] = {tmr, d, c, 0};
   test(c, d, tmr, ids);
 
-  timer_free(tmr);
+  timer_free(&tmr);
 }
 
