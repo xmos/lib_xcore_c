@@ -9,11 +9,12 @@ void port_test_output(chanend c)
   port p;
   port_alloc(&p, XS1_PORT_4A);
 
-  chan_in_word(c); // Wait for ack
+  int dummy;
+  chan_in_word(c, &dummy); // Wait for ack
 
   for (int i = 0; i < 16; ++i) {
     port_output(p, i);
-    chan_in_word(c); // Wait for ack
+    chan_in_word(c, &dummy); // Wait for ack
   }
 
   port_free(p);

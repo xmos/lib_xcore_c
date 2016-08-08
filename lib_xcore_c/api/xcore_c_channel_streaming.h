@@ -5,15 +5,6 @@
 
 #include "xcore_c_chanend.h"
 
-/** Type that denotes a stremaing channel-end. Streaming communication
- *  channels comprise two connected streaming channel-ends and can be
- *  created using s_chan_alloc(). Streaming channels must be deinitialised
- *  using s_chan_free().
- */
-typedef chanend streaming_chanend;
-
-#include "xcore_c_channel_internal.h"
-
 #if !defined(__XC__) || defined(__DOXYGEN__)
 
 /** Helper type for passing around both ends of a streaming channel.
@@ -23,174 +14,314 @@ typedef struct streaming_channel {
   streaming_chanend right;
 } streaming_channel;
 
-/** Create a streaming channel.
- * The chan-ends must be accessed on the same tile.
+/** Allocate a streaming_channel.
  *
- *  \param c streaming_channel variable holding the two initialised chanends
+ *  This function allocates two hardware chan-ends and joins them.
+ *  If there are not enough chan-ends available the function returns a
+ *  streaming_channel with both fields set to 0.
+ *  When the streaming_channel is no longer required, s_chan_free() must be
+ *  called to deallocate it.
+ *  N.B. The chan-ends must be accessed on the same tile.
+ *
+ *  \return     streaming_channel variable holding the two initialised and
+ *              joined chan-ends or 0s.
  */
-inline void s_chan_alloc(streaming_channel *c)
+inline streaming_channel s_chan_alloc(void)
 {
-  chanend_alloc(&c->left);
-  chanend_alloc(&c->right);
-  chanend_set_dest(c->left, c->right);
-  chanend_set_dest(c->right, c->left);
+  streaming_channel c;
+  if ((c.left = chanend_alloc())) {
+    if ((c.right = chanend_alloc())) {
+      // exception safe calls to _chanend_set_dest()
+      _chanend_set_dest(c.left, c.right);
+      _chanend_set_dest(c.right, c.left);
+    }
+    else {
+      _chanend_free(c.left);
+      c.left = 0;
+      //c.right = 0;
+    }
+  }
+  else {
+    //c.left = 0;
+    c.right = 0;
+  }
+  return c;
 }
 
-/** Disconnect and deallocate a streaming channel.
+/** Deallocate a streaming_channel.
  *
- *  \param c  streaming_channel to free
+ *  \param c    streaming_channel to free.
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_LINK_ERROR         a chan-end destination is not set.
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated channel,
+ *                                    or an input/output is pending.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the channel.
+ *  \exception  ET_LOAD_STORE         invalid *c argument.
  */
-inline void s_chan_free(streaming_channel c)
+inline unsigned s_chan_free(streaming_channel *c)
 {
-  s_chan_out_ct_end(c.left);
-  s_chan_out_ct_end(c.right);
-  s_chan_check_ct_end(c.left);
-  s_chan_check_ct_end(c.right);
-  chanend_free(c.left);
-  chanend_free(c.right);
+  RETURN_COND_TRYCATCH_ERROR( do {
+                                _s_chan_out_ct_end(c->left); \
+                                _s_chan_out_ct_end(c->right); \
+                                _s_chan_check_ct_end(c->left); \
+                                _s_chan_check_ct_end(c->right); \
+                                _chanend_free(c->left); \
+                                c->left = 0; \
+                                _chanend_free(c->right); \
+                                c->right = 0; \
+                              } while (0) );
 }
 
 #endif // __XC__
 
-/** Output a word over a streaming channel-end.
+/** Output a word over a streaming_channel.
  *
- *  \param c    The streaming channel-end
+ *  \param c    The streaming chan-end
  *
  *  \param data The word to be output
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_LINK_ERROR         chan-end destination is not set.
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  */
-inline void s_chan_out_word(streaming_chanend c, int data)
+inline unsigned s_chan_out_word(streaming_chanend c, int data)
 {
-  asm volatile("out res[%0], %1" :: "r" (c), "r" (data));
+  RETURN_COND_TRYCATCH_ERROR( _s_chan_out_word(c, data) );
 }
 
-/** Output an byte over a streaming channel-end.
+/** Output an byte over a streaming_channel.
  *
- *  \param c    The streaming channel-end
+ *  \param c    The streaming chan-end
  *
  *  \param data The byte to be output
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_LINK_ERROR         chan-end destination is not set.
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  */
-inline void s_chan_out_byte(streaming_chanend c, char data)
+inline unsigned s_chan_out_byte(streaming_chanend c, char data)
 {
-  asm volatile("outt res[%0], %1" :: "r" (c), "r" (data));
+  RETURN_COND_TRYCATCH_ERROR( _s_chan_out_byte(c, data) );
 }
 
-/** Output a block of data over a streaming channel-end.
+/** Output a block of data over a streaming_channel.
  *
- *  \param c    The streaming channel-end
+ *  \param c    The streaming chan-end
  *
  *  \param buf  A pointer to the buffer containing the data to send
  *
  *  \param n    The number of words to send
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_LINK_ERROR         chan-end destination is not set.
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
+ *  \exception  ET_LOAD_STORE         invalid buf[] argument.
  */
-inline void s_chan_out_buf_word(streaming_chanend c, int buf[], int n)
+inline unsigned s_chan_out_buf_word(streaming_chanend c, int buf[], int n)
 {
-  for (int i = 0; i < n; i++) {
-    s_chan_out_word(c, buf[i]);
-  }
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                for (int i = 0; i < n; i++) { \
+                                  _s_chan_out_word(c, buf[i]); \
+                                } \
+                              } while (0) );
 }
 
-/** Output a block of data over a streaming channel-end.
+/** Output a block of data over a streaming_channel.
  *
- *  \param c    The streaming channel-end
+ *  \param c    The streaming chan-end
  *
  *  \param buf  A pointer to the buffer containing the data to send
  *
  *  \param n    The number of bytes to send
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_LINK_ERROR         chan-end destination is not set.
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
+ *  \exception  ET_LOAD_STORE         invalid buf[] argument.
  */
-inline void s_chan_out_buf_byte(streaming_chanend c, char buf[], int n)
+inline unsigned s_chan_out_buf_byte(streaming_chanend c, char buf[], int n)
 {
-  // Note we could do this more efficiently depending on the size of n
-  // and the alignment of buf
-  for (int i = 0; i < n; i++) {
-    s_chan_out_byte(c, buf[i]);
-  }
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                for (int i = 0; i < n; i++) { \
+                                  _s_chan_out_byte(c, buf[i]); \
+                                } \
+                              } \
+                              while (0) );
 }
 
-/** Input a word from a streaming channel-end.
+/** Input a word from a streaming_channel.
  *
- *  \param c    The streaming channel-end
+ *  \param c    The streaming chan-end
  *
- *  \returns    The inputted integer
+ *  \param data The inputted word.
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
+ *                                    or has pending control token.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
+ *  \exception  ET_LOAD_STORE         invalid *data argument.
  */
-inline int s_chan_in_word(streaming_chanend c)
+inline unsigned s_chan_in_word(streaming_chanend c, int *data)
 {
-  int data;
-  asm volatile("in %0, res[%1]" : "=r" (data): "r" (c));
-  return data;
+  RETURN_COND_TRYCATCH_ERROR( *data = _s_chan_in_word(c) );
 }
 
-/** Input a byte from a streaming channel-end.
+/** Input a byte from a streaming_channel.
  *
- *  \param c    The streaming channel-end
+ *  \param c    The streaming chan-end
  *
- *  \returns    The inputted byte
+ *  \param data The inputted byte
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
+ *                                    or has pending control token.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
+ *  \exception  ET_LOAD_STORE         invalid *data argument.
  */
-inline char s_chan_in_byte(streaming_chanend c)
+inline unsigned s_chan_in_byte(streaming_chanend c, char *data)
 {
-  char data;
-  asm volatile("int %0, res[%1]" : "=r" (data): "r" (c));
-  return data;
+  RETURN_COND_TRYCATCH_ERROR( *data = _s_chan_in_byte(c) );
 }
 
-/** Input a block of data from a streaming channel-end.
+/** Input a block of data from a streaming_channel.
  *
- *  \param c    The streaming channel-end
+ *  \param c    The streaming chan-end
  *
  *  \param buf  A pointer to the memory region to fill
  *
  *  \param n    The number of words to receive
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
+ *                                    or has pending control token.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
+ *  \exception  ET_LOAD_STORE         invalid buf[] argument.
  */
-inline void s_chan_in_buf_word(streaming_chanend c, int buf[], int n)
+inline unsigned s_chan_in_buf_word(streaming_chanend c, int buf[], int n)
 {
-  // Note we could do this more efficiently depending on the size of n
-  // and the alignment of buf
-  for (int i = 0; i < n; i++) {
-    buf[i] = s_chan_in_word(c);
-  }
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                for (int i = 0; i < n; i++) { \
+                                  buf[i] = _s_chan_in_word(c); \
+                                } \
+                              } while (0) );
 }
 
-/** Input a block of data from a streaming channel-end.
+/** Input a block of data from a streaming_channel.
  *
- *  \param c    The streaming channel-end
+ *  \param c    The streaming chan-end
  *
  *  \param buf  A pointer to the memory region to fill
  *
  *  \param n    The number of bytes to receive
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
+ *                                    or has pending control token.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
+ *  \exception  ET_LOAD_STORE         invalid buf[] argument.
  */
-inline void s_chan_in_buf_byte(streaming_chanend c, char buf[], int n)
+inline unsigned s_chan_in_buf_byte(streaming_chanend c, char buf[], int n)
 {
-  // Note we could do this more efficiently depending on the size of n
-  // and the alignment of buf
-  for (int i = 0; i < n; i++) {
-    buf[i] = s_chan_in_byte(c);
-  }
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                for (int i = 0; i < n; i++) { \
+                                  buf[i] = _s_chan_in_byte(c); \
+                                } \
+                              } while (0) );
 }
 
-/** Output a control token onto a streaming channel-end.
+/** Output a control token onto a streaming_channel.
  *
- *  \param c    The streaming channel-end
+ *  \param c    The streaming chan-end
  *
  *  \param ct   Control token to be output. Legal control tokens that can be
  *              used are 0 or any value in the range 3..191 inclusive.
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_LINK_ERROR         chan-end destination is not set
+ *                                    or token is reserverd.
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  */
-inline void s_chan_out_ct(streaming_chanend c, int ct)
+inline unsigned s_chan_out_ct(streaming_chanend c, int ct)
 {
-  asm volatile("outct res[%0], %1" :: "r" (c), "r" (ct));
+  RETURN_COND_TRYCATCH_ERROR( asm volatile("outct res[%0], %1" :: "r" (c), "r" (ct)) );
 }
 
-/** Check that a specific control token is available on a streaming channel-end.
+/** Output a CT_END control token onto a streaming_channel.
  *
- *  This function blocks until a token is available on the streaming channel. If
+ *  Outputting a CT_END control token informs the communication network and the
+ *  other chan-end that the current transaction has completed. Thus freeing the
+ *  communication network for other channels to use.
+ *
+ *  The streaming_channel remains allocated, awaiting another transaction or
+ *  deallocation.
+ *
+ *  \param c    The streaming chan-end
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_LINK_ERROR         chan-end destination is not set.
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
+ */
+inline unsigned s_chan_out_ct_end(streaming_chanend c)
+{
+  return s_chan_out_ct(c, XS1_CT_END);
+}
+
+/** Check that a specific control token on a streaming_channel.
+ *
+ *  This function blocks until a token is available on the streaming_channel. If
  *  the available token is a control token and has the value ``ct``, then the
  *  token is input and discarded. Otherwise an exception is raised.
  *
- *  \param c    The streaming channel-end
+ *  \param c    The streaming chan-end
  *
- *  \param ct   Control token that is expected on the streaming channel
+ *  \param ct   Control token that is expected on the streaming_channel.
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
+ *                                    or does not contain expected token.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  */
-inline void s_chan_check_ct(streaming_chanend c, int ct)
+inline unsigned s_chan_check_ct(streaming_chanend c, int ct)
 {
-  asm volatile("chkct res[%0], %1" :: "r" (c), "r" (ct));
+  RETURN_COND_TRYCATCH_ERROR( asm volatile("chkct res[%0], %1" :: "r" (c), "r" (ct)) );
+}
+
+/** Check for a CT_END token on a streaming_channel.
+ *
+ *  This function blocks until a token is available on the streaming_channel. If
+ *  the available token is a CT_END token the token is input and discarded.
+ *  Otherwise an exception is raised.
+ *
+ *  \param c    The streaming chan-end
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
+ *                                    or does not contain CT_END token.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
+ */
+inline unsigned s_chan_check_ct_end(streaming_chanend c)
+{
+  return s_chan_check_ct(c, XS1_CT_END);
 }
 
 #endif // __xcore_c_channel_streaming_h__

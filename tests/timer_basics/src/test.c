@@ -41,7 +41,8 @@ void slow(chanend c)
   debug_printf("Slow started\n");
 
   // Get the time from the other core to wait until
-  int time = s_chan_in_word(c);
+  int time;
+  s_chan_in_word(c, &time);
 
   timer_wait_until(tmr, time);
 

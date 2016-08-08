@@ -16,7 +16,7 @@ void get_addresses(chanend c, unsigned *local_server, unsigned *remote_server)
   // Exchange channel IDs with the other end of a channel
   s_chan_out_word(c, c);
   s_chan_out_ct(c, XS1_CT_END);
-  *remote_server = s_chan_in_word(c);
+  s_chan_in_word(c, (int*)remote_server);
   s_chan_check_ct(c, XS1_CT_END);
   debug_printf("%x:%d: get_addresses: local %x, remote: %x\n",
                tile_id, core_id, *local_server, *remote_server);
@@ -34,8 +34,10 @@ void chanend_server(chanend c)
   unsigned core_id = get_logical_core_id();
 
   while (1) {
-    chanend sender = s_chan_in_word(c);
-    int command = s_chan_in_word(c);
+    chanend sender;
+    s_chan_in_word(c, (int*)&sender);
+    int command;
+    s_chan_in_word(c, &command);
     s_chan_check_ct(c, XS1_CT_END);
 
     debug_printf("%x:%d: received %d from %x\n", tile_id, core_id, command, sender);
@@ -58,17 +60,17 @@ void chanend_server(chanend c)
  */
 int send_command(chanend dst, int command)
 {
-  chanend c;
-  chanend_alloc(&c);
+  chanend c = chanend_alloc();
   chanend_set_dest(c, dst);
   s_chan_out_word(c, c);
   s_chan_out_word(c, command);
   s_chan_out_ct(c, XS1_CT_END);
 
-  int response = s_chan_in_word(c);
+  int response;
+  s_chan_in_word(c, &response);
   s_chan_check_ct(c, XS1_CT_END);
 
-  chanend_free(c);
+  chanend_free(&c);
   if (command == ~response) {
     debug_printf("Send cmd %d to %x response ok\n", command, dst);
   }
@@ -88,3 +90,4 @@ void chanend_client(chanend local_server, chanend remote_server)
   send_command(remote_server, 2);
   send_command(local_server, SHUT_DOWN);
 }
+

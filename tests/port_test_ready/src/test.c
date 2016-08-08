@@ -25,7 +25,8 @@ void port_test_output(chanend c)
 
   port_configure_out_strobed_master(p, p_ready, clk, 0);
 
-  chan_in_word(c); // Wait for ack
+  int dummy;
+  chan_in_word(c, &dummy); // Wait for ack
 
   port_output(p, 0xfeedbeef);
 
@@ -36,7 +37,7 @@ void port_test_output(chanend c)
 
   port_output(p, 0x12345678);
 
-  chan_in_word(c); // Wait for ack
+  chan_in_word(c, &dummy); // Wait for ack
 
   port_free(p);
   port_free(p_ready);

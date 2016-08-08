@@ -19,7 +19,8 @@ void core0(chanend c)
   lock_release(l);
 
   // Wait for core1 to have finished with the lock before freeing it
-  chan_in_word(c);
+  int dummy;
+  chan_in_word(c, &dummy);
 
   lock_free(l);
   timer_free(tmr);
@@ -27,7 +28,8 @@ void core0(chanend c)
 
 void core1(chanend c)
 {
-  lock l = chan_in_word(c);
+  lock l;
+  chan_in_word(c, &l);
   debug_printf("Core1 try acquire\n");
   lock_acquire(l);
   debug_printf("Core1 owns the lock\n");

@@ -11,159 +11,255 @@
 */
 typedef streaming_channel channel;
 
-/** Create a channel.
- *  The chan-ends must be accessed on the same tile.
+/** Allocate a channel.
  *
- *  \param c channel variable holding the two initialised chanends
+ *  This function allocates two hardware chan-ends and joins them.
+ *  If there are not enough chan-ends available the function returns a
+ *  channel with both fields set to 0.
+ *  When the channel is no longer required, chan_free() must be
+ *  called to deallocate it.
+ *  N.B. The chan-ends must be accessed on the same tile.
+ *
+ *  \return     channel variable holding the two initialised and
+ *              joined chan-ends or 0s.
  */
-inline void chan_alloc(channel *c)
+inline channel chan_alloc(void)
 {
-  s_chan_alloc(c);
+  return (channel) s_chan_alloc();
 }
 
-/** Disconnect and deallocate a channel.
+/** Deallocate a channel.
  *
  *  \param c  channel to free
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
+ *                                    or channel handshaking corrupted.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chanend.
+ *  \exception  ET_LOAD_STORE         invalid *c argument.
  */
-inline void chan_free(channel c)
+inline unsigned chan_free(channel *c)
 {
-  // Not implemented in terms of s_chan_free() as we are already synced.
-  chanend_free(c.left);
-  chanend_free(c.right);
+  // Not implemented in terms of s_chan_free() as we have already hand-shook a CT_END.
+  RETURN_COND_TRYCATCH_ERROR( do {
+                                _chanend_free(c->left); \
+                                c->left = 0; \
+                                _chanend_free(c->right); \
+                                c->right = 0; \
+                              } while (0) );
 }
 
 #endif // __XC__
 
-/** Output a word over a channel-end.
+/** Output a word over a channel.
  *
- *  \param c    The channel-end
+ *  \param c    The chan-end
  *
  *  \param data The word to be output
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_LINK_ERROR         chan-end destination is not set.
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
+ *                                    or channel handshaking corrupted.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  */
-inline void chan_out_word(chanend c, int data)
+inline unsigned chan_out_word(chanend c, int data)
 {
-  s_chan_out_ct_end(c);
-  s_chan_check_ct_end(c);
-  s_chan_out_word(c, data);
-  s_chan_out_ct_end(c);
-  s_chan_check_ct_end(c);
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                _s_chan_out_ct_end(c); \
+                                _s_chan_check_ct_end(c); \
+                                _s_chan_out_word(c, data); \
+                                _s_chan_out_ct_end(c); \
+                                _s_chan_check_ct_end(c); \
+                              } while (0) );
 }
 
-/** Output a byte over a channel-end.
+/** Output a byte over a channel.
  *
- *  \param c    The channel-end
+ *  \param c    The chan-end
  *
  *  \param data The byte to be output
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_LINK_ERROR         chan-end destination is not set.
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
+ *                                    or channel handshaking corrupted.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  */
-inline void chan_out_byte(chanend c, char data)
+inline unsigned chan_out_byte(chanend c, char data)
 {
-  s_chan_out_ct_end(c);
-  s_chan_check_ct_end(c);
-  s_chan_out_byte(c, data);
-  s_chan_out_ct_end(c);
-  s_chan_check_ct_end(c);
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                _s_chan_out_ct_end(c); \
+                                _s_chan_check_ct_end(c); \
+                                _s_chan_out_byte(c, data); \
+                                _s_chan_out_ct_end(c); \
+                                _s_chan_check_ct_end(c); \
+                              } while (0) );
 }
 
-/** Output a block of data over a channel-end.
+/** Output a block of data over a channel.
  *
- *  \param c    The streaming channel-end
+ *  \param c    The chan-end
  *
  *  \param buf  A pointer to the buffer containing the data to send
  *
  *  \param n    The number of words to send
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_LINK_ERROR         chan-end destination is not set.
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
+ *                                    or channel handshaking corrupted.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
+ *  \exception  ET_LOAD_STORE         invalid buf[] argument.
  */
-inline void chan_out_buf_word(chanend c, int buf[], int n)
+inline unsigned chan_out_buf_word(chanend c, int buf[], int n)
 {
-  s_chan_out_ct_end(c);
-  s_chan_check_ct_end(c);
-  s_chan_out_buf_word(c, buf, n);
-  s_chan_out_ct_end(c);
-  s_chan_check_ct_end(c);
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                _s_chan_out_ct_end(c); \
+                                _s_chan_check_ct_end(c); \
+                                for (int i = 0; i < n; i++) { \
+                                  _s_chan_out_word(c, buf[i]); \
+                                } \
+                                _s_chan_out_ct_end(c); \
+                                _s_chan_check_ct_end(c); \
+                              } while (0) );
 }
 
-/** Output a block of data over a channel-end.
+/** Output a block of data over a channel.
  *
- *  \param c    The streaming channel-end
+ *  \param c    The chan-end
  *
  *  \param buf  A pointer to the buffer containing the data to send
  *
  *  \param n    The number of bytes to send
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_LINK_ERROR         chan-end destination is not set.
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
+ *                                    or channel handshaking corrupted.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
+ *  \exception  ET_LOAD_STORE         invalid buf[] argument.
  */
-inline void chan_out_buf_byte(chanend c, char buf[], int n)
+inline unsigned chan_out_buf_byte(chanend c, char buf[], int n)
 {
-  s_chan_out_ct_end(c);
-  s_chan_check_ct_end(c);
-  s_chan_out_buf_byte(c, buf, n);
-  s_chan_out_ct_end(c);
-  s_chan_check_ct_end(c);
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                _s_chan_out_ct_end(c); \
+                                _s_chan_check_ct_end(c); \
+                                for (int i = 0; i < n; i++) { \
+                                  _s_chan_out_byte(c, buf[i]); \
+                                } \
+                                _s_chan_out_ct_end(c); \
+                                _s_chan_check_ct_end(c); \
+                              } while (0) );
 }
 
 /** Input a word from a channel.
  *
- *  \param c    The channel-end
+ *  \param c    The chan-end
  *
- *  \returns    The inputted word
+ *  \param data The inputted word
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
+ *                                    or channel handshaking corrupted.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
+ *  \exception  ET_LOAD_STORE         invalid *data argument.
  */
-inline int chan_in_word(chanend c)
+inline unsigned chan_in_word(chanend c, int *data)
 {
-  int data;
-  s_chan_out_ct_end(c);
-  s_chan_check_ct_end(c);
-  data = s_chan_in_word(c);
-  s_chan_out_ct_end(c);
-  s_chan_check_ct_end(c);
-  return data;
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                _s_chan_out_ct_end(c); \
+                                _s_chan_check_ct_end(c); \
+                                *data = _s_chan_in_word(c); \
+                                _s_chan_out_ct_end(c); \
+                                _s_chan_check_ct_end(c); \
+                              } while (0) );
 }
 
 /** Input a byte from a channel.
  *
- *  \param c    The channel-end
+ *  \param c    The chan-end
  *
- *  \returns    The inputted byte
+ *  \param data The inputted byte
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
+ *                                    or channel handshaking corrupted.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
+ *  \exception  ET_LOAD_STORE         invalid *data argument.
  */
-inline char chan_in_byte(chanend c)
+inline unsigned chan_in_byte(chanend c, char *data)
 {
-  char data;
-  s_chan_out_ct_end(c);
-  s_chan_check_ct_end(c);
-  data = s_chan_in_byte(c);
-  s_chan_out_ct_end(c);
-  s_chan_check_ct_end(c);
-  return data;
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                _s_chan_out_ct_end(c); \
+                                _s_chan_check_ct_end(c); \
+                                *data = _s_chan_in_byte(c); \
+                                _s_chan_out_ct_end(c); \
+                                _s_chan_check_ct_end(c); \
+                              } while (0) );
 }
 
-/** Input a block of data from a channel-end.
+/** Input a block of data from a channel.
  *
- *  \param c    The channel-end
+ *  \param c    The chan-end
  *
  *  \param buf  A pointer to the memory region to fill
  *
  *  \param n    The number of words to receive
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
+ *                                    or channel handshaking corrupted.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
+ *  \exception  ET_LOAD_STORE         invalid buf[] argument.
  */
-inline void chan_in_buf_word(chanend c, int buf[], int n)
+inline unsigned chan_in_buf_word(chanend c, int buf[], int n)
 {
-  s_chan_out_ct_end(c);
-  s_chan_check_ct_end(c);
-  s_chan_in_buf_word(c, buf, n);
-  s_chan_out_ct_end(c);
-  s_chan_check_ct_end(c);
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                _s_chan_out_ct_end(c);
+                                _s_chan_check_ct_end(c);
+                                for (int i = 0; i < n; i++) { \
+                                  buf[i] = _s_chan_in_word(c); \
+                                } \
+                                _s_chan_out_ct_end(c);
+                                _s_chan_check_ct_end(c);
+                              } while (0) );
 }
 
-/** Input a block of data from a channel-end.
+/** Input a block of data from a channel.
  *
- *  \param c    The channel-end
+ *  \param c    The chan-end
  *
  *  \param buf  A pointer to the memory region to fill
  *
  *  \param n    The number of bytes to receive
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
+ *                                    or channel handshaking corrupted.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
+ *  \exception  ET_LOAD_STORE         invalid buf[] argument.
  */
-inline void chan_in_buf_byte(chanend c, char buf[], int n)
+inline unsigned chan_in_buf_byte(chanend c, char buf[], int n)
 {
-  s_chan_out_ct_end(c);
-  s_chan_check_ct_end(c);
-  s_chan_in_buf_byte(c, buf, n);
-  s_chan_out_ct_end(c);
-  s_chan_check_ct_end(c);
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                _s_chan_out_ct_end(c);
+                                _s_chan_check_ct_end(c);
+                                for (int i = 0; i < n; i++) { \
+                                  buf[i] = _s_chan_in_byte(c); \
+                                } \
+                                _s_chan_out_ct_end(c);
+                                _s_chan_check_ct_end(c);
+                              } while (0) );
 }
 
 #endif // __xcore_c_channel_h__

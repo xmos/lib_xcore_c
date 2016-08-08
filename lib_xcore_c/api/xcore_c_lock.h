@@ -14,9 +14,9 @@ typedef int lock;
 
 /** Allocates a lock.
  *
- *  This function allocates a hardware lock. If there are no locks availble,
- *  then the function will return NULL. When the lock is no longer required,
- *  lock_free() must be called to free the lock.
+ *  This function allocates a hardware lock.
+ *  If there are no locks availble the function returns 0.
+ *  When the lock is no longer required, lock_free() must be called to free the lock.
  *
  *  \param l   Lock variable representing the initialised lock
  */

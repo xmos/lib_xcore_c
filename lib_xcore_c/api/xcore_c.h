@@ -3,8 +3,7 @@
 #ifndef __xcore_c_h__
 #define __xcore_c_h__
 
-#include <xs1.h>
-#include <xccompat.h>
+#include "xcore_c_error_codes.h"
 #include "xcore_c_chanend.h"
 #include "xcore_c_channel.h"
 #include "xcore_c_channel_streaming.h"

@@ -31,13 +31,15 @@ void test(chanend c, chanend d, timer tmr, resource ids[])
     switch (choice) {
       case EVENT_CHAN_C: {
         // Read value and clear event
-        int x = chan_in_word(c);
+        int x;
+        chan_in_word(c, &x);
         debug_printf("Received %d on channel c\n", x);
         break;
       }
       case EVENT_CHAN_D: {
         // Read value and clear event
-        int x = chan_in_word(d);
+        int x;
+        chan_in_word(d, &x);
         debug_printf("Received %d on channel d\n", x);
         break;
       }

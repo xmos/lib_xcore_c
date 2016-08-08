@@ -27,7 +27,7 @@ class LibraryFunctionExtractor(c_ast.NodeVisitor):
     def visit_FuncDef(self, node):
         current_path = '{}'.format(node.decl.coord)
         if re.match(os.path.join('..','lib_xcore_c','api','')+'\w+\.h\:\d+',
-                    current_path) and '_internal.h' not in current_path:
+                    current_path) and '_impl.h' not in current_path:
             args = []
             function_params = []
             for params in node.decl.type.args.params:
@@ -80,7 +80,9 @@ def generate_test_app():
                                            'bin', 'xcc'),
                      cpp_args=['-E',
                                '{}{}'.format('-I',
-                                             os.path.join('..','lib_xcore_c','api'))
+                                             os.path.join('..','lib_xcore_c','api')),
+                               '{}{}'.format('-I',
+                                             os.path.join('..','..','lib_trycatch','lib_trycatch','api'))
                               ]
                     )
 

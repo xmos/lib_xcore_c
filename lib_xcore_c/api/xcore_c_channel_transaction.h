@@ -3,224 +3,307 @@
 #ifndef __xcore_c_channel_transaction_h__
 #define __xcore_c_channel_transaction_h__
 
-#if defined(__XC__) || defined(__DOXYGEN__)
-#define __tc_get_reference_member(x,m) x.m
-#else
-#define __tc_get_reference_member(x,m) x->m
-#endif
-
 #if !defined(__XC__) || defined(__DOXYGEN__)
 
 #include "xcore_c_channel_streaming.h"
-
-/** Type that denotes a transacting channel-end. A transaction temporarily
- *  opens a route to the other side of the channel. During the transaction,
- *  you can use transaction channel operations for increased efficiency.
- *
- *  You can create a transacting chanend from a normal chanend using
- *  chan_init_transaction_master() and chan_init_transaction_slave().
- */
-typedef struct transacting_chanend {
-  chanend c;
-  int last_out;
-} transacting_chanend;
+//#include "trycatch.h"
 
 /** Start a transaction (master).
  *
- *  This initiates a *transaction* on a channel. A transaction temporarily
- *  opens a route to the other side of the channel. During the transaction,
- *  you can use transaction channel operations for increased efficiency.
+ *  This initiates a *transaction* on a channel.
+ *
+ *  A transacting_chanend is used to temporarily open a transaction
+ *  route through a channel.
+ *  During the transaction, you can use transaction channel operations for
+ *  increased efficiency.
+ *  You can create a transacting chanend from a normal *chanend* using
+ *  chan_init_transaction_master() and chan_init_transaction_slave().
  *
  *  This called must be matched by a call to chan_init_transaction_slave()
  *  on the other end of the channel.
  *
  *  A transaction must be closed with chan_complete_transaction().
  *
- * \param c   Channel-end to initialize the transaction on
+ *  \param c    chan-end to initialize the transaction on. chanend is invalidated
  *
- * \returns   Version of the chanend to use within the transaction
+ *  \param tc   the intialized master transacting_chanend
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_LINK_ERROR         chan-end destination is not set.
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
+ *  \exception  ET_LOAD_STORE         invalid *c or *tc argument.
  */
-inline transacting_chanend chan_init_transaction_master(chanend c)
+inline unsigned chan_init_transaction_master(chanend *c, transacting_chanend *tc)
 {
-  transacting_chanend tc;
-  tc.c = c;
-  tc.last_out = 0;
-  s_chan_out_ct_end(c);
-  return tc;
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                _s_chan_out_ct_end(*c); \
+                                tc->last_out = 0; \
+                                tc->c = *c; \
+                                *c = 0; \
+                              } while (0) );
 }
 
 /** Start a transaction (slave).
  *
- *  This initiates a *transaction* on a channel. A transaction temporarily
- *  opens a route to the other side of the channel. During the transaction,
- *  you can use transaction channel operations for increased efficiency.
+ *  This initiates a *transaction* on a channel.
  *
  *  This called must be matched by a call to chan_init_transaction_master()
  *  on the other end of the channel.
  *
  *  A transaction must be closed with chan_complete_transaction().
  *
- * \param c   Channel-end to initialize the transaction on
+ *  The original *chanend* must not be used until the transaction is closed.
  *
- * \returns   Version of the channel-end to use within the transaction
+ *  \param c    chan-end to initialize the transaction on. chanend is invalidated
+ *
+ *  \param tc   the intialized slave transacting_chanend
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
+ *                                    or does not contain CT_END token.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
+ *  \exception  ET_LOAD_STORE         invalid *c or *tc argument.
  */
-inline transacting_chanend chan_init_transaction_slave(chanend c)
+inline unsigned chan_init_transaction_slave(chanend *c, transacting_chanend *tc)
 {
-  transacting_chanend tc;
-  tc.c = c;
-  tc.last_out = 1;
-  s_chan_check_ct_end(c);
-  return tc;
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                _s_chan_check_ct_end(*c); \
+                                tc->last_out = 1; \
+                                tc->c = *c; \
+                                *c = 0; \
+                              } while (0) );
 }
 
 /** Complete a transaction.
  *
- * This function completes a transaction. After this call the route between the
- * two ends of the channel is freed allowing other channels to use the
- * communication network.
+ *  This function completes a transaction. After this call the route between the
+ *  two ends of the channel is freed allowing other channels to use the
+ *  communication network.
  *
- * This call must be accompanied by a call to chan_complete_transaction() on
- * the other side of the channel.
+ *  Whilst the transacting_chanend is now invalid, the channel remains allocated,
+ *  awaiting another transaction or deallocation.
  *
- * \param tc  Transacting channel-end to close the transaction on
+ *  This call must be accompanied by a call to chan_complete_transaction() on
+ *  the other side of the channel.
  *
- * \returns   Non-transacting version of the channel-end
+ *  \param tc  Transacting chan-end to close. transacting_chanend is invalidated
+ *
+ *  \param c   The original chan-end.
+ *
+ *  \exception  ET_LINK_ERROR         chan-end destination is not set.
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
+ *                                    or channel handshaking corrupted.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
+ *  \exception  ET_LOAD_STORE         invalid *c or *tc argument.
  */
-inline chanend chan_complete_transaction(REFERENCE_PARAM(transacting_chanend, tc))
+inline unsigned chan_complete_transaction(transacting_chanend *tc, chanend *c)
 {
-  if (__tc_get_reference_member(tc,last_out)) {
-    s_chan_out_ct_end(__tc_get_reference_member(tc, c));
-    s_chan_check_ct_end(__tc_get_reference_member(tc, c));
-  } else {
-    s_chan_check_ct_end(__tc_get_reference_member(tc, c));
-    s_chan_out_ct_end(__tc_get_reference_member(tc, c));
-  }
-  return __tc_get_reference_member(tc, c);
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                if (tc->last_out) { \
+                                  _s_chan_out_ct_end(tc->c); \
+                                  _s_chan_check_ct_end(tc->c); \
+                                } else { \
+                                  _s_chan_check_ct_end(tc->c); \
+                                  _s_chan_out_ct_end(tc->c); \
+                                } \
+                                *c = tc->c; \
+                                tc->c = 0; \
+                              } while (0) );
 }
 
-/** Manage direction changes.
+/** Output a word over a transacting chan-end.
  *
- * As specified in the Tools Development Guide, the last_out state is managed
- * to control when CT_END tokens are sent or expected
+ *  \param tc   Transacting chan-end
+ *
+ *  \param data Word to be output
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_LINK_ERROR         chan-end destination is not set.
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
+ *                                    or channel handshaking corrupted.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
+ *  \exception  ET_LOAD_STORE         invalid *tc argument.
  */
-#define __t_chan_change_to_input(tc) \
-  do { \
-    if (__tc_get_reference_member(tc,last_out)) { \
-      __tc_get_reference_member(tc,last_out) = 0; \
-      s_chan_out_ct_end(__tc_get_reference_member(tc, c)); \
-    } \
-  } while (0)
-
-#define __t_chan_change_to_output(tc) \
-  do { \
-    if (!__tc_get_reference_member(tc,last_out)) { \
-      __tc_get_reference_member(tc,last_out) = 1; \
-      s_chan_check_ct_end(__tc_get_reference_member(tc, c)); \
-    } \
-  } while (0)
-
-/** Output a word over a transacting channel-end.
- *
- * \param tc   Transacting channel-end
- *
- * \param data Word to be output
- */
-inline void t_chan_out_word(REFERENCE_PARAM(transacting_chanend, tc), int data)
+inline unsigned t_chan_out_word(transacting_chanend *tc, int data)
 {
-  __t_chan_change_to_output(tc);
-  s_chan_out_word(__tc_get_reference_member(tc, c), data);
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                _t_chan_change_to_output(tc); \
+                                _s_chan_out_word(tc->c, data); \
+                              } while (0) );
 }
 
-/** Output an byte over a transacting channel-end.
+/** Output an byte over a transacting chan-end.
  *
- * \param tc   Transacting channel-end
+ *  \param tc   Transacting chan-end
  *
- * \param data Byte to be output
+ *  \param data Byte to be output
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_LINK_ERROR         chan-end destination is not set.
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
+ *                                    or channel handshaking corrupted.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
+ *  \exception  ET_LOAD_STORE         invalid *tc argument.
  */
-inline void t_chan_out_byte(REFERENCE_PARAM(transacting_chanend, tc), char data)
+inline unsigned t_chan_out_byte(transacting_chanend *tc, char data)
 {
-  __t_chan_change_to_output(tc);
-  s_chan_out_byte(__tc_get_reference_member(tc, c), data);
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                _t_chan_change_to_output(tc); \
+                                _s_chan_out_byte(tc->c, data); \
+                              } while (0) );
 }
 
-/** Output a block of data over a transacting channel-end.
+/** Output a block of data over a transacting chan-end.
  *
- * \param c    Transacting channel-end
+ *  \param c    Transacting chan-end
  *
- * \param buf  Pointer to the buffer containing the data to send
+ *  \param buf  Pointer to the buffer containing the data to send
  *
- * \param n    Number of words to send
+ *  \param n    Number of words to send
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_LINK_ERROR         chan-end destination is not set.
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
+ *                                    or channel handshaking corrupted.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
+ *  \exception  ET_LOAD_STORE         invalid *tc or buf[] argument.
  */
-inline void t_chan_out_buf_word(REFERENCE_PARAM(transacting_chanend, tc), int buf[], int n)
+inline unsigned t_chan_out_buf_word(transacting_chanend *tc, int buf[], int n)
 {
-  __t_chan_change_to_output(tc);
-  s_chan_out_buf_word(__tc_get_reference_member(tc, c), buf, n);
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                _t_chan_change_to_output(tc); \
+                                for (int i = 0; i < n; i++) { \
+                                  _s_chan_out_word(tc->c, buf[i]); \
+                                } \
+                              } while (0) );
 }
 
-/** Output a block of data over a transacting channel-end.
+/** Output a block of data over a transacting chan-end.
  *
- * \param c    Transacting channel-end
+ *  \param c    Transacting chan-end
  *
- * \param buf  Pointer to the buffer containing the data to send
+ *  \param buf  Pointer to the buffer containing the data to send
  *
- * \param n    Number of bytes to send
+ *  \param n    Number of bytes to send
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_LINK_ERROR         chan-end destination is not set.
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
+ *                                    or channel handshaking corrupted.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
+ *  \exception  ET_LOAD_STORE         invalid *tc or buf[] argument.
  */
-inline void t_chan_out_buf_byte(REFERENCE_PARAM(transacting_chanend, tc), char buf[], int n)
+inline unsigned t_chan_out_buf_byte(transacting_chanend *tc, char buf[], int n)
 {
-  __t_chan_change_to_output(tc);
-  s_chan_out_buf_byte(__tc_get_reference_member(tc, c), buf, n);
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                _t_chan_change_to_output(tc); \
+                                for (int i = 0; i < n; i++) { \
+                                  _s_chan_out_byte(tc->c, buf[i]); \
+                                } \
+                              } while (0) );
 }
 
-/** Input a word from a transacting channel-end.
+/** Input a word from a transacting chan-end.
  *
- * \param tc   Transacting channel-end
+ *  \param tc   Transacting chan-end
  *
- * \returns    Inputted integer
+ *  \param data Inputted integer
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_LINK_ERROR         chan-end destination is not set.
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
+ *                                    or channel handshaking corrupted.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
+ *  \exception  ET_LOAD_STORE         invalid *tc or *data argument.
  */
-inline int t_chan_in_word(REFERENCE_PARAM(transacting_chanend, tc))
+inline unsigned t_chan_in_word(transacting_chanend *tc, int *data)
 {
-  __t_chan_change_to_input(tc);
-  return s_chan_in_word(__tc_get_reference_member(tc, c));
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                _t_chan_change_to_input(tc); \
+                                *data = _s_chan_in_word(tc->c); \
+                              } while (0) );
 }
 
-/** Input a byte from a transacting channel-end.
+/** Input a byte from a transacting chan-end.
  *
- * \param tc   Transacting channel-end
+ *  \param tc   Transacting chan-end
  *
- * \returns    Inputted byte
+ *  \param data Inputted byte
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_LINK_ERROR         chan-end destination is not set.
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
+ *                                    or channel handshaking corrupted.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
+ *  \exception  ET_LOAD_STORE         invalid *tc or *data argument.
  */
-inline char t_chan_in_byte(REFERENCE_PARAM(transacting_chanend, tc))
+inline unsigned t_chan_in_byte(transacting_chanend *tc, char *data)
 {
-  __t_chan_change_to_input(tc);
-  return s_chan_in_byte(__tc_get_reference_member(tc, c));
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                _t_chan_change_to_input(tc); \
+                                *data = _s_chan_in_byte(tc->c); \
+                              } while (0) );
 }
 
-/** Input a block of data from a transacting channel-end.
+/** Input a block of data from a transacting chan-end.
  *
- * \param tc   Transacting channel-end
+ *  \param tc   Transacting chan-end
  *
- * \param buf  Pointer to the memory region to fill
+ *  \param buf  Pointer to the memory region to fill
  *
- * \param n    The number of words to receive
+ *  \param n    The number of words to receive
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_LINK_ERROR         chan-end destination is not set.
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
+ *                                    or channel handshaking corrupted.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
+ *  \exception  ET_LOAD_STORE         invalid *tc or buf[] argument.
  */
-inline void t_chan_in_buf_word(REFERENCE_PARAM(transacting_chanend, tc), int buf[], int n)
+inline unsigned t_chan_in_buf_word(transacting_chanend *tc, int buf[], int n)
 {
-  __t_chan_change_to_input(tc);
-  s_chan_in_buf_word(__tc_get_reference_member(tc, c), buf, n);
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                _t_chan_change_to_input(tc); \
+                                for (int i = 0; i < n; i++) { \
+                                  buf[i] = _s_chan_in_word(tc->c); \
+                                } \
+                              } while (0) );
 }
 
-/** Input a block of data from a transacting channel-end.
+/** Input a block of data from a transacting chan-end.
  *
- * \param tc   Transacting channel-end
+ *  \param tc   Transacting chan-end
  *
- * \param buf  Pointer to the memory region to fill
+ *  \param buf  Pointer to the memory region to fill
  *
- * \param n    The number of bytes to receive
+ *  \param n    The number of bytes to receive
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_LINK_ERROR         chan-end destination is not set.
+ *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
+ *                                    or channel handshaking corrupted.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
+ *  \exception  ET_LOAD_STORE         invalid *tc or buf[] argument.
  */
-inline void t_chan_in_buf_byte(REFERENCE_PARAM(transacting_chanend, tc), char buf[], int n)
+inline unsigned t_chan_in_buf_byte(transacting_chanend *tc, char buf[], int n)
 {
-  __t_chan_change_to_input(tc);
-  s_chan_in_buf_byte(__tc_get_reference_member(tc, c), buf, n);
+  RETURN_COND_TRYCATCH_ERROR( do { \
+                                _t_chan_change_to_input(tc); \
+                                for (int i = 0; i < n; i++) { \
+                                  buf[i] = _s_chan_in_byte(tc->c); \
+                                } \
+                              } while (0) );
 }
 
 #endif // __XC__
