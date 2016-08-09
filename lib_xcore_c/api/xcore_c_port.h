@@ -645,6 +645,11 @@ inline void port_clear_condition(port p)
  *  \param p      The port to set the condition on
  *
  *  \param count  The port counter value
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the port.
  */
 inline void port_set_time_condition(port p, int16_t count)
 {

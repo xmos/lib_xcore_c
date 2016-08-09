@@ -6,7 +6,8 @@
 #if !defined(__XC__) || defined(__DOXYGEN__)
 
 #include "xcore_c_channel_streaming.h"
-//#include "trycatch.h"
+#include "xcore_c_chan_impl.h"
+#include "xcore_c_exception_impl.h"
 
 /** Start a transaction (master).
  *
@@ -37,7 +38,7 @@
  */
 inline unsigned chan_init_transaction_master(chanend *c, transacting_chanend *tc)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _s_chan_out_ct_end(*c); \
                                 tc->last_out = 0; \
                                 tc->c = *c; \
@@ -69,7 +70,7 @@ inline unsigned chan_init_transaction_master(chanend *c, transacting_chanend *tc
  */
 inline unsigned chan_init_transaction_slave(chanend *c, transacting_chanend *tc)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _s_chan_check_ct_end(*c); \
                                 tc->last_out = 1; \
                                 tc->c = *c; \
@@ -101,7 +102,7 @@ inline unsigned chan_init_transaction_slave(chanend *c, transacting_chanend *tc)
  */
 inline unsigned chan_complete_transaction(transacting_chanend *tc, chanend *c)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 if (tc->last_out) { \
                                   _s_chan_out_ct_end(tc->c); \
                                   _s_chan_check_ct_end(tc->c); \
@@ -130,7 +131,7 @@ inline unsigned chan_complete_transaction(transacting_chanend *tc, chanend *c)
  */
 inline unsigned t_chan_out_word(transacting_chanend *tc, int data)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _t_chan_change_to_output(tc); \
                                 _s_chan_out_word(tc->c, data); \
                               } while (0) );
@@ -152,7 +153,7 @@ inline unsigned t_chan_out_word(transacting_chanend *tc, int data)
  */
 inline unsigned t_chan_out_byte(transacting_chanend *tc, char data)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _t_chan_change_to_output(tc); \
                                 _s_chan_out_byte(tc->c, data); \
                               } while (0) );
@@ -176,7 +177,7 @@ inline unsigned t_chan_out_byte(transacting_chanend *tc, char data)
  */
 inline unsigned t_chan_out_buf_word(transacting_chanend *tc, int buf[], int n)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _t_chan_change_to_output(tc); \
                                 for (int i = 0; i < n; i++) { \
                                   _s_chan_out_word(tc->c, buf[i]); \
@@ -202,7 +203,7 @@ inline unsigned t_chan_out_buf_word(transacting_chanend *tc, int buf[], int n)
  */
 inline unsigned t_chan_out_buf_byte(transacting_chanend *tc, char buf[], int n)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _t_chan_change_to_output(tc); \
                                 for (int i = 0; i < n; i++) { \
                                   _s_chan_out_byte(tc->c, buf[i]); \
@@ -226,7 +227,7 @@ inline unsigned t_chan_out_buf_byte(transacting_chanend *tc, char buf[], int n)
  */
 inline unsigned t_chan_in_word(transacting_chanend *tc, int *data)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _t_chan_change_to_input(tc); \
                                 *data = _s_chan_in_word(tc->c); \
                               } while (0) );
@@ -248,7 +249,7 @@ inline unsigned t_chan_in_word(transacting_chanend *tc, int *data)
  */
 inline unsigned t_chan_in_byte(transacting_chanend *tc, char *data)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _t_chan_change_to_input(tc); \
                                 *data = _s_chan_in_byte(tc->c); \
                               } while (0) );
@@ -272,7 +273,7 @@ inline unsigned t_chan_in_byte(transacting_chanend *tc, char *data)
  */
 inline unsigned t_chan_in_buf_word(transacting_chanend *tc, int buf[], int n)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _t_chan_change_to_input(tc); \
                                 for (int i = 0; i < n; i++) { \
                                   buf[i] = _s_chan_in_word(tc->c); \
@@ -298,7 +299,7 @@ inline unsigned t_chan_in_buf_word(transacting_chanend *tc, int buf[], int n)
  */
 inline unsigned t_chan_in_buf_byte(transacting_chanend *tc, char buf[], int n)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _t_chan_change_to_input(tc); \
                                 for (int i = 0; i < n; i++) { \
                                   buf[i] = _s_chan_in_byte(tc->c); \

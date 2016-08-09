@@ -3,7 +3,8 @@
 #ifndef __xcore_c_timer_h__
 #define __xcore_c_timer_h__
 
-#include "xcore_c_impl.h"
+#include <xccompat.h>
+#include "xcore_c_exception_impl.h"
 
 #if !defined(__XC__) || defined(__DOXYGEN__)
 
@@ -23,7 +24,7 @@
  */
 inline unsigned timer_alloc(timer *t)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 asm volatile("getr %0, 1" : "=r" (*t)); \
                               } while (0) );
 }
@@ -42,7 +43,7 @@ inline unsigned timer_alloc(timer *t)
  */
 inline unsigned timer_free(timer *t)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 asm volatile("freer res[%0]" :: "r" (*t)); \
                                 *t = 0; \
                               } while (0) );
@@ -62,7 +63,7 @@ inline unsigned timer_free(timer *t)
  */
 inline unsigned timer_get_time(timer t, int *now)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 asm volatile("in %0, res[%1]" : "=r" (*now): "r" (t)); \
                               } while (0) );
 }
@@ -83,7 +84,7 @@ inline unsigned timer_get_time(timer t, int *now)
  */
 inline unsigned timer_wait_until(timer t, int until, int *now)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 asm volatile("setd res[%0], %1" :: "r" (t), "r" (until)); \
                                 asm volatile("setc res[%0], 0x9" :: "r" (t)); \
                                 asm volatile("in %0, res[%1]" : "=r" (*now): "r" (t)); \
@@ -106,7 +107,7 @@ inline unsigned timer_wait_until(timer t, int until, int *now)
  */
 inline unsigned timer_delay(timer t, int period)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 int start; \
                                 asm volatile("in %0, res[%1]" : "=r" (start): "r" (t)); \
                                 int until = start + period; \

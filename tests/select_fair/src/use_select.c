@@ -16,30 +16,32 @@ typedef enum {
  */
 void channel_example_fair(chanend c, chanend d)
 {
-  event_clear_all();
+  event_disable_all();
 
   // Setup the channels to generate events
   event_setup_chanend(c, EVENT_CHAN_C);
+  event_enable_chanend(c);
   event_setup_chanend(d, EVENT_CHAN_D);
+  event_enable_chanend(d);
 
   for (int count = 0; count < 10; count++) {
     event_choice_t choice = event_select();
     switch (choice) {
       case EVENT_CHAN_C: {
-        // Read value and clear event
+        // Read value to clear event and toggle enabled event
         int x;
         chan_in_word(c, &x);
-        event_disable(c);
-        event_enable(d);
+        event_disable_chanend(c);
+        event_enable_chanend(d);
         debug_printf("Received %d on channel c\n", x);
         break;
       }
       case EVENT_CHAN_D: {
-        // Read value and clear event
+        // Read value to clear event and toggle enabled event
         int x;
         chan_in_word(d, &x);
-        event_disable(d);
-        event_enable(c);
+        event_disable_chanend(d);
+        event_enable_chanend(c);
         debug_printf("Received %d on channel d\n", x);
         break;
       }

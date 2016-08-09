@@ -1,6 +1,6 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
-#include "xcore_c_impl.h"
+#include "xcore_c_chan_impl.h"
 extern chanend _chanend_alloc(void);
 extern void _chanend_free(chanend c);
 extern void _chanend_set_dest(chanend c, chanend dst);

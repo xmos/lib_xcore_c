@@ -4,6 +4,8 @@
 #define __xcore_c_channel_h__
 
 #include "xcore_c_channel_streaming.h"
+#include "xcore_c_chan_impl.h"
+#include "xcore_c_exception_impl.h"
 
 #if !defined(__XC__) || defined(__DOXYGEN__)
 
@@ -48,7 +50,7 @@ inline unsigned chan_alloc(channel *c)
 inline unsigned chan_free(channel *c)
 {
   // Not implemented in terms of s_chan_free() as we have already hand-shook a CT_END.
-  RETURN_COND_TRYCATCH_ERROR( do {
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _chanend_free(c->left); \
                                 c->left = 0; \
                                 _chanend_free(c->right); \
@@ -73,7 +75,7 @@ inline unsigned chan_free(channel *c)
  */
 inline unsigned chan_out_word(chanend c, int data)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _s_chan_out_ct_end(c); \
                                 _s_chan_check_ct_end(c); \
                                 _s_chan_out_word(c, data); \
@@ -97,7 +99,7 @@ inline unsigned chan_out_word(chanend c, int data)
  */
 inline unsigned chan_out_byte(chanend c, char data)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _s_chan_out_ct_end(c); \
                                 _s_chan_check_ct_end(c); \
                                 _s_chan_out_byte(c, data); \
@@ -124,7 +126,7 @@ inline unsigned chan_out_byte(chanend c, char data)
  */
 inline unsigned chan_out_buf_word(chanend c, int buf[], int n)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _s_chan_out_ct_end(c); \
                                 _s_chan_check_ct_end(c); \
                                 for (int i = 0; i < n; i++) { \
@@ -153,7 +155,7 @@ inline unsigned chan_out_buf_word(chanend c, int buf[], int n)
  */
 inline unsigned chan_out_buf_byte(chanend c, char buf[], int n)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _s_chan_out_ct_end(c); \
                                 _s_chan_check_ct_end(c); \
                                 for (int i = 0; i < n; i++) { \
@@ -179,7 +181,7 @@ inline unsigned chan_out_buf_byte(chanend c, char buf[], int n)
  */
 inline unsigned chan_in_word(chanend c, int *data)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _s_chan_out_ct_end(c); \
                                 _s_chan_check_ct_end(c); \
                                 *data = _s_chan_in_word(c); \
@@ -203,7 +205,7 @@ inline unsigned chan_in_word(chanend c, int *data)
  */
 inline unsigned chan_in_byte(chanend c, char *data)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _s_chan_out_ct_end(c); \
                                 _s_chan_check_ct_end(c); \
                                 *data = _s_chan_in_byte(c); \
@@ -229,7 +231,7 @@ inline unsigned chan_in_byte(chanend c, char *data)
  */
 inline unsigned chan_in_buf_word(chanend c, int buf[], int n)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _s_chan_out_ct_end(c);
                                 _s_chan_check_ct_end(c);
                                 for (int i = 0; i < n; i++) { \
@@ -257,7 +259,7 @@ inline unsigned chan_in_buf_word(chanend c, int buf[], int n)
  */
 inline unsigned chan_in_buf_byte(chanend c, char buf[], int n)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _s_chan_out_ct_end(c);
                                 _s_chan_check_ct_end(c);
                                 for (int i = 0; i < n; i++) { \

@@ -18,7 +18,7 @@ typedef enum {
 void port_example()
 {
   static const int period = 5000;
-  event_clear_all();
+  event_disable_all();
 
   port p;
   port_alloc(&p, XS1_PORT_1A);
@@ -36,9 +36,10 @@ void port_example()
 
   // Setup the resources for eventing
   event_setup_timer(t, time, EVENT_TIMER);
+  event_enable_timer(t);
   event_setup_port(p, EVENT_PORT_P);
-
   event_change_port_condition(p, PORT_COND_PINSEQ, 0x1);
+  event_enable_port(p);
 
   for (int count = 0; count < 10; count++) {
     port_event_result_t choice = event_select();
@@ -50,7 +51,7 @@ void port_example()
 
         // Set up the next timer event
         time += period;
-        event_change_timer_time(t, time);
+        event_change_timer(t, time);
 
         // Toggle the port value
         q_value = !q_value;

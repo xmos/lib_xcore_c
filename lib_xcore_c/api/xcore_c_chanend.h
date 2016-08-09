@@ -3,7 +3,8 @@
 #ifndef __xcore_c_chanend_h__
 #define __xcore_c_chanend_h__
 
-#include "xcore_c_impl.h"
+#include "xcore_c_chan_impl.h"
+#include "xcore_c_exception_impl.h"
 
 #if !defined(__XC__) || defined(__DOXYGEN__)
 
@@ -22,7 +23,7 @@
  */
 inline unsigned chanend_alloc(chanend* c)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 *c = _chanend_alloc(); \
                               } while (0) );
 }
@@ -44,7 +45,7 @@ inline unsigned chanend_alloc(chanend* c)
  */
 inline unsigned chanend_free(chanend *c)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _chanend_free(*c); \
                                 *c = 0; \
                               } while (0) );
@@ -63,7 +64,7 @@ inline unsigned chanend_free(chanend *c)
 */
 inline unsigned chanend_set_dest(chanend c, chanend dst)
 {
-  RETURN_COND_TRYCATCH_ERROR( _chanend_set_dest(c, dst) );
+  RETURN_EXCEPTION_OR_ERROR( _chanend_set_dest(c, dst) );
 }
 
 #endif // __XC__

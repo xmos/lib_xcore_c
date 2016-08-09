@@ -3,7 +3,7 @@
 #ifndef __xcore_c_lock_h__
 #define __xcore_c_lock_h__
 
-#include "xcore_c_impl.h"
+#include "xcore_c_exception_impl.h"
 
 /** Type that denotes a hardware lock which provide a mutex function.
  *
@@ -27,7 +27,7 @@ typedef int lock;
  */
 inline unsigned lock_alloc(lock *l)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 asm volatile("getr %0, 5" : "=r" (*l)); \
                               } while (0) );
 }
@@ -48,7 +48,7 @@ inline unsigned lock_alloc(lock *l)
  */
 inline unsigned lock_free(lock *l)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 asm volatile("freer res[%0]" :: "r" (*l)); \
                                 *l = 0; \
                               } while (0) );
@@ -70,7 +70,7 @@ inline unsigned lock_free(lock *l)
  */
 inline unsigned lock_acquire(lock l)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 int dummy; \
                                 asm volatile("in %0, res[%1]" : "=r" (dummy): "r" (l)); \
                               } while (0) );
@@ -92,7 +92,7 @@ inline unsigned lock_acquire(lock l)
  */
 inline unsigned lock_release(lock l)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 asm volatile("out res[%0], %0" :: "r" (l)); \
                               } while (0) );
 }

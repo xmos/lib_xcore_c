@@ -16,9 +16,13 @@ USED_MODULES = lib_logging lib_xcore_c
 # XCC_XC_FLAGS, XCC_C_FLAGS, XCC_ASM_FLAGS, XCC_CPP_FLAGS
 # If the variable XCC_MAP_FLAGS is set it overrides the flags passed to
 # xcc for the final link (mapping) stage.
-FLAGS_COMMON = -g -O0 -save-temps -DDEBUG_PRINT_ENABLE=1 -Wno-uninitialized
+FLAGS_COMMON = -g -O0 -save-temps -DDEBUG_PRINT_ENABLE=1
+
 XCC_FLAGS_XS1 = $(FLAGS_COMMON)
 XCC_FLAGS_XS2 = $(FLAGS_COMMON)
+
+#XCC_C_FLAGS_XS1 = $(XCC_FLAGS_XS1) -Wno-uninitialized
+#XCC_C_FLAGS_XS1 = $(XCC_FLAGS_XS2) -Wno-uninitialized
 
 ifeq ($(CONFIG),XS1)
 	TARGET = SLICEKIT-L16

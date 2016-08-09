@@ -4,6 +4,8 @@
 #define __xcore_c_channel_streaming_h__
 
 #include "xcore_c_chanend.h"
+#include "xcore_c_chan_impl.h"
+#include "xcore_c_exception_impl.h"
 
 #if !defined(__XC__) || defined(__DOXYGEN__)
 
@@ -32,7 +34,7 @@ typedef struct streaming_channel {
  */
 inline unsigned s_chan_alloc(streaming_channel *c)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 if ((c->left = _chanend_alloc())) {
                                   if ((c->right = _chanend_alloc())) {
                                     // exception safe calls to _chanend_set_dest()
@@ -68,7 +70,7 @@ inline unsigned s_chan_alloc(streaming_channel *c)
  */
 inline unsigned s_chan_free(streaming_channel *c)
 {
-  RETURN_COND_TRYCATCH_ERROR( do {
+  RETURN_EXCEPTION_OR_ERROR(  do {
                                 _s_chan_out_ct_end(c->left); \
                                 _s_chan_out_ct_end(c->right); \
                                 _s_chan_check_ct_end(c->left); \
@@ -96,7 +98,7 @@ inline unsigned s_chan_free(streaming_channel *c)
  */
 inline unsigned s_chan_out_word(streaming_chanend c, int data)
 {
-  RETURN_COND_TRYCATCH_ERROR( _s_chan_out_word(c, data) );
+  RETURN_EXCEPTION_OR_ERROR( _s_chan_out_word(c, data) );
 }
 
 /** Output an byte over a streaming_channel.
@@ -113,7 +115,7 @@ inline unsigned s_chan_out_word(streaming_chanend c, int data)
  */
 inline unsigned s_chan_out_byte(streaming_chanend c, char data)
 {
-  RETURN_COND_TRYCATCH_ERROR( _s_chan_out_byte(c, data) );
+  RETURN_EXCEPTION_OR_ERROR( _s_chan_out_byte(c, data) );
 }
 
 /** Output a block of data over a streaming_channel.
@@ -133,7 +135,7 @@ inline unsigned s_chan_out_byte(streaming_chanend c, char data)
  */
 inline unsigned s_chan_out_buf_word(streaming_chanend c, int buf[], int n)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 for (int i = 0; i < n; i++) { \
                                   _s_chan_out_word(c, buf[i]); \
                                 } \
@@ -157,7 +159,7 @@ inline unsigned s_chan_out_buf_word(streaming_chanend c, int buf[], int n)
  */
 inline unsigned s_chan_out_buf_byte(streaming_chanend c, char buf[], int n)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 for (int i = 0; i < n; i++) { \
                                   _s_chan_out_byte(c, buf[i]); \
                                 } \
@@ -180,7 +182,7 @@ inline unsigned s_chan_out_buf_byte(streaming_chanend c, char buf[], int n)
  */
 inline unsigned s_chan_in_word(streaming_chanend c, int *data)
 {
-  RETURN_COND_TRYCATCH_ERROR( *data = _s_chan_in_word(c) );
+  RETURN_EXCEPTION_OR_ERROR( *data = _s_chan_in_word(c) );
 }
 
 /** Input a byte from a streaming_channel.
@@ -198,7 +200,7 @@ inline unsigned s_chan_in_word(streaming_chanend c, int *data)
  */
 inline unsigned s_chan_in_byte(streaming_chanend c, char *data)
 {
-  RETURN_COND_TRYCATCH_ERROR( *data = _s_chan_in_byte(c) );
+  RETURN_EXCEPTION_OR_ERROR( *data = _s_chan_in_byte(c) );
 }
 
 /** Input a block of data from a streaming_channel.
@@ -218,7 +220,7 @@ inline unsigned s_chan_in_byte(streaming_chanend c, char *data)
  */
 inline unsigned s_chan_in_buf_word(streaming_chanend c, int buf[], int n)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 for (int i = 0; i < n; i++) { \
                                   buf[i] = _s_chan_in_word(c); \
                                 } \
@@ -242,7 +244,7 @@ inline unsigned s_chan_in_buf_word(streaming_chanend c, int buf[], int n)
  */
 inline unsigned s_chan_in_buf_byte(streaming_chanend c, char buf[], int n)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 for (int i = 0; i < n; i++) { \
                                   buf[i] = _s_chan_in_byte(c); \
                                 } \
@@ -265,7 +267,7 @@ inline unsigned s_chan_in_buf_byte(streaming_chanend c, char buf[], int n)
  */
 inline unsigned s_chan_out_ct(streaming_chanend c, int ct)
 {
-  RETURN_COND_TRYCATCH_ERROR( asm volatile("outct res[%0], %1" :: "r" (c), "r" (ct)) );
+  RETURN_EXCEPTION_OR_ERROR( asm volatile("outct res[%0], %1" :: "r" (c), "r" (ct)) );
 }
 
 /** Output a CT_END control token onto a streaming_channel.
@@ -308,7 +310,7 @@ inline unsigned s_chan_out_ct_end(streaming_chanend c)
  */
 inline unsigned s_chan_check_ct(streaming_chanend c, int ct)
 {
-  RETURN_COND_TRYCATCH_ERROR( asm volatile("chkct res[%0], %1" :: "r" (c), "r" (ct)) );
+  RETURN_EXCEPTION_OR_ERROR( asm volatile("chkct res[%0], %1" :: "r" (c), "r" (ct)) );
 }
 
 /** Check for a CT_END token on a streaming_channel.

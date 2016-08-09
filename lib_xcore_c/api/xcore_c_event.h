@@ -5,44 +5,35 @@
 
 #if !defined(__XC__) || defined(__DOXYGEN__)
 
-#include "xcore_c_resource.h"
+#include "xcore_c_event_impl.h"
+#include "xcore_c_exception_impl.h"
+
 #include "xcore_c_port.h"
 
-/** Disable events from a given resource.
+/** Starting value to use for enumerating values to be registerd with
+ *  event_setup_xxx() functions and returned by event_select() etal.
  *
- *  Disable a given resource raising events. They can be enabled using
- *  event_enable().
- *
- *  \param r  The resource to disable events for
- */
-inline void event_disable(resource r)
-{
-  asm volatile("edu res[%0]" :: "r" (r));
-}
+ *  On XS1 the environment vectors (EVs) are only 16-bit and bit 16 will be set
+ *  to 1 as it is expected to be used as a memory address.
+*/
+#if defined(__XS2A__)
+#define EVENT_ENUM_BASE 0
+#else
+#define EVENT_ENUM_BASE 0x10000
+#endif
 
-/** Enable events from a given resource.
+/** Disable all events.
  *
- *  Enable a given resource to trigger events. They can be disabled using
- *  event_disable().
- *
- *  \param r  The resource to enable events for
- */
-inline void event_enable(resource r)
-{
-  asm volatile("eeu res[%0]" :: "r" (r));
-}
-
-#include "xcore_c_event_internal.h"
-
-/** Clear all pending events.
- *
- *  In order to ensure that no events set up by other code will be triggered
- *  this function is called before starting to configure events for
+ *  This function is called before starting to configure events for
  *  a new event loop.
+ *  This will ensure that no events set up by other code will be triggered.
+ *
+ *  \return     XS1_ET_NONE
  */
-inline void event_clear_all(void)
+inline unsigned event_disable_all(void)
 {
   asm volatile("clre");
+  return XS1_ET_NONE;
 }
 
 /** Setup events on a timer.
@@ -52,27 +43,63 @@ inline void event_clear_all(void)
  *  context of an event handling function and so is passed the value to return
  *  when the event is triggered.
  *
- *  \param t     The timer to enable events on
+ *  Once the event is setup you need to call event_enable_timer() to enable it.
+ *
+ *  \param t     The timer to setup events on
  *  \param time  The time at which the timer will trigger an event. The default
  *               timer ticks are at a 10ns resolution.
  *  \param value The value to be returned by event_select()/event_select_no_wait()
  *               when the timer event is triggered.
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid timer.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the timer.
  */
-inline void event_setup_timer(timer t, int time, unsigned value)
+inline unsigned event_setup_timer(timer t, int time, unsigned value)
 {
-  event_setup_resource(t, value);
-  event_setup_timer_common(t, time);
+  RETURN_EXCEPTION_OR_ERROR(  do { \
+                                _event_setup_resource(t, value); \
+                                  /* Set the condition to be AFTER */ \
+                                  asm volatile("setc res[%0], 0x9" :: "r" (t)); \
+                                  /* Set the time at which the event will fire */ \
+                                  asm volatile("setd res[%0], %1" :: "r" (t), "r" (time)); \
+                              } while (0) );
 }
 
-/** Clear events for a given timer.
+/** Enable events on a timer.
+ *
+ *  Enable a timer to trigger events. They can be disabled using
+ *  event_disable_timer().
+ *
+ *  Prior to enabling, event_setup_timer() must have been called.
+ *
+ *  \param t    The timer to enable events on
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid timer.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the timer.
+ */
+inline unsigned event_enable_timer(timer t)
+{
+  RETURN_EXCEPTION_OR_ERROR( _event_enable(t) );
+}
+
+/** Disable events for a given timer.
  *
  *  This function prevents any further events being triggered by a given timer.
  *
- *  \param t  The timer to clear events on
+ *  \param t    The timer to disable events on
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid timer.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the timer.
  */
-inline void event_clear_timer(timer t)
+inline unsigned event_disable_timer(timer t)
 {
-  event_disable(t);
+  RETURN_EXCEPTION_OR_ERROR( _event_disable(t) );
 }
 
 /** Change the time at which a timer event will fire.
@@ -84,35 +111,70 @@ inline void event_clear_timer(timer t)
  *  \param t     The timer to change the time for
  *  \param time  The time at which the timer will trigger an event. The default
  *               timer ticks are at a 10ns resolution.
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid timer.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the timer.
  */
-inline void event_change_timer_time(timer t, int time)
+inline unsigned event_change_timer(timer t, int time)
 {
-  asm volatile("setd res[%0], %1" :: "r" (t), "r" (time));
+  RETURN_EXCEPTION_OR_ERROR( asm volatile("setd res[%0], %1" :: "r" (t), "r" (time)) );
 }
 
-/** Setup events on a channel end.
+/** Setup events on a chan-end.
  *
- *  This function configures a channel end to trigger events when data is ready.
+ *  This function configures a chan-end to trigger events when data is ready.
  *
- *  \param c     The channel end to enable events on
+ *  Once the event is setup you need to call event_enable_chanend() to enable it.
+ *
+ *  \param c     The chan-end to enable events on
  *  \param value The value to be returned by event_select()/event_select_no_wait()
- *               when the channel end event is triggered.
+ *               when the chan-end event is triggered.
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid chan-end.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  */
-inline void event_setup_chanend(chanend c, unsigned value)
+inline unsigned event_setup_chanend(chanend c, unsigned value)
 {
-  event_setup_resource(c, value);
+  RETURN_EXCEPTION_OR_ERROR( _event_setup_resource(c, value) );
 }
 
-/** Clear events for a given chanend.
+/** Enable events on a chan-end.
  *
- *  This function prevents any further events being triggered by a given channel
- *  end.
+ *  Enable a chan-end to trigger events. They can be disabled using
+ *  event_disable_chanend().
  *
- *  \param c  The chanend to clear events on
+ *  Prior to enabling, event_setup_chanend() must have been called.
+ *
+ *  \param c    The chan-end to enable events on
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid chan-end.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  */
-inline void event_clear_chanend(chanend c)
+inline unsigned event_enable_chanend(chanend c)
 {
-  event_disable(c);
+  RETURN_EXCEPTION_OR_ERROR( _event_enable(c) );
+}
+
+/** Disable events for a given chan-end.
+ *
+ *  This function prevents any further events being triggered by a given chan-end.
+ *
+ *  \param c    The chan-end to disable events on
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid chan-end.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
+ */
+inline unsigned event_disable_chanend(chanend c)
+{
+  RETURN_EXCEPTION_OR_ERROR( _event_disable(c) );
 }
 
 /** Setup events on a port.
@@ -121,27 +183,59 @@ inline void event_clear_chanend(chanend c)
  *  port will trigger when there is data available. The trigger event can be
  *  changed using the event_change_port_condition() function.
  *
+ *  Once the event is setup you need to call event_enable_port() to enable it.
+ *
  *  \param p     The port to enable events on
  *  \param value The value to be returned by event_select()/event_select_no_wait()
  *               when the port event is triggered.
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the port.
  */
-inline void event_setup_port(port p, unsigned value)
+inline unsigned event_setup_port(port p, unsigned value)
 {
-  event_setup_resource(p, value);
-
-  // Set the default condition to be when there is data available
-  asm volatile("setc res[%0], %1" :: "r" (p), "r" (PORT_COND_FULL));
+  RETURN_EXCEPTION_OR_ERROR(  do { \
+                                _event_setup_resource(p, value); \
+                                /* Set the default condition to be when there is data available */ \
+                                asm volatile("setc res[%0], %1" :: "r" (p), "r" (PORT_COND_FULL)); \
+                              } while (0) );
 }
 
-/** Clear events for a given port.
+/** Enable events on a port.
+ *
+ *  Enable a port to trigger events. They can be disabled using
+ *  event_disable_port().
+ *
+ *  Prior to enabling, event_setup_port() must have been called.
+ *
+ *  \param p    The port to enable events on
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the port.
+ */
+inline unsigned event_enable_port(port p)
+{
+  RETURN_EXCEPTION_OR_ERROR( _event_enable(p) );
+}
+
+/** Disable events for a given port.
  *
  *  This function prevents any further events being triggered by a given port.
  *
- *  \param p  The port to clear events on
+ *  \param p    The port to disable events on
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the port.
  */
-inline void event_clear_port(port p)
+inline unsigned event_disable_port(port p)
 {
-  event_disable(p);
+  RETURN_EXCEPTION_OR_ERROR( _event_disable(p) );
 }
 
 /** Change the condition that triggers events on a port.
@@ -154,11 +248,18 @@ inline void event_clear_port(port p)
  *  \param cond  The condition which the port is waiting for
  *  \param data  The data value that is being compared. The data has no effect
  *               when the condition is being set to PORT_COND_FULL.
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the port.
  */
-inline void event_change_port_condition(port p, port_condition cond, unsigned data)
+inline unsigned event_change_port_condition(port p, port_condition cond, unsigned data)
 {
-  asm volatile("setc res[%0], %1" :: "r" (p), "r" (cond));
-  asm volatile("setd res[%0], %1" :: "r" (p), "r" (data));
+  RETURN_EXCEPTION_OR_ERROR(  do { \
+                                asm volatile("setc res[%0], %1" :: "r" (p), "r" (cond)); \
+                                asm volatile("setd res[%0], %1" :: "r" (p), "r" (data)); \
+                              } while (0) );
 }
 
 /** Set the time at which the port will input data and trigger an event.
@@ -171,10 +272,17 @@ inline void event_change_port_condition(port p, port_condition cond, unsigned da
  *  \param p     The port to enable events on
  *  \param count The port counter value at which the port will capture data and
  *               trigger an event
+ *
+ *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the port.
  */
-inline void event_change_port_time(port p, int16_t count)
+inline unsigned event_change_port_time(port p, int16_t count)
 {
+  //return port_set_time_condition(p, count);
   port_set_time_condition(p, count);
+  return 0; /// TODO *****************************************
 }
 
 /** Wait for an event to fire.
@@ -211,6 +319,8 @@ unsigned event_select_no_wait(unsigned no_wait_value);
  *  \param ids  Null-terminated list of resources to enable events on
  *
  *  \returns    The value registered with the resource which triggers an event
+ *
+ *  \exception  ET_LOAD_STORE         invalid ids[] argument.
  */
 unsigned event_select_ordered(resource ids[]);
 
@@ -224,6 +334,8 @@ unsigned event_select_ordered(resource ids[]);
  *
  *  \returns  The value registered with the resource which triggered an event
  *            or the no_wait_value passed in if no event fired
+ *
+ *  \exception  ET_LOAD_STORE         invalid ids[] argument.
  */
 unsigned event_select_ordered_no_wait(resource ids[], unsigned no_wait_value);
 

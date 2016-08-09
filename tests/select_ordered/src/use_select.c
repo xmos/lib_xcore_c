@@ -21,8 +21,11 @@ void test(chanend c, chanend d, timer tmr, resource ids[])
 
   // Setup the channels to generate events
   event_setup_chanend(c, EVENT_CHAN_C);
+  event_enable_chanend(c);
   event_setup_chanend(d, EVENT_CHAN_D);
+  event_enable_chanend(d);
   event_setup_timer(tmr, time, EVENT_TIMER);
+  event_enable_timer(tmr);
 
   int timer_event_count = 0;
 
@@ -31,21 +34,21 @@ void test(chanend c, chanend d, timer tmr, resource ids[])
     event_choice_t choice = event_select_ordered(ids);
     switch (choice) {
       case EVENT_CHAN_C: {
-        // Read value and clear event
+        // Read value to clear event
         int x;
         chan_in_word(c, &x);
         debug_printf("Received %d on channel c\n", x);
         break;
       }
       case EVENT_CHAN_D: {
-        // Read value and clear event
+        // Read value to clear event
         int x;
         chan_in_word(d, &x);
         debug_printf("Received %d on channel d\n", x);
         break;
       }
       case EVENT_TIMER: {
-        // Read value and clear event
+        // Read value to clear event
         timer_get_time(tmr, &time);
         timer_event_count++;
         debug_printf("Timer event %d\n", timer_event_count);
@@ -57,7 +60,7 @@ void test(chanend c, chanend d, timer tmr, resource ids[])
           // Don't give time for other resources to be ready
           time += 10;
         }
-        event_change_timer_time(tmr, time);
+        event_change_timer(tmr, time);
         break;
       }
     }

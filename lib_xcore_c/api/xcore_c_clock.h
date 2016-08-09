@@ -5,8 +5,7 @@
 
 #if !defined(__XC__) || defined(__DOXYGEN__)
 
-#include <stdint.h>
-#include "xcore_c_impl.h"
+#include "xcore_c_exception_impl.h"
 
 /** Allocates a clock
  *
@@ -24,7 +23,7 @@
  */
 inline unsigned clock_alloc(clock *clk, int clock_id)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 asm volatile("setc res[%0], 8" :: "r" (clock_id)); \
                                 *clk = clock_id; \
                               } while (0) );
@@ -41,7 +40,7 @@ inline unsigned clock_alloc(clock *clk, int clock_id)
  */
 inline unsigned clock_free(clock *clk)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 asm volatile("setc res[%0], 0" :: "r" (*clk)); \
                                 *clk = 0;
                               } while (0) );
@@ -60,7 +59,7 @@ inline unsigned clock_free(clock *clk)
  */
 inline unsigned clock_start(clock clk)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 asm volatile("setc res[%0], 0xf" :: "r" (clk)); \
                               } while (0) );
 }
@@ -78,7 +77,7 @@ inline unsigned clock_start(clock clk)
  */
 inline unsigned clock_stop(clock clk)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 asm volatile("setc res[%0], 0x7" :: "r" (clk)); \
                               } while (0) );
 }
@@ -102,7 +101,7 @@ inline unsigned clock_stop(clock clk)
  */
 inline unsigned clock_set_source_port(clock clk, port p)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 asm volatile("setclk res[%0], %1" :: "r" (clk), "r" (p)); \
                               } while (0) );
 }
@@ -119,7 +118,7 @@ inline unsigned clock_set_source_port(clock clk, port p)
  */
 inline unsigned clock_set_source_clk_ref(clock clk)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 asm volatile("setclk res[%0], %1" :: "r" (clk), "r" (0x1)); \
                               } while (0) );
 }
@@ -139,7 +138,7 @@ inline unsigned clock_set_source_clk_ref(clock clk)
  */
 inline unsigned clock_set_source_clk_xcore(clock clk)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 asm volatile("setclk res[%0], %1" :: "r" (clk), "r" (0x101)); \
                               } while (0) );
 }
@@ -168,7 +167,7 @@ inline unsigned clock_set_source_clk_xcore(clock clk)
  */
 inline unsigned clock_set_divide(clock clk, uint8_t divide)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 asm volatile("setd res[%0], %1" :: "r" (clk), "r" (divide)); \
                               } while (0) );
 }
@@ -189,7 +188,7 @@ inline unsigned clock_set_divide(clock clk, uint8_t divide)
  */
 inline unsigned clock_set_ready_src(clock clk, port ready_source)
 {
-  RETURN_COND_TRYCATCH_ERROR( do { \
+  RETURN_EXCEPTION_OR_ERROR(  do { \
                                 asm volatile("setrdy res[%0], %1" :: "r" (clk), "r" (ready_source)); \
                               } while (0) );
 }
