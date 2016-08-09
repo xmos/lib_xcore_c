@@ -84,7 +84,8 @@ static void test_port_clock(timer tmr, port p, clock c)
   clock_stop(divided_c);
   clock_free(&divided_c);
   xassert(!divided_c);
-  port_free(p_clk_src);
+  port_free(&p_clk_src);
+  xassert(!p_clk_src);
 }
 
 /*
@@ -102,6 +103,7 @@ void test_clock_sources()
   // Enable a port to use as a clock source
   port p;
   port_alloc(&p, XS1_PORT_1A);
+  xassert(p);
   port_set_buffered(p);
   port_set_transfer_width(p, 32);
   port_set_clock(p, c);
@@ -110,7 +112,8 @@ void test_clock_sources()
   test_xcore_clock(tmr, p, c);
   test_port_clock(tmr, p, c);
 
-  port_free(p);
+  port_free(&p);
+  xassert(!p);
   clock_free(&c);
   xassert(!c);
   timer_free(&tmr);

@@ -35,7 +35,8 @@
   port_set_mode_data_port(p);
   port_set_buffered(p);
   /* ensure port is in input mode. */
-  port_input(p);
+  int data;
+  port_input(p, &data);
 
   clock_set_ready_src(clk, readyin);
   port_set_clock(p, clk);
@@ -115,7 +116,8 @@ inline void port_configure_in_strobed_master(port p, port readyout,
   port_set_mode_data_port(p);
   port_set_buffered(p);
   /* ensure port is in input mode. */
-  port_input(p);
+  int data;
+  port_input(p, &data);
 
   port_set_clock(p, clk);
   port_set_ready_strobed(p);
@@ -182,7 +184,8 @@ inline void port_configure_in_strobed_slave(port p, port readyin, clock clk)
   port_set_mode_data_port(p);
   port_set_buffered(p);
   /* ensure port is in input mode. */
-  port_input(p);
+  int data;
+  port_input(p, &data);
 
   clock_set_ready_src(clk, readyin);
   port_set_clock(p, clk);

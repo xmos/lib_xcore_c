@@ -21,7 +21,7 @@ void port_test_output(chanend c)
   port_output(p, 0);
   chan_in_word(c, &dummy); // Wait for ack
 
-  port_free(p);
+  port_free(&p);
 
   // Get information about the tile/core running the server for debug messages
   unsigned tile_id = get_local_tile_id();
@@ -37,30 +37,35 @@ void port_test_input(chanend c)
   port p;
   port_alloc(&p, XS1_PORT_1B);
 
-  port_input(p);
+  int input;
+  port_input(p, &input);
   chan_out_word(c, 0); // Send ack
 
-  if (port_input_when_pinseq(p, 1) != 1) {
+  port_input_when_pinseq(p, 1, &input);
+  if (input != 1) {
     debug_printf("Error\n");
   }
   chan_out_word(c, 0); // Send ack
 
-  if (port_input_when_pinsneq(p, 1) != 0) {
+  port_input_when_pinsneq(p, 1, &input);
+  if (input != 0) {
     debug_printf("Error\n");
   }
   chan_out_word(c, 0); // Send ack
 
-  if (port_input_when_pinsneq(p, 0) != 1) {
+  port_input_when_pinsneq(p, 0, &input);
+  if (input != 1) {
     debug_printf("Error\n");
   }
   chan_out_word(c, 0); // Send ack
 
-  if (port_input_when_pinseq(p, 0) != 0) {
+  port_input_when_pinseq(p, 0, &input);
+  if (input != 0) {
     debug_printf("Error\n");
   }
   chan_out_word(c, 0); // Send ack
 
-  port_free(p);
+  port_free(&p);
 
   // Get information about the tile/core running the server for debug messages
   unsigned tile_id = get_local_tile_id();

@@ -20,6 +20,7 @@
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid clock.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the clock.
+ *  \exception  ET_LOAD_STORE         invalid *clk argument.
  */
 inline unsigned clock_alloc(clock *clk, int clock_id)
 {
@@ -37,12 +38,13 @@ inline unsigned clock_alloc(clock *clk, int clock_id)
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid clock.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the clock.
+ *  \exception  ET_LOAD_STORE         invalid *clk argument.
  */
 inline unsigned clock_free(clock *clk)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 asm volatile("setc res[%0], 0" :: "r" (*clk)); \
-                                *clk = 0;
+                                *clk = 0; \
                               } while (0) );
 }
 

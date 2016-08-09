@@ -10,7 +10,7 @@
 #include "xcore_c_error_codes.h"
 
 #ifndef XCORE_C_NO_EXCEPTION
-#define XCORE_C_NO_EXCEPTION 1
+#define XCORE_C_NO_EXCEPTION 0
 #endif
 
 #define RETURN_EXCEPTION_OR_ERROR(expr) \

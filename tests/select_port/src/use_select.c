@@ -63,7 +63,8 @@ void port_example()
 
       case EVENT_PORT_P: {
         // Read the port to clear the event
-        int x = port_input(p);
+        int x;
+        port_input(p, &x);
         event_change_port_condition(p, PORT_COND_PINSNEQ, x);
 
         debug_printf("Port event got %d\n", x);
@@ -74,6 +75,6 @@ void port_example()
 
   // Release the resources
   timer_free(&t);
-  port_free(q);
-  port_free(p);
+  port_free(&q);
+  port_free(&p);
 }

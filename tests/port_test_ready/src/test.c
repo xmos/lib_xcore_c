@@ -39,8 +39,8 @@ void port_test_output(chanend c)
 
   chan_in_word(c, &dummy); // Wait for ack
 
-  port_free(p);
-  port_free(p_ready);
+  port_free(&p);
+  port_free(&p_ready);
   clock_free(&clk);
 
   // Get information about the tile/core running the server for debug messages
@@ -70,20 +70,21 @@ void port_test_input(chanend c)
 
   chan_out_word(c, 0); // Send ack
 
-  unsigned int x = port_input(p);
+  unsigned int x;
+  port_input(p, &x);
   if (x != 0xfeedbeef) {
     debug_printf("Error %x received instead of 0xfeedbeef\n", x);
   }
 
-  x = port_input(p);
+  port_input(p, &x);
   if (x != 0x12345678) {
     debug_printf("Error %x received instead of 0x12345678\n", x);
   }
 
   chan_out_word(c, 0); // Send ack
 
-  port_free(p);
-  port_free(p_ready);
+  port_free(&p);
+  port_free(&p_ready);
   clock_free(&clk);
 
   // Get information about the tile/core running the server for debug messages
