@@ -1,7 +1,9 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
-#include "xcore_c_clock.h"
+#include "xcore_c_clock_impl.h"
+extern void _clock_set_ready_src(clock clk, port ready_source);
 
+#include "xcore_c_clock.h"
 extern unsigned clock_alloc(clock *clk, int clock_id);
 extern unsigned clock_free(clock *clk);
 extern unsigned clock_start(clock clk);

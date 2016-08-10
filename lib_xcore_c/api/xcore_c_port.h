@@ -6,7 +6,7 @@
 #if !defined(__XC__) || defined(__DOXYGEN__)
 
 #include <stdint.h>
-#include <xccompat.h>
+#include "xcore_c_port_impl.h"
 #include "xcore_c_exception_impl.h"
 
 /** Allocates a port.
@@ -134,7 +134,7 @@ inline unsigned port_set_unbuffered(port p)
  */
 inline unsigned port_set_buffered(port p)
 {
-  RETURN_EXCEPTION_OR_ERROR( asm volatile("setc res[%0], 0x200f" :: "r" (p)) );
+  RETURN_EXCEPTION_OR_ERROR( _port_set_buffered(p) );
 }
 
 /** Set the clock controlling a port.
@@ -153,7 +153,7 @@ inline unsigned port_set_buffered(port p)
  */
 inline unsigned port_set_clock(port p, clock clk)
 {
-  RETURN_EXCEPTION_OR_ERROR( asm volatile("setclk res[%0], %1" :: "r" (p), "r" (clk)) );
+  RETURN_EXCEPTION_OR_ERROR( _port_set_clock(p, clk) );
 }
 
 /** Set a port drive out the data value.
@@ -167,7 +167,7 @@ inline unsigned port_set_clock(port p, clock clk)
  */
 inline unsigned port_set_mode_data_port(port p)
 {
-  RETURN_EXCEPTION_OR_ERROR( asm volatile("setc res[%0], 0x5007" :: "r" (p)) );
+  RETURN_EXCEPTION_OR_ERROR( _port_set_mode_data_port(p) );
 }
 
 /** Set a port drive out the ready signal of another port.
@@ -185,7 +185,7 @@ inline unsigned port_set_mode_data_port(port p)
  */
 inline unsigned port_set_mode_ready_port(port p)
 {
-  RETURN_EXCEPTION_OR_ERROR( asm volatile("setc res[%0], 0x5017" :: "r" (p)) );
+  RETURN_EXCEPTION_OR_ERROR( _port_set_mode_ready_port(p) );
 }
 
 /** Set a port drive out the clock signal.
@@ -225,7 +225,7 @@ inline unsigned port_set_mode_clock_port(port p)
  */
 inline unsigned port_set_ready_src(port p, port ready_source)
 {
-  RETURN_EXCEPTION_OR_ERROR( asm volatile("setrdy res[%0], %1" :: "r" (p), "r" (ready_source)) );
+  RETURN_EXCEPTION_OR_ERROR( _port_set_ready_src(p, ready_source) );
 }
 
 /** Set the port to invert its data.
@@ -314,7 +314,7 @@ inline unsigned port_set_no_sample_delay(port p)
  */
 inline unsigned port_set_master(port p)
 {
-  RETURN_EXCEPTION_OR_ERROR( asm volatile("setc res[%0], 0x1007" :: "r" (p)) );
+  RETURN_EXCEPTION_OR_ERROR( _port_set_master(p) );
 }
 
 /** Set the port to slave mode.
@@ -337,7 +337,7 @@ inline unsigned port_set_master(port p)
  */
 inline unsigned port_set_slave(port p)
 {
-  RETURN_EXCEPTION_OR_ERROR( asm volatile("setc res[%0], 0x100f" :: "r" (p)) );
+  RETURN_EXCEPTION_OR_ERROR( _port_set_slave(p) );
 }
 
 /** Set the port to use no ready signals (default state).
@@ -385,7 +385,7 @@ inline unsigned port_set_no_ready(port p)
  */
 inline unsigned port_set_ready_strobed(port p)
 {
-  RETURN_EXCEPTION_OR_ERROR( asm volatile("setc res[%0], 0x300f" :: "r" (p)) );
+  RETURN_EXCEPTION_OR_ERROR( _port_set_ready_strobed(p) );
 }
 
 /** Set the port to be fully handshaken.
@@ -408,7 +408,7 @@ inline unsigned port_set_ready_strobed(port p)
  */
 inline unsigned port_set_ready_handshake(port p)
 {
-  RETURN_EXCEPTION_OR_ERROR( asm volatile("setc res[%0], 0x3017" :: "r" (p)) );
+  RETURN_EXCEPTION_OR_ERROR( _port_set_ready_handshake(p) );
 }
 
 /** Outputs a value onto a port.
@@ -428,7 +428,7 @@ inline unsigned port_set_ready_handshake(port p)
  */
 inline unsigned port_output(port p, int data)
 {
-  RETURN_EXCEPTION_OR_ERROR( asm volatile("out res[%0], %1" :: "r" (p), "r" (data)) );
+  RETURN_EXCEPTION_OR_ERROR( _port_output(p, data) );
 }
 
 /** Outputs a value onto a port at a specified port counter value.
@@ -544,7 +544,7 @@ inline unsigned port_peek(port p, int *data)
  */
 inline unsigned port_input(port p, int *data)
 {
-  RETURN_EXCEPTION_OR_ERROR( asm volatile("in %0, res[%1]" : "=r" (*data): "r" (p)) );
+  RETURN_EXCEPTION_OR_ERROR( *data = _port_input(p) );
 }
 
 /** Input data from a port when its pins match a specific value.
@@ -882,7 +882,7 @@ inline unsigned port_clear_time_condition(port p)
  */
 inline unsigned port_clear_buffer(port p)
 {
-  RETURN_EXCEPTION_OR_ERROR( asm volatile("setc res[%0], 0x17" :: "r" (p)) );
+  RETURN_EXCEPTION_OR_ERROR( _port_clear_buffer(p) );
 }
 
 /** Ends the current input on a buffered port.
