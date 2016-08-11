@@ -10,7 +10,11 @@
 #include "xcore_c_error_codes.h"
 
 #ifndef XCORE_C_NO_EXCEPTION
-#define XCORE_C_NO_EXCEPTION 0
+/**
+ * The exception policy for the library.
+ * This is a boolean constant or expression.
+ */
+#define XCORE_C_NO_EXCEPTION 1
 #endif
 
 #define RETURN_EXCEPTION_OR_ERROR(expr) \
