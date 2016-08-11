@@ -55,6 +55,7 @@ inline unsigned event_disable_all(void)
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid timer.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the timer.
+ *  \exception  ET_ECALL              when xassert enabled, on XS1 bit 16 not set in value.
  */
 inline unsigned event_setup_timer(timer t, int time, unsigned value)
 {
@@ -136,7 +137,8 @@ inline unsigned event_change_timer(timer t, int time)
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid chan-end.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
- */
+ *  \exception  ET_ECALL              when xassert enabled, on XS1 bit 16 not set in value.
+*/
 inline unsigned event_setup_chanend(chanend c, unsigned value)
 {
   RETURN_EXCEPTION_OR_ERROR( _event_setup_resource(c, value) );
@@ -193,6 +195,7 @@ inline unsigned event_disable_chanend(chanend c)
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the port.
+ *  \exception  ET_ECALL              when xassert enabled, on XS1 bit 16 not set in value.
  */
 inline unsigned event_setup_port(port p, unsigned value)
 {

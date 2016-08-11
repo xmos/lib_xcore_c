@@ -18,7 +18,4 @@
 // XS1_ET_RESOURCE_DEP 0x9
 // XS1_ET_KCALL 0xf
 
-// Other errors....
-#define ERROR_NONE 0
-
 #endif // __xcore_c_chanend_h__
