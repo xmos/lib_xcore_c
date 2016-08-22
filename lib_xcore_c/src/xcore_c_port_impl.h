@@ -9,6 +9,12 @@
 #include <stdint.h>
 #include <xccompat.h>
 
+inline port _port_alloc(int port_id)
+{
+  asm volatile("setc res[%0], 8" :: "r" (port_id));
+  return port_id;
+}
+
 inline void _port_set_buffered(port p)
 {
   asm volatile("setc res[%0], 0x200f" :: "r" (p));
@@ -64,6 +70,22 @@ inline int _port_input(port p)
   int data;
   asm volatile("in %0, res[%1]" : "=r" (data): "r" (p));
   return data;
+}
+
+typedef enum port_condition {
+  PORT_COND_FULL    =  0x1, //< Condition that holds when port contains data ready to be input
+  PORT_COND_PINSEQ  = 0x11, //< Condition that holds when the pins of the port are equal to the port conditional data
+  PORT_COND_PINSNEQ = 0x19  //< Condition that holds when the pins of the port are equal to the port conditional data
+} port_condition;
+
+inline void _port_set_condition(port p, port_condition c)
+{
+  asm volatile("setc res[%0], %1" :: "r" (p), "r" (c));
+}
+
+inline void _port_set_conditional_data(port p, int d)
+{
+  asm volatile("setd res[%0], %1" :: "r" (p), "r" (d));
 }
 
 inline void _port_clear_buffer(port p)

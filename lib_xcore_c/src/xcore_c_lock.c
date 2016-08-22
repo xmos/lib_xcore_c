@@ -2,7 +2,7 @@
 
 #include "xcore_c_lock.h"
 
-extern unsigned lock_alloc(lock *l);
-extern unsigned lock_free(lock *l);
-extern unsigned lock_acquire(lock l);
-extern unsigned lock_release(lock l);
+extern xcore_c_error lock_alloc(lock *l);
+extern xcore_c_error lock_free(lock *l);
+extern xcore_c_error lock_acquire(lock l);
+extern xcore_c_error lock_release(lock l);

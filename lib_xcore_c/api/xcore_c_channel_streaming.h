@@ -28,11 +28,11 @@ typedef struct streaming_channel {
  *  \param c    streaming_channel variable holding the two initialised and
  *              joined chan-ends or 0s.
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_LOAD_STORE         invalid *c argument.
  */
-inline unsigned s_chan_alloc(streaming_channel *c)
+inline xcore_c_error s_chan_alloc(streaming_channel *c)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 if ((c->left = _chanend_alloc())) {
@@ -60,7 +60,7 @@ inline unsigned s_chan_alloc(streaming_channel *c)
  *
  *  \param c    streaming_channel to free.
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_LINK_ERROR         a chan-end destination is not set.
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated channel,
@@ -68,7 +68,7 @@ inline unsigned s_chan_alloc(streaming_channel *c)
  *  \exception  ET_RESOURCE_DEP       another core is actively using the channel.
  *  \exception  ET_LOAD_STORE         invalid *c argument.
  */
-inline unsigned s_chan_free(streaming_channel *c)
+inline xcore_c_error s_chan_free(streaming_channel *c)
 {
   RETURN_EXCEPTION_OR_ERROR(  do {
                                 _s_chan_out_ct_end(c->left); \
@@ -90,13 +90,13 @@ inline unsigned s_chan_free(streaming_channel *c)
  *
  *  \param data The word to be output
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_LINK_ERROR         chan-end destination is not set.
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  */
-inline unsigned s_chan_out_word(streaming_chanend c, int data)
+inline xcore_c_error s_chan_out_word(streaming_chanend c, int data)
 {
   RETURN_EXCEPTION_OR_ERROR( _s_chan_out_word(c, data) );
 }
@@ -107,13 +107,13 @@ inline unsigned s_chan_out_word(streaming_chanend c, int data)
  *
  *  \param data The byte to be output
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_LINK_ERROR         chan-end destination is not set.
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  */
-inline unsigned s_chan_out_byte(streaming_chanend c, char data)
+inline xcore_c_error s_chan_out_byte(streaming_chanend c, char data)
 {
   RETURN_EXCEPTION_OR_ERROR( _s_chan_out_byte(c, data) );
 }
@@ -126,14 +126,14 @@ inline unsigned s_chan_out_byte(streaming_chanend c, char data)
  *
  *  \param n    The number of words to send
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_LINK_ERROR         chan-end destination is not set.
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  *  \exception  ET_LOAD_STORE         invalid buf[] argument.
  */
-inline unsigned s_chan_out_buf_word(streaming_chanend c, int buf[], int n)
+inline xcore_c_error s_chan_out_buf_word(streaming_chanend c, int buf[], int n)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 for (int i = 0; i < n; i++) { \
@@ -150,14 +150,14 @@ inline unsigned s_chan_out_buf_word(streaming_chanend c, int buf[], int n)
  *
  *  \param n    The number of bytes to send
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_LINK_ERROR         chan-end destination is not set.
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  *  \exception  ET_LOAD_STORE         invalid buf[] argument.
  */
-inline unsigned s_chan_out_buf_byte(streaming_chanend c, char buf[], int n)
+inline xcore_c_error s_chan_out_buf_byte(streaming_chanend c, char buf[], int n)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 for (int i = 0; i < n; i++) { \
@@ -173,14 +173,14 @@ inline unsigned s_chan_out_buf_byte(streaming_chanend c, char buf[], int n)
  *
  *  \param data The inputted word.
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
  *                                    or has pending control token.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  *  \exception  ET_LOAD_STORE         invalid *data argument.
  */
-inline unsigned s_chan_in_word(streaming_chanend c, int *data)
+inline xcore_c_error s_chan_in_word(streaming_chanend c, int *data)
 {
   RETURN_EXCEPTION_OR_ERROR( *data = _s_chan_in_word(c) );
 }
@@ -191,14 +191,14 @@ inline unsigned s_chan_in_word(streaming_chanend c, int *data)
  *
  *  \param data The inputted byte
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
  *                                    or has pending control token.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  *  \exception  ET_LOAD_STORE         invalid *data argument.
  */
-inline unsigned s_chan_in_byte(streaming_chanend c, char *data)
+inline xcore_c_error s_chan_in_byte(streaming_chanend c, char *data)
 {
   RETURN_EXCEPTION_OR_ERROR( *data = _s_chan_in_byte(c) );
 }
@@ -211,14 +211,14 @@ inline unsigned s_chan_in_byte(streaming_chanend c, char *data)
  *
  *  \param n    The number of words to receive
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
  *                                    or has pending control token.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  *  \exception  ET_LOAD_STORE         invalid buf[] argument.
  */
-inline unsigned s_chan_in_buf_word(streaming_chanend c, int buf[], int n)
+inline xcore_c_error s_chan_in_buf_word(streaming_chanend c, int buf[], int n)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 for (int i = 0; i < n; i++) { \
@@ -235,14 +235,14 @@ inline unsigned s_chan_in_buf_word(streaming_chanend c, int buf[], int n)
  *
  *  \param n    The number of bytes to receive
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
  *                                    or has pending control token.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  *  \exception  ET_LOAD_STORE         invalid buf[] argument.
  */
-inline unsigned s_chan_in_buf_byte(streaming_chanend c, char buf[], int n)
+inline xcore_c_error s_chan_in_buf_byte(streaming_chanend c, char buf[], int n)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 for (int i = 0; i < n; i++) { \
@@ -258,14 +258,14 @@ inline unsigned s_chan_in_buf_byte(streaming_chanend c, char buf[], int n)
  *  \param ct   Control token to be output. Legal control tokens that can be
  *              used are 0 or any value in the range 3..191 inclusive.
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_LINK_ERROR         chan-end destination is not set
  *                                    or token is reserverd.
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  */
-inline unsigned s_chan_out_ct(streaming_chanend c, int ct)
+inline xcore_c_error s_chan_out_ct(streaming_chanend c, int ct)
 {
   RETURN_EXCEPTION_OR_ERROR( asm volatile("outct res[%0], %1" :: "r" (c), "r" (ct)) );
 }
@@ -281,13 +281,13 @@ inline unsigned s_chan_out_ct(streaming_chanend c, int ct)
  *
  *  \param c    The streaming chan-end
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_LINK_ERROR         chan-end destination is not set.
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  */
-inline unsigned s_chan_out_ct_end(streaming_chanend c)
+inline xcore_c_error s_chan_out_ct_end(streaming_chanend c)
 {
   return s_chan_out_ct(c, XS1_CT_END);
 }
@@ -302,13 +302,13 @@ inline unsigned s_chan_out_ct_end(streaming_chanend c)
  *
  *  \param ct   Control token that is expected on the streaming_channel.
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
  *                                    or does not contain expected token.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  */
-inline unsigned s_chan_check_ct(streaming_chanend c, int ct)
+inline xcore_c_error s_chan_check_ct(streaming_chanend c, int ct)
 {
   RETURN_EXCEPTION_OR_ERROR( asm volatile("chkct res[%0], %1" :: "r" (c), "r" (ct)) );
 }
@@ -321,13 +321,13 @@ inline unsigned s_chan_check_ct(streaming_chanend c, int ct)
  *
  *  \param c    The streaming chan-end
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
  *                                    or does not contain CT_END token.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  */
-inline unsigned s_chan_check_ct_end(streaming_chanend c)
+inline xcore_c_error s_chan_check_ct_end(streaming_chanend c)
 {
   return s_chan_check_ct(c, XS1_CT_END);
 }

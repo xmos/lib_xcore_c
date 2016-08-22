@@ -29,14 +29,14 @@
  *
  *  \param tc   the intialized master transacting_chanend
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_LINK_ERROR         chan-end destination is not set.
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  *  \exception  ET_LOAD_STORE         invalid *c or *tc argument.
  */
-inline unsigned chan_init_transaction_master(chanend *c, transacting_chanend *tc)
+inline xcore_c_error chan_init_transaction_master(chanend *c, transacting_chanend *tc)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _s_chan_out_ct_end(*c); \
@@ -61,14 +61,14 @@ inline unsigned chan_init_transaction_master(chanend *c, transacting_chanend *tc
  *
  *  \param tc   the intialized slave transacting_chanend
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
  *                                    or does not contain CT_END token.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  *  \exception  ET_LOAD_STORE         invalid *c or *tc argument.
  */
-inline unsigned chan_init_transaction_slave(chanend *c, transacting_chanend *tc)
+inline xcore_c_error chan_init_transaction_slave(chanend *c, transacting_chanend *tc)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _s_chan_check_ct_end(*c); \
@@ -100,7 +100,7 @@ inline unsigned chan_init_transaction_slave(chanend *c, transacting_chanend *tc)
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  *  \exception  ET_LOAD_STORE         invalid *c or *tc argument.
  */
-inline unsigned chan_complete_transaction(transacting_chanend *tc, chanend *c)
+inline xcore_c_error chan_complete_transaction(transacting_chanend *tc, chanend *c)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 if (tc->last_out) { \
@@ -121,7 +121,7 @@ inline unsigned chan_complete_transaction(transacting_chanend *tc, chanend *c)
  *
  *  \param data Word to be output
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_LINK_ERROR         chan-end destination is not set.
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
@@ -129,7 +129,7 @@ inline unsigned chan_complete_transaction(transacting_chanend *tc, chanend *c)
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  *  \exception  ET_LOAD_STORE         invalid *tc argument.
  */
-inline unsigned t_chan_out_word(transacting_chanend *tc, int data)
+inline xcore_c_error t_chan_out_word(transacting_chanend *tc, int data)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _t_chan_change_to_output(tc); \
@@ -143,7 +143,7 @@ inline unsigned t_chan_out_word(transacting_chanend *tc, int data)
  *
  *  \param data Byte to be output
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_LINK_ERROR         chan-end destination is not set.
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
@@ -151,7 +151,7 @@ inline unsigned t_chan_out_word(transacting_chanend *tc, int data)
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  *  \exception  ET_LOAD_STORE         invalid *tc argument.
  */
-inline unsigned t_chan_out_byte(transacting_chanend *tc, char data)
+inline xcore_c_error t_chan_out_byte(transacting_chanend *tc, char data)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _t_chan_change_to_output(tc); \
@@ -167,7 +167,7 @@ inline unsigned t_chan_out_byte(transacting_chanend *tc, char data)
  *
  *  \param n    Number of words to send
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_LINK_ERROR         chan-end destination is not set.
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
@@ -175,7 +175,7 @@ inline unsigned t_chan_out_byte(transacting_chanend *tc, char data)
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  *  \exception  ET_LOAD_STORE         invalid *tc or buf[] argument.
  */
-inline unsigned t_chan_out_buf_word(transacting_chanend *tc, int buf[], int n)
+inline xcore_c_error t_chan_out_buf_word(transacting_chanend *tc, int buf[], int n)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _t_chan_change_to_output(tc); \
@@ -193,7 +193,7 @@ inline unsigned t_chan_out_buf_word(transacting_chanend *tc, int buf[], int n)
  *
  *  \param n    Number of bytes to send
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_LINK_ERROR         chan-end destination is not set.
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
@@ -201,7 +201,7 @@ inline unsigned t_chan_out_buf_word(transacting_chanend *tc, int buf[], int n)
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  *  \exception  ET_LOAD_STORE         invalid *tc or buf[] argument.
  */
-inline unsigned t_chan_out_buf_byte(transacting_chanend *tc, char buf[], int n)
+inline xcore_c_error t_chan_out_buf_byte(transacting_chanend *tc, char buf[], int n)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _t_chan_change_to_output(tc); \
@@ -217,7 +217,7 @@ inline unsigned t_chan_out_buf_byte(transacting_chanend *tc, char buf[], int n)
  *
  *  \param data Inputted integer
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_LINK_ERROR         chan-end destination is not set.
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
@@ -225,7 +225,7 @@ inline unsigned t_chan_out_buf_byte(transacting_chanend *tc, char buf[], int n)
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  *  \exception  ET_LOAD_STORE         invalid *tc or *data argument.
  */
-inline unsigned t_chan_in_word(transacting_chanend *tc, int *data)
+inline xcore_c_error t_chan_in_word(transacting_chanend *tc, int *data)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _t_chan_change_to_input(tc); \
@@ -239,7 +239,7 @@ inline unsigned t_chan_in_word(transacting_chanend *tc, int *data)
  *
  *  \param data Inputted byte
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_LINK_ERROR         chan-end destination is not set.
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
@@ -247,7 +247,7 @@ inline unsigned t_chan_in_word(transacting_chanend *tc, int *data)
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  *  \exception  ET_LOAD_STORE         invalid *tc or *data argument.
  */
-inline unsigned t_chan_in_byte(transacting_chanend *tc, char *data)
+inline xcore_c_error t_chan_in_byte(transacting_chanend *tc, char *data)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _t_chan_change_to_input(tc); \
@@ -263,7 +263,7 @@ inline unsigned t_chan_in_byte(transacting_chanend *tc, char *data)
  *
  *  \param n    The number of words to receive
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_LINK_ERROR         chan-end destination is not set.
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
@@ -271,7 +271,7 @@ inline unsigned t_chan_in_byte(transacting_chanend *tc, char *data)
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  *  \exception  ET_LOAD_STORE         invalid *tc or buf[] argument.
  */
-inline unsigned t_chan_in_buf_word(transacting_chanend *tc, int buf[], int n)
+inline xcore_c_error t_chan_in_buf_word(transacting_chanend *tc, int buf[], int n)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _t_chan_change_to_input(tc); \
@@ -289,7 +289,7 @@ inline unsigned t_chan_in_buf_word(transacting_chanend *tc, int buf[], int n)
  *
  *  \param n    The number of bytes to receive
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_LINK_ERROR         chan-end destination is not set.
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
@@ -297,7 +297,7 @@ inline unsigned t_chan_in_buf_word(transacting_chanend *tc, int buf[], int n)
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  *  \exception  ET_LOAD_STORE         invalid *tc or buf[] argument.
  */
-inline unsigned t_chan_in_buf_byte(transacting_chanend *tc, char buf[], int n)
+inline xcore_c_error t_chan_in_buf_byte(transacting_chanend *tc, char buf[], int n)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _t_chan_change_to_input(tc); \

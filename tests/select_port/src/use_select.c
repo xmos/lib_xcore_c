@@ -6,7 +6,7 @@
 
 // For XS1 support all values passed to the event_setup function must have bit 16 set
 typedef enum {
-  EVENT_TIMER = EVENT_ENUM_BASE,
+  EVENT_TIMER = ENUM_ID_BASE,
   EVENT_PORT_P
 } port_event_result_t;
 
@@ -18,7 +18,7 @@ typedef enum {
 void port_example()
 {
   static const int period = 5000;
-  event_disable_all();
+  select_disable_trigger_all();
 
   port p;
   port_alloc(&p, XS1_PORT_1A);
@@ -35,14 +35,14 @@ void port_example()
   port_output(q, q_value);
 
   // Setup the resources for eventing
-  event_setup_timer(t, time, EVENT_TIMER);
-  event_enable_timer(t);
-  event_setup_port(p, EVENT_PORT_P);
-  event_change_port_condition(p, PORT_COND_PINSEQ, 0x1);
-  event_enable_port(p);
+  timer_setup_select(t, time, EVENT_TIMER);
+  timer_enable_trigger(t);
+  port_setup_select(p, EVENT_PORT_P);
+  port_change_condition(p, PORT_COND_PINSEQ, 0x1);
+  port_enable_trigger(p);
 
   for (int count = 0; count < 10; count++) {
-    port_event_result_t choice = event_select();
+    port_event_result_t choice = select_wait();
     switch (choice) {
       case EVENT_TIMER: {
         // Read the timer to clear the event
@@ -51,7 +51,7 @@ void port_example()
 
         // Set up the next timer event
         time += period;
-        event_change_timer(t, time);
+        timer_change_trigger_time(t, time);
 
         // Toggle the port value
         q_value = !q_value;
@@ -65,7 +65,7 @@ void port_example()
         // Read the port to clear the event
         int x;
         port_input(p, &x);
-        event_change_port_condition(p, PORT_COND_PINSNEQ, x);
+        port_change_condition(p, PORT_COND_PINSNEQ, x);
 
         debug_printf("Port event got %d\n", x);
         break;

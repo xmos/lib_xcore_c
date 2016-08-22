@@ -6,22 +6,22 @@
 
 // For XS1 support all values passed to the event_setup function must have bit 16 set
 typedef enum {
-  EVENT_CHAN_C = EVENT_ENUM_BASE,
+  EVENT_CHAN_C = ENUM_ID_BASE,
   EVENT_CHAN_D
 } event_choice_t;
 
 void channel_example(chanend c, chanend d)
 {
-  event_disable_all();
+  select_disable_trigger_all();
 
   // Setup the channels to generate events
-  event_setup_chanend(c, EVENT_CHAN_C);
-  event_enable_chanend(c);
-  event_setup_chanend(d, EVENT_CHAN_D);
-  event_enable_chanend(d);
+  chanend_setup_select(c, EVENT_CHAN_C);
+  chanend_enable_trigger(c);
+  chanend_setup_select(d, EVENT_CHAN_D);
+  chanend_enable_trigger(d);
 
   for (int count = 0; count < 10; count++) {
-    event_choice_t choice = event_select();
+    event_choice_t choice = select_wait();
     switch (choice) {
       case EVENT_CHAN_C: {
         // Read value to clear event

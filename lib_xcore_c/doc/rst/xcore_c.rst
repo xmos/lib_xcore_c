@@ -21,13 +21,15 @@ using::
 
 A timer can then be read to get the current time by doing::
 
-  int time = timer_get_time(tmr);
+  int time;
+  timer_get_time(tmr, &time);
 
 There are two functions provided to delay using a timer. The first waits for a
 specified time::
 
   // The times are in 10ns, so 100000 timer ticks is 1ms
-  timer_wait_until(tmr, time + 100000); // Wait for (time + 1ms)
+  int now;
+  timer_wait_until(tmr, time + 100000, &now); // Wait for (time + 1ms)
 
 The second delays for a period of time in 100MHz timer ticks::
 
@@ -36,7 +38,7 @@ The second delays for a period of time in 100MHz timer ticks::
 When the timer is no longer required it can be released to be used by other cores
 by calling::
 
-  timer_free(tmr);
+  timer_free(&tmr);
 
 Using channels
 ..............
@@ -57,13 +59,15 @@ Data can then be sent and received using::
 
 with a corresponding block of code on another core to consume the data::
 
-  int i = chan_in_word(c.right);
-  char j = chan_in_byte(c.right);
+  int i;
+  chan_in_word(c.right, &i);
+  char j;
+  chan_in_byte(c.right, &j);
 
 When the channel is finished with then it is closed and the resources released
 using::
 
-  chan_free(c);
+  chan_free(&c);
 
 Inter-tile channels
 ~~~~~~~~~~~~~~~~~~~
@@ -108,8 +112,14 @@ existing link, receiving the destination link on the other tile and connecting
 the two. So, both applications can do::
 
     chan_out_word(c, new_c);             // Send my new-chanend to other tile.
-    chanend new_dest = chan_in_word(c);  // Recieve other tile's new-chanend...
-    chanend_set_dest(new_c, new_dest);      // ... and connect it to my new-chanend.
+    chanend new_dest;
+    chan_in_word(c, new_dest);           // Recieve other tile's new-chanend...
+    chanend_set_dest(new_c, new_dest);   // ... and connect it to my new-chanend.
+
+When the channel-end is finished with then it is closed and the resources released
+using::
+
+  chanend_free(&new_c);
 
 Streaming channels
 ~~~~~~~~~~~~~~~~~~
@@ -127,13 +137,15 @@ Data can then be sent and received using::
 
 with a corresponding block of code on another core to consume the data::
 
-  int i = s_chan_in_word(c.right);
-  char j = s_chan_in_byte(c.right);
+  int i;
+  s_chan_in_word(c.right, &i);
+  char j;
+  s_chan_in_byte(c.right, &j);
 
 When the channel is finished with then it is closed and the resources released
 using::
 
-  s_chan_free(c);
+  s_chan_free(&c);
 
 Channel transactions
 ~~~~~~~~~~~~~~~~~~~~
@@ -152,12 +164,14 @@ and end::
 
 The C code to receive this data is of the form::
 
-  transacting_chanend tc = chan_init_transaction_slave(c);
+  // we have a chanend 'c';
+  transacting_chanend tc;
+  chan_init_transaction_slave(&c, &tc);
   int data[10];
   for (int i = 0; i < 10; i++) {
-    data[i] = t_chan_in_word(tc);
+    t_chan_in_word(tc, &data[i]);
   }
-  chan_complete_transaction(tc);
+  chan_complete_transaction(&tc, &c);
 
 There are additional functions to send and receive both bytes and blocks of data.
 
@@ -198,10 +212,10 @@ The port can now be used to output or input data::
   port_output(p, 0);
   ...
 
-In order to clean up, both the port and clock block must be disabled/freed::
+In order to clean up, both the port and clock block must be freed::
 
-  clock_free(c);
-  port_free(c);
+  clock_free(&c);
+  port_free(&p);
 
 .. TODO: example of driving clock from input port
 
@@ -225,9 +239,9 @@ following code sequence could be used::
   port_alloc(&p_ready, XS1_PORT_1A);
   clock clk;
   clock_alloc(&clk, XS1_CLKBLK_1);
-  clock_start(clk);
 
   port_configure_in_strobed_slave(p, p_ready, clk);
+  clock_start(clk);
 
 After this, any data received on the port ``p`` will only be available when the
 valid signal (strobe on ``PORT_1A``) is high.
@@ -254,10 +268,10 @@ To leave the mutex region the lock is released::
 
 The lock resource is released using::
 
-  lock_free(l);
+  lock_free(&l);
 
-Using events
-............
+Using select events
+...................
 
 The library provides the ability to re-create the equivalent of the xC ``select``
 statement.
@@ -272,73 +286,77 @@ The function needs to have an *enum* containing an entry per resource that is
 part of the ``select``::
 
   typedef enum {
-    EVENT_CHAN_C = EVENT_ENUM_BASE,
+    EVENT_CHAN_C = ENUM_ID_BASE,
     EVENT_CHAN_D
   } event_choice_t;
 
-The function then starts by clearing all existing events enable on resources
+The function then starts by clearing all existing select triggers on resources
 owned by this core to ensure that they cannot trigger events::
 
   void channel_example(chanend c, chanend d)
   {
-    event_clear_all();
+    select_disable_trigger_all();
 
 The resources are each configured to trigger events and return a value from the
 *enum* specified above::
 
-    event_setup_chanend(c, EVENT_CHAN_C);
-    event_setup_chanend(d, EVENT_CHAN_D);
+    chanend_setup_select(c, EVENT_CHAN_C);
+    chanend_enable_trigger(c);
+    chanend_setup_select(d, EVENT_CHAN_D);
+    chanend_enable_trigger(d);
 
-And then the rest of the function can simply use the ``event_select()`` function
+And then the rest of the function can simply use the ``select_wait()`` function
 to wait for events to be triggered by either resource::
 
     while (1) {
-      event_choice_t choice = event_select();
+      event_choice_t choice = select_wait();
+      int x;
       switch (choice) {
         case EVENT_CHAN_C: {
-          // Read value and clear event
-          int x = chan_in_word(c);
+          // Read value to clear the trigger
+          chan_in_word(c, &x);
           ...
           break;
         }
         case EVENT_CHAN_D: {
-          // Read value and clear event
-          int x = chan_in_word(d);
+          // Read value to clear the trigger
+          chan_in_word(d, &x);
           ...
           break;
         }
       }
     }
 
-Event handling with a default
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Select event handling with a default
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In xC a ``select`` can have a ``default`` case which is executed if no events
 have triggered. This library provides the user with the ability to do this by
-using the ``event_select_no_wait()`` function. For example, the above example
+using the ``select_no_wait()`` function. For example, the above example
 could be changed to add to the ``enum`` a no-event value::
 
   typedef enum {
-    EVENT_CHAN_C = EVENT_ENUM_BASE,
+    EVENT_CHAN_C = ENUM_ID_BASE,
     EVENT_CHAN_D,
     EVENT_NONE
   } event_choice_t;
 
-And then to test for events but perform some background task if there is no data
+And then to test for triggers but perform some background task if there is no data
 available on either channel::
 
     while (1) {
-      event_choice_t choice = event_select_no_wait(EVENT_NONE);
+      event_choice_t choice = select_no_wait(EVENT_NONE);
+      int x;
       switch (choice) {
         case EVENT_CHAN_C: {
           // Read value and clear event
-          int x = chan_in_word(c);
+          chan_in_word(c, &x);
           ...
           break;
         }
         case EVENT_CHAN_D: {
           // Read value and clear event
-          int x = chan_in_word(d);
+          chan_in_word(d, &x);
           ...
           break;
         }
@@ -350,41 +368,133 @@ available on either channel::
       }
     }
 
-The argument that is passed to ``event_select_no_wait()`` is the value that will
+The argument that is passed to ``select_no_wait()`` is the value that will
 be returned if no events are ready.
 
-Ordered events
-~~~~~~~~~~~~~~
+Select event callback functions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This library also supports the ability to install select event callback functions. This
+allows the user to write code where events are not all handled within one
+``switch`` statement. It makes it possible to write libraries which are completely
+self-contained.
+
+For example, if the user writes a library to perform a real-time task based on
+a timer event the library initialisation would install a callback::
+
+  void lib_init(void *data)
+  {
+    timer tmr;
+    timer_alloc(&tmr);
+    int time;
+    timer_get_time(tmr, &time);
+    timer_setup_select_callback(tmr, time + period, data, timer_callback_func);
+  }
+
+This code allocates a hardware timer and then gets the current time before
+registering callback function. The call to ``timer_setup_select_callback()`` takes
+four arguments.
+
+  1. The timer to configure
+  2. The time at which the next event should fire
+  3. A ``void*`` which is user data that is passed to the handler
+  4. The callback function to call when events are triggered by the timer
+
+*Note*: There are similar functions for ports (``port_setup_select_callback()``)
+and channel ends (``chanend_setup_select_callback()``).
+
+The callback function is passed the user data registered with that resource::
+
+  void timer_callback_func(void *data);
+
+This will usually be the resource's ID so that the callback can access the resource.
+If additional information is required, data may be a pointer to a struct::
+
+  typedef struct data_t {timer tmr; int period;} data_t;
+
+  void timer_callback_func(void *data) {
+    data_t *d = (data_t *)data;
+    int time;
+    timer_get_time(d->tmr, &time);
+    timer_change_trigger_time(d->tmr, time + d->period);
+
+
+When using select callback functions, the ``select_disable_trigger_all()`` function
+should not be called, otherwise any registered callback functions will be disabled.
+Instead, users should now clear any triggers it enables::
+
+  void handle_events(chanend c, chanend d)
+  {
+    // Setup the channels to generate select events
+    chanend_setup_select(c, EVENT_CHAN_C);
+    chanend_enable_trigger(c);
+    chanend_setup_select(d, EVENT_CHAN_D);
+    chanend_enable_trigger(d);
+
+    // Handle select events using select_wait() / select_no_wait()
+    ...
+
+    // Disable select events local to this function
+    chanend_disable_trigger(c);
+    chanend_disable_trigger(d);
+    // The chenends keep their setup should you wish to re-enable their triggering.
+  }
+
+After the ``handle_events()`` function has completed another equivalent function
+can be called in which the timer callback will continue to be called periodically.
+
+When the timer select callbacks are no longer required then they can be disabled
+ using the ``timer_disable_trigger()`` function (or equivalent port/chanend functions)::
+
+  timer_disable_trigger(tmr);
+
+Ordered select events
+~~~~~~~~~~~~~~~~~~~~~
 
 The xCORE hardware has implicit ordering enforced. Ports are highest priority,
 then timers, then channels. If there are multiple resources of the same type
-that are ready then the resource with the lowest resource ID will be selected.
+that are ready then the resource with the highest priority (lowest resource ID)
+will be selected.
 
 If the user wants to enforce a different ordering from that provided by the
-hardware then they can use ``event_select_ordered()`` (or the now wait equivalent
-``event_select_ordered_no_wait()``).
+hardware then they can use ``select_wait_ordered()`` (or the no wait equivalent
+``select_no_wait_ordered()``).
 
-Events are set up in as detailed above and a list is created with all the active
+Events are set up as detailed above and a list is created with all the active
 resources. For example, if using two channels (``c``, ``d``) and a timer (``tmr``)
 then a null-terminated list can be defined to ensure the channels are handled
 before the timer if they are ready::
 
   resource ids[4] = {c, d, tmr, 0};
 
-And then the core of the event handling loop would be changed to pass this list
+And then the core of the select event handling loop would be changed to pass this list
 of resource IDs to define the order in which events are enabled::
 
   while (1) {
-    event_choice_t choice = event_select_ordered(ids);
+    event_choice_t choice = select_wait_ordered(ids);
     switch (choice) {
     ...
     }
   }
 
-.. Using trap handlers
-.. ...................
+Using interrupts
+................
 
-.. TODO: document use of trap handlers once implemented
+The library provides support for hardware interrupts from xCORE resources.
+
+Interrupts can be raised by resources as an alternative to select events, and
+will be vectored to the provided callback function.
+
+As interrupts can occur at any point during program execution there are certain
+requirements which must be adhered to ensure safe operation:
+
+  #. Resources must not have interrupts enabled whilst being configured, or
+     the core must have interrupts masked if the resource has already been
+     configured to raise interrupts.
+
+  #. The core must have interrupts masked when disabling interrupts for a
+     resource.
+
 
 API
 ---
@@ -399,6 +509,10 @@ Supporting types
 .. doxygentypedef:: streaming_chanend
 
 .. doxygentypedef:: transacting_chanend
+
+.. doxygentypedef:: event_handler
+
+.. doxygentypedef:: interrupt_handler
 
 .. doxygenenum:: port_condition
 
@@ -651,6 +765,8 @@ Locks
 Events
 ......
 
+.. doxygendefine:: EVENT_MAX_HANDLER_FUNCTIONS
+
 .. doxygenfunction:: event_disable
 
 .. doxygenfunction:: event_enable
@@ -659,15 +775,21 @@ Events
 
 .. doxygenfunction:: event_setup_timer
 
+.. doxygenfunction:: event_setup_timer_function
+
 .. doxygenfunction:: event_clear_timer
 
 .. doxygenfunction:: event_change_timer_time
 
 .. doxygenfunction:: event_setup_chanend
 
+.. doxygenfunction:: event_setup_chanend_function
+
 .. doxygenfunction:: event_clear_chanend
 
 .. doxygenfunction:: event_setup_port
+
+.. doxygenfunction:: event_setup_port_function
 
 .. doxygenfunction:: event_clear_port
 
@@ -685,10 +807,36 @@ Events
 
 |newpage|
 
-.. Trap handlers
-.. .............
+Interrupts
+..........
 
-.. TODO : document trap handler API once implemented
+.. doxygendefine:: INTERRUPT_MAX_HANDLER_FUNCTIONS
+
+.. doxygenfunction:: interrupt_disable
+
+.. doxygenfunction:: interrupt_enable
+
+.. doxygenfunction:: interrupt_mask_all
+
+.. doxygenfunction:: interrupt_unmask_all
+
+.. doxygenfunction:: interrupt_setup_timer_function
+
+.. doxygenfunction:: interrupt_clear_timer
+
+.. doxygenfunction:: interrupt_change_timer_time
+
+.. doxygenfunction:: interrupt_setup_chanend_function
+
+.. doxygenfunction:: interrupt_clear_chanend
+
+.. doxygenfunction:: interrupt_setup_port_function
+
+.. doxygenfunction:: interrupt_clear_port
+
+.. doxygenfunction:: interrupt_change_port_condition
+
+.. doxygenfunction:: interrupt_change_port_time
 
 |appendix|
 

@@ -14,7 +14,7 @@
  * The exception policy for the library.
  * This is a boolean constant or expression.
  */
-#define XCORE_C_NO_EXCEPTION 1
+#define XCORE_C_NO_EXCEPTION 0
 #endif
 
 #define RETURN_EXCEPTION_OR_ERROR(expr) \
@@ -30,7 +30,7 @@
   else { \
     expr ; \
   } \
-  return XS1_ET_NONE
+  return error_none
 
 #endif // __xcore_c_exception_impl_h__
 

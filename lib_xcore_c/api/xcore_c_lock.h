@@ -21,15 +21,13 @@ typedef int lock;
  *
  *  \param l    lock variable representing the initialised lock
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_LOAD_STORE         invalid *l argument.
  */
-inline unsigned lock_alloc(lock *l)
+inline xcore_c_error lock_alloc(lock *l)
 {
-  RETURN_EXCEPTION_OR_ERROR(  do { \
-                                asm volatile("getr %0, 5" : "=r" (*l)); \
-                              } while (0) );
+  RETURN_EXCEPTION_OR_ERROR( asm volatile("getr %0, 5" : "=r" (*l)) );
 }
 
 /** Deallocate a lock.
@@ -39,14 +37,14 @@ inline unsigned lock_alloc(lock *l)
  *
  *  \param l    The lock to be freed
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated lock,
  *                                    or the lock has not been released.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the lock.
  *  \exception  ET_LOAD_STORE         invalid *l argument.
  */
-inline unsigned lock_free(lock *l)
+inline xcore_c_error lock_free(lock *l)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 asm volatile("freer res[%0]" :: "r" (*l)); \
@@ -63,12 +61,12 @@ inline unsigned lock_free(lock *l)
  *
  *  \param l    The lock to acquire
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated lock.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the lock.
  */
-inline unsigned lock_acquire(lock l)
+inline xcore_c_error lock_acquire(lock l)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 int dummy; \
@@ -85,16 +83,14 @@ inline unsigned lock_acquire(lock l)
  *
  *  \param l    The lock to use release
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated lock.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the lock.
  */
-inline unsigned lock_release(lock l)
+inline xcore_c_error lock_release(lock l)
 {
-  RETURN_EXCEPTION_OR_ERROR(  do { \
-                                asm volatile("out res[%0], %0" :: "r" (l)); \
-                              } while (0) );
+  RETURN_EXCEPTION_OR_ERROR( asm volatile("out res[%0], %0" :: "r" (l)) );
 }
 
 #endif // __XC__

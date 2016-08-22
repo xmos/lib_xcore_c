@@ -8,7 +8,7 @@ const int events_per_resource = 5;
 
 // For XS1 support all values passed to the event_setup function must have bit 16 set
 typedef enum {
-  EVENT_CHAN_C = EVENT_ENUM_BASE,
+  EVENT_CHAN_C = ENUM_ID_BASE,
   EVENT_CHAN_D,
   EVENT_TIMER,
   EVENT_NONE
@@ -21,12 +21,12 @@ void test(chanend c, chanend d, timer tmr, resource ids[])
   time += 10;
 
   // Setup the channels to generate events
-  event_setup_chanend(c, EVENT_CHAN_C);
-  event_enable_chanend(c);
-  event_setup_chanend(d, EVENT_CHAN_D);
-  event_enable_chanend(d);
-  event_setup_timer(tmr, time, EVENT_TIMER);
-  event_enable_timer(tmr);
+  chanend_setup_select(c, EVENT_CHAN_C);
+  chanend_enable_trigger(c);
+  chanend_setup_select(d, EVENT_CHAN_D);
+  chanend_enable_trigger(d);
+  timer_setup_select(tmr, time, EVENT_TIMER);
+  timer_enable_trigger(tmr);
 
   int timer_event_count = 0;
   int default_event_count = 0;
@@ -34,7 +34,7 @@ void test(chanend c, chanend d, timer tmr, resource ids[])
   // Expect N events for each of the resources used (and one lot for the default)
   int count = 0;
   while (count < events_per_resource * 4) {
-    event_choice_t choice = event_select_ordered_no_wait(ids, EVENT_NONE);
+    event_choice_t choice = select_no_wait_ordered(EVENT_NONE, ids);
     switch (choice) {
       case EVENT_CHAN_C: {
         // Read value to clear event
@@ -65,7 +65,7 @@ void test(chanend c, chanend d, timer tmr, resource ids[])
           // Give enough time for the default to fire
           time += 1000;
         }
-        event_change_timer(tmr, time);
+        timer_change_trigger_time(tmr, time);
         count += 1;
         break;
       }
@@ -87,7 +87,7 @@ void test(chanend c, chanend d, timer tmr, resource ids[])
 
 void channel_first(chanend c, chanend d)
 {
-  // No need to clear all events first as the event_select_ordered will do that
+  // No need to clear all events first as the select_wait_ordered will do that
   debug_printf("Running with order [c, d, timer]\n");
 
   timer tmr;
@@ -101,7 +101,7 @@ void channel_first(chanend c, chanend d)
 
 void timer_first(chanend c, chanend d)
 {
-  // No need to clear all events first as the event_select_ordered will do that
+  // No need to clear all events first as the select_wait_ordered will do that
   debug_printf("Running with order [timer, d, c]\n");
 
   timer tmr;

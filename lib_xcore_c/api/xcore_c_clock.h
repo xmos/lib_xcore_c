@@ -17,13 +17,13 @@
  *
  *  \param clock_id   The id of the clock to allocate
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid clock.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the clock.
  *  \exception  ET_LOAD_STORE         invalid *clk argument.
  */
-inline unsigned clock_alloc(clock *clk, int clock_id)
+inline xcore_c_error clock_alloc(clock *clk, int clock_id)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 asm volatile("setc res[%0], 8" :: "r" (clock_id)); \
@@ -35,13 +35,13 @@ inline unsigned clock_alloc(clock *clk, int clock_id)
  *
  *  \param clk  The clock to be freed
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid clock.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the clock.
  *  \exception  ET_LOAD_STORE         invalid *clk argument.
  */
-inline unsigned clock_free(clock *clk)
+inline xcore_c_error clock_free(clock *clk)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 asm volatile("setc res[%0], 0" :: "r" (*clk)); \
@@ -55,12 +55,12 @@ inline unsigned clock_free(clock *clk)
  *
  *  \param clk  The clock to start running
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid clock.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the clock.
  */
-inline unsigned clock_start(clock clk)
+inline xcore_c_error clock_start(clock clk)
 {
   RETURN_EXCEPTION_OR_ERROR( asm volatile("setc res[%0], 0xf" :: "r" (clk)) );
 }
@@ -71,12 +71,12 @@ inline unsigned clock_start(clock clk)
  *
  *  \param clk  The clock to stop
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid clock.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the clock.
  */
-inline unsigned clock_stop(clock clk)
+inline xcore_c_error clock_stop(clock clk)
 {
   RETURN_EXCEPTION_OR_ERROR( asm volatile("setc res[%0], 0x7" :: "r" (clk)) );
 }
@@ -92,14 +92,14 @@ inline unsigned clock_stop(clock clk)
  *  \param p  The 1-bit port to set as the clock input. Attempting to set a
  *            port which is not 1-bit as the input will cause an exception.
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid clock or port,
  *                                    or the clock is running,
  *                                    or p not a one bit port.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the clock.
  */
-inline unsigned clock_set_source_port(clock clk, port p)
+inline xcore_c_error clock_set_source_port(clock clk, port p)
 {
   RETURN_EXCEPTION_OR_ERROR( asm volatile("setclk res[%0], %1" :: "r" (clk), "r" (p)) );
 }
@@ -108,13 +108,13 @@ inline unsigned clock_set_source_port(clock clk, port p)
  *
  *  \param clk  The clock to configure
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid clock,
  *                                    or the clock is running.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the clock.
  */
-inline unsigned clock_set_source_clk_ref(clock clk)
+inline xcore_c_error clock_set_source_clk_ref(clock clk)
 {
   RETURN_EXCEPTION_OR_ERROR( asm volatile("setclk res[%0], %1" :: "r" (clk), "r" (0x1)) );
 }
@@ -126,13 +126,13 @@ inline unsigned clock_set_source_clk_ref(clock clk)
  *
  *  \param clk  The clock to configure
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid clock,
  *                                    or the clock is running.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the clock.
  */
-inline unsigned clock_set_source_clk_xcore(clock clk)
+inline xcore_c_error clock_set_source_clk_xcore(clock clk)
 {
   RETURN_EXCEPTION_OR_ERROR( asm volatile("setclk res[%0], %1" :: "r" (clk), "r" (0x101)) );
 }
@@ -153,13 +153,13 @@ inline unsigned clock_set_source_clk_xcore(clock clk)
  *
  *  \param divide The divide value
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid clock,
  *                                    or the clock is running.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the clock.
  */
-inline unsigned clock_set_divide(clock clk, uint8_t divide)
+inline xcore_c_error clock_set_divide(clock clk, uint8_t divide)
 {
   RETURN_EXCEPTION_OR_ERROR( asm volatile("setd res[%0], %1" :: "r" (clk), "r" (divide)) );
 }
@@ -173,13 +173,13 @@ inline unsigned clock_set_divide(clock clk, uint8_t divide)
  *
  *  \param ready_source The 1-bit port to use for the ready-in signal.
  *
- *  \return     XS1_ET_NONE (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid clock,
  *                                    or ready_source not a one bit port.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the clock.
  */
-inline unsigned clock_set_ready_src(clock clk, port ready_source)
+inline xcore_c_error clock_set_ready_src(clock clk, port ready_source)
 {
   RETURN_EXCEPTION_OR_ERROR( _clock_set_ready_src(clk, ready_source) );
 }
