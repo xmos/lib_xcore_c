@@ -6,7 +6,9 @@
 // This file contains private implementation details and is not part of the API.
 // The contents may vary between releases.
 
+#include <stdint.h>
 #include <xccompat.h>
+#include <xs1.h>
 
 typedef chanend streaming_chanend;
 
@@ -58,14 +60,24 @@ inline char _s_chan_in_byte(streaming_chanend c)
   return data;
 }
 
+inline void _s_chan_out_ct(streaming_chanend c, int ct)
+{
+  asm volatile("outct res[%0], %1" :: "r" (c), "r" (ct));
+}
+
 inline void _s_chan_out_ct_end(streaming_chanend c)
 {
-  asm("outct res[%0],1"::"r"(c)); // XS1_CT_END
+  _s_chan_out_ct(c, XS1_CT_END);
+}
+
+inline void _s_chan_check_ct(streaming_chanend c, int ct)
+{
+  asm volatile("chkct res[%0], %1" :: "r" (c), "r" (ct));
 }
 
 inline void _s_chan_check_ct_end(streaming_chanend c)
 {
-  asm("chkct res[%0],1"::"r"(c)); // XS1_CT_END
+  _s_chan_check_ct(c, XS1_CT_END);
 }
 
 #if !defined(__XC__) || defined(__DOXYGEN__)

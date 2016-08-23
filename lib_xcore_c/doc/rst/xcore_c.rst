@@ -208,8 +208,8 @@ will be synchronised::
 
 The port can now be used to output or input data::
 
-  port_output(p, 1);
-  port_output(p, 0);
+  port_out(p, 1);
+  port_out(p, 0);
   ...
 
 In order to clean up, both the port and clock block must be freed::
@@ -224,8 +224,8 @@ In order to clean up, both the port and clock block must be freed::
 Ready signals
 ~~~~~~~~~~~~~
 
-Configuring ports to use ready signals is done using the ``port_configure_``
-functions provided in ``port_configure.h``. All the basic functions needed to
+Configuring ports to use ready signals is done using the ``port_protocol_``
+functions provided in ``port_protocol.h``. All the basic functions needed to
 implement this functionality is provided, but the order of configuring a port
 as a strobed or handshaken port is critical and therefore best done using these
 wrapper functions.
@@ -240,7 +240,7 @@ following code sequence could be used::
   clock clk;
   clock_alloc(&clk, XS1_CLKBLK_1);
 
-  port_configure_in_strobed_slave(p, p_ready, clk);
+  port_protocol_in_strobed_slave(p, p_ready, clk);
   clock_start(clk);
 
 After this, any data received on the port ``p`` will only be available when the
@@ -639,13 +639,11 @@ Ports
 
 .. doxygenfunction:: port_set_clock
 
-.. doxygenfunction:: port_set_mode_data_port
+.. doxygenfunction:: port_set_inout_data
 
-.. doxygenfunction:: port_set_mode_ready_port
+.. doxygenfunction:: port_set_out_clock
 
-.. doxygenfunction:: port_set_mode_clock_port
-
-.. doxygenfunction:: port_set_ready_src
+.. doxygenfunction:: port_set_out_ready
 
 .. doxygenfunction:: port_set_invert
 
@@ -665,31 +663,31 @@ Ports
 
 .. doxygenfunction:: port_set_ready_handshake
 
-.. doxygenfunction:: port_output
+.. doxygenfunction:: port_out
 
-.. doxygenfunction:: port_output_at_time
+.. doxygenfunction:: port_out_at_time
 
-.. doxygenfunction:: port_output_shift_right
+.. doxygenfunction:: port_out_shift_right
 
-.. doxygenfunction:: port_output_shift_right_at_time
+.. doxygenfunction:: port_out_shift_right_at_time
 
 .. doxygenfunction:: port_peek
 
-.. doxygenfunction:: port_input
+.. doxygenfunction:: port_in
 
-.. doxygenfunction:: port_input_when_pinseq
+.. doxygenfunction:: port_in_when_pinseq
 
-.. doxygenfunction:: port_input_when_pinsneq
+.. doxygenfunction:: port_in_when_pinsneq
 
-.. doxygenfunction:: port_input_at_time
+.. doxygenfunction:: port_in_at_time
 
-.. doxygenfunction:: port_input_shift_right
+.. doxygenfunction:: port_in_shift_right
 
-.. doxygenfunction:: port_input_shift_right_when_pinseq
+.. doxygenfunction:: port_in_shift_right_when_pinseq
 
-.. doxygenfunction:: port_input_shift_right_when_pinsneq
+.. doxygenfunction:: port_in_shift_right_when_pinsneq
 
-.. doxygenfunction:: port_input_shift_right_at_time
+.. doxygenfunction:: port_in_shift_right_at_time
 
 .. doxygenfunction:: port_get_timestamp
 
@@ -714,17 +712,17 @@ Ports
 Port configuration helpers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. doxygenfunction:: port_configure_in_handshake
+.. doxygenfunction:: port_protocol_in_handshake
 
-.. doxygenfunction:: port_configure_out_handshake
+.. doxygenfunction:: port_protocol_out_handshake
 
-.. doxygenfunction:: port_configure_in_strobed_master
+.. doxygenfunction:: port_protocol_in_strobed_master
 
-.. doxygenfunction:: port_configure_out_strobed_master
+.. doxygenfunction:: port_protocol_out_strobed_master
 
-.. doxygenfunction:: port_configure_in_strobed_slave
+.. doxygenfunction:: port_protocol_in_strobed_slave
 
-.. doxygenfunction:: port_configure_out_strobed_slave
+.. doxygenfunction:: port_protocol_out_strobed_slave
 
 |newpage|
 

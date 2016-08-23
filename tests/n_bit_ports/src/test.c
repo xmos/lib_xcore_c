@@ -13,7 +13,7 @@ void port_test_output(chanend c)
   chan_in_word(c, &dummy); // Wait for ack
 
   for (int i = 0; i < 16; ++i) {
-    port_output(p, i);
+    port_out(p, i);
     chan_in_word(c, &dummy); // Wait for ack
   }
 
@@ -34,12 +34,12 @@ void port_test_input(chanend c)
   port_alloc(&p, XS1_PORT_4C);
 
   int input;
-  port_input(p, &input);
+  port_in(p, &input);
   chan_out_word(c, 0); // Send ack
 
   for (int i = 0; i < 16; ++i) {
     int ii;
-    port_input_when_pinseq(p, i, &input);
+    port_in_when_pinseq(p, PORT_UNBUFFERED, i, &input);
     if (input != i) {
       debug_printf("Error\n");
     }

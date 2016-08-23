@@ -71,10 +71,10 @@ inline xcore_c_error timer_get_time(timer t, int *now)
 /** Setup an event trigger on a timer.
  *
  *  This will cause timer_get_time() to pause until the specified time.
- *  The trigger may be cleared using timer_clear_trigger().
+ *  The trigger may be cleared using timer_clear_trigger_time().
  *  N.B. timer_wait_until(), timer_delay(), timer_setup_select()
  *  timer_setup_select_callback() and timer_setup_interrupt_callback()
- *  call timer_setup_trigger().
+ *  call timer_set_trigger_time().
  *
  *  \param t     The timer to setup a event trigger on.
  *  \param time  The time at which the timer will trigger an event. The default
@@ -85,28 +85,9 @@ inline xcore_c_error timer_get_time(timer t, int *now)
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid timer.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the timer.
  */
-inline xcore_c_error timer_setup_trigger(timer t, int time)
+inline xcore_c_error timer_set_trigger_time(timer t, int time)
 {
-  RETURN_EXCEPTION_OR_ERROR( _timer_setup_trigger(t, time) );
-}
-
-/** Clear an event trigger on a timer.
- *
- *  Makes sure no triggers are setup on a timer.
- *  Should be called when a timer is no longer being used for select and interrupt events.
- *  timer_wait_until() and timer_delay() call timer_clear_trigger().
- *
- *  \param t    The timer to tear down events on
- *
- *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
- *
- *  \exception  ET_ILLEGAL_RESOURCE   not a valid timer.
- *  \exception  ET_RESOURCE_DEP       another core is actively using the timer.
- */
-
-inline xcore_c_error timer_clear_trigger(timer t)
-{
-  RETURN_EXCEPTION_OR_ERROR( _timer_clear_trigger(t) );
+  RETURN_EXCEPTION_OR_ERROR( _timer_set_trigger_time(t, time) );
 }
 
 /** Change the time at which a timer trigger will fire.
@@ -128,6 +109,25 @@ inline xcore_c_error timer_change_trigger_time(timer t, int time)
   RETURN_EXCEPTION_OR_ERROR( _timer_change_trigger_time(t, time) );
 }
 
+/** Clear an event trigger on a timer.
+ *
+ *  Makes sure no triggers are setup on a timer.
+ *  Should be called when a timer is no longer being used for select and interrupt events.
+ *  Both timer_wait_until() and timer_delay() call timer_clear_trigger_time().
+ *
+ *  \param t    The timer to tear down events on
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid timer.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the timer.
+ */
+
+inline xcore_c_error timer_clear_trigger_time(timer t)
+{
+  RETURN_EXCEPTION_OR_ERROR( _timer_clear_trigger_time(t) );
+}
+
 /** Wait until after a specified time.
  *
  *  N.B. This will destroy any select or interrupt event triggers.
@@ -145,9 +145,9 @@ inline xcore_c_error timer_change_trigger_time(timer t, int time)
 inline xcore_c_error timer_wait_until(timer t, int until, int *now)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
-                                _timer_setup_trigger(t, until); \
+                                _timer_set_trigger_time(t, until); \
                                 _timer_get_time(t, now); \
-                                _timer_clear_trigger(t); \
+                                _timer_clear_trigger_time(t); \
                               } while (0) );
 }
 
@@ -170,10 +170,10 @@ inline xcore_c_error timer_delay(timer t, int period)
                                 int start; \
                                 _timer_get_time(t, &start); \
                                 int until = start + period; \
-                                _timer_setup_trigger(t, until); \
+                                _timer_set_trigger_time(t, until); \
                                 int dummy; \
                                 _timer_get_time(t, &dummy); \
-                                _timer_clear_trigger(t); \
+                                _timer_clear_trigger_time(t); \
                               } while (0) );
 }
 
@@ -201,7 +201,7 @@ inline xcore_c_error timer_setup_select(timer t, int time, unsigned enum_id)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _resource_setup_select(t, enum_id); \
-                                _timer_setup_trigger(t, time); \
+                                _timer_set_trigger_time(t, time); \
                               } while (0) );
 }
 
@@ -229,7 +229,7 @@ inline xcore_c_error timer_setup_select_callback(timer t, int time, void *data,
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _resource_setup_select_callback(t, data, func);
-                                _timer_setup_trigger(t, time);
+                                _timer_set_trigger_time(t, time);
                               } while (0) );
 }
 
@@ -254,7 +254,7 @@ inline xcore_c_error timer_setup_interrupt_callback(timer t, int time, void *dat
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _resource_setup_interrupt_callback(t, data, func);
-                                _timer_setup_trigger(t, time);
+                                _timer_set_trigger_time(t, time);
                               } while (0) );
 }
 

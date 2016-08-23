@@ -19,13 +19,13 @@ static void time_port_rate(timer tmr, port p, clock c)
 
   clock_start(c);
 
-  port_output(p, 0); // Pre-fill the transfer reg
-  port_output(p, 0); // Start running after a clock edge has moved data from the
+  port_out(p, 0); // Pre-fill the transfer reg
+  port_out(p, 0); // Start running after a clock edge has moved data from the
                      // transfer register
   int start_time;
   timer_get_time(tmr, &start_time);
   for (int i = 0; i < num_writes; ++i) {
-    port_output(p, i);
+    port_out(p, i);
   }
   int end_time;
   timer_get_time(tmr, &end_time);
@@ -72,7 +72,7 @@ static void test_port_clock(timer tmr, port p, clock c)
   port p_clk_src;
   port_alloc(&p_clk_src, XS1_PORT_1B);
   port_set_clock(p_clk_src, divided_c);
-  port_set_mode_clock_port(p_clk_src);
+  port_set_out_clock(p_clk_src);
 
   clock_start(divided_c);
 

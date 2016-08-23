@@ -32,13 +32,13 @@ void port_example()
   time += period;
 
   int q_value = 0;
-  port_output(q, q_value);
+  port_out(q, q_value);
 
   // Setup the resources for eventing
   timer_setup_select(t, time, EVENT_TIMER);
   timer_enable_trigger(t);
   port_setup_select(p, EVENT_PORT_P);
-  port_change_condition(p, PORT_COND_PINSEQ, 0x1);
+  port_set_trigger_in_equal(p, 0x1);
   port_enable_trigger(p);
 
   for (int count = 0; count < 10; count++) {
@@ -55,7 +55,7 @@ void port_example()
 
         // Toggle the port value
         q_value = !q_value;
-        port_output(q, q_value);
+        port_out(q, q_value);
 
         debug_printf("Timer event, drive %d\n", q_value);
         break;
@@ -64,8 +64,8 @@ void port_example()
       case EVENT_PORT_P: {
         // Read the port to clear the event
         int x;
-        port_input(p, &x);
-        port_change_condition(p, PORT_COND_PINSNEQ, x);
+        port_in(p, &x);
+        port_set_trigger_in_not_equal(p, x);
 
         debug_printf("Port event got %d\n", x);
         break;

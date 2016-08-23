@@ -10,15 +10,15 @@ void port_test_output(chanend c)
   port_alloc(&p, XS1_PORT_1A);
 
   int dummy;
-  port_output(p, 0);
+  port_out(p, 0);
   chan_in_word(c, &dummy); // Wait for ack
-  port_output(p, 1);
+  port_out(p, 1);
   chan_in_word(c, &dummy); // Wait for ack
-  port_output(p, 0);
+  port_out(p, 0);
   chan_in_word(c, &dummy); // Wait for ack
-  port_output(p, 1);
+  port_out(p, 1);
   chan_in_word(c, &dummy); // Wait for ack
-  port_output(p, 0);
+  port_out(p, 0);
   chan_in_word(c, &dummy); // Wait for ack
 
   port_free(&p);
@@ -38,28 +38,28 @@ void port_test_input(chanend c)
   port_alloc(&p, XS1_PORT_1B);
 
   int input;
-  port_input(p, &input);
+  port_in(p, &input);
   chan_out_word(c, 0); // Send ack
 
-  port_input_when_pinseq(p, 1, &input);
+  port_in_when_pinseq(p, PORT_UNBUFFERED, 1, &input);
   if (input != 1) {
     debug_printf("Error\n");
   }
   chan_out_word(c, 0); // Send ack
 
-  port_input_when_pinsneq(p, 1, &input);
+  port_in_when_pinsneq(p, PORT_UNBUFFERED, 1, &input);
   if (input != 0) {
     debug_printf("Error\n");
   }
   chan_out_word(c, 0); // Send ack
 
-  port_input_when_pinsneq(p, 0, &input);
+  port_in_when_pinsneq(p, PORT_UNBUFFERED, 0, &input);
   if (input != 1) {
     debug_printf("Error\n");
   }
   chan_out_word(c, 0); // Send ack
 
-  port_input_when_pinseq(p, 0, &input);
+  port_in_when_pinseq(p, PORT_UNBUFFERED, 0, &input);
   if (input != 0) {
     debug_printf("Error\n");
   }

@@ -23,19 +23,19 @@ void port_test_output(chanend c)
   clock_alloc(&clk, XS1_CLKBLK_1);
   clock_start(clk);
 
-  port_configure_out_strobed_master(p, p_ready, clk, 0);
+  port_protocol_out_strobed_master(p, p_ready, clk, 0);
 
   int dummy;
   chan_in_word(c, &dummy); // Wait for ack
 
-  port_output(p, 0xfeedbeef);
+  port_out(p, 0xfeedbeef);
 
   timer tmr;
   timer_alloc(&tmr);
   timer_delay(tmr, 1000);
   timer_free(&tmr);
 
-  port_output(p, 0x12345678);
+  port_out(p, 0x12345678);
 
   chan_in_word(c, &dummy); // Wait for ack
 
@@ -66,17 +66,17 @@ void port_test_input(chanend c)
   clock_alloc(&clk, XS1_CLKBLK_2);
   clock_start(clk);
 
-  port_configure_in_strobed_slave(p, p_ready, clk);
+  port_protocol_in_strobed_slave(p, p_ready, clk);
 
   chan_out_word(c, 0); // Send ack
 
   unsigned int x;
-  port_input(p, &x);
+  port_in(p, &x);
   if (x != 0xfeedbeef) {
     debug_printf("Error %x received instead of 0xfeedbeef\n", x);
   }
 
-  port_input(p, &x);
+  port_in(p, &x);
   if (x != 0x12345678) {
     debug_printf("Error %x received instead of 0x12345678\n", x);
   }

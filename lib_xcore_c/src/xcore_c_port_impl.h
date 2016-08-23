@@ -8,16 +8,42 @@
 
 #include <stdint.h>
 #include <xccompat.h>
+#include <xs1.h>
+
+inline void _port_setc(port p, uint32_t c)
+{
+  asm volatile("setc res[%0], %1" :: "r" (p), "r" (c));
+}
+
+inline void _port_set_transfer_width(port p, int width)
+{
+  asm volatile("settw res[%0], %1" :: "r" (p), "r" (width));
+}
 
 inline port _port_alloc(int port_id)
 {
-  asm volatile("setc res[%0], 8" :: "r" (port_id));
+  _port_setc(port_id, XS1_SETC_INUSE_ON);
   return port_id;
+}
+
+inline void _port_reset(port p)
+{
+  _port_setc(p, XS1_SETC_INUSE_ON);
+}
+
+inline void _port_free(port p)
+{
+  _port_setc(p, XS1_SETC_INUSE_OFF);
 }
 
 inline void _port_set_buffered(port p)
 {
-  asm volatile("setc res[%0], 0x200f" :: "r" (p));
+  _port_setc(p, XS1_SETC_BUF_BUFFERS);
+}
+
+inline void _port_set_unbuffered(port p)
+{
+  _port_setc(p, XS1_SETC_BUF_NOBUFFERS);
 }
 
 inline void _port_set_clock(port p, clock clk)
@@ -25,72 +51,142 @@ inline void _port_set_clock(port p, clock clk)
   asm volatile("setclk res[%0], %1" :: "r" (p), "r" (clk));
 }
 
-inline void _port_set_mode_data_port(port p)
+inline void _port_set_inout_data(port p)
 {
-  asm volatile("setc res[%0], 0x5007" :: "r" (p));
+  _port_setc(p, XS1_SETC_PORT_DATAPORT);
 }
 
-inline void _port_set_mode_ready_port(port p)
+inline void _port_set_out_clock(port p)
 {
-  asm volatile("setc res[%0], 0x5017" :: "r" (p));
+  _port_setc(p, XS1_SETC_PORT_CLOCKPORT);
 }
 
-inline void _port_set_ready_src(port p, port ready_source)
+inline void _port_set_out_ready(port p, port ready_source)
 {
+  _port_setc(p, XS1_SETC_PORT_READYPORT);
   asm volatile("setrdy res[%0], %1" :: "r" (p), "r" (ready_source));
+}
+
+inline void _port_set_invert(port p)
+{
+  _port_setc(p, XS1_SETC_INV_INVERT);
+}
+
+inline void _port_set_no_invert(port p)
+{
+  _port_setc(p, XS1_SETC_INV_NOINVERT);
+}
+
+inline void _port_set_sample_falling_edge(port p)
+{
+  _port_setc(p, XS1_SETC_SDELAY_SDELAY);
+}
+
+inline void _port_set_sample_rising_edge(port p)
+{
+  _port_setc(p, XS1_SETC_SDELAY_NOSDELAY);
 }
 
 inline void _port_set_master(port p)
 {
-  asm volatile("setc res[%0], 0x1007" :: "r" (p));
+  _port_setc(p, XS1_SETC_MS_MASTER);
 }
 
 inline void _port_set_slave(port p)
 {
-  asm volatile("setc res[%0], 0x100f" :: "r" (p));
+  _port_setc(p, XS1_SETC_MS_SLAVE);
+}
+
+inline void _port_set_no_ready(port p)
+{
+  _port_setc(p, XS1_SETC_RDY_NOREADY);
 }
 
 inline void _port_set_ready_strobed(port p)
 {
-  asm volatile("setc res[%0], 0x300f" :: "r" (p));
+  _port_setc(p, XS1_SETC_RDY_STROBED);
 }
 
 inline void _port_set_ready_handshake(port p)
 {
-  asm volatile("setc res[%0], 0x3017" :: "r" (p));
+  _port_setc(p, XS1_SETC_RDY_HANDSHAKE);
 }
 
-inline void _port_output(port p, int data)
+inline int16_t _port_get_trigger_time(port p)
+{
+  int16_t ts;
+  asm volatile("getts %0, res[%1]" : "=r" (ts) : "r" (p));
+  return ts;
+}
+
+inline void _port_set_trigger_time(port p, int16_t t)
+{
+  asm volatile("setpt res[%0], %1" :: "r" (p), "r" (t));
+}
+
+inline void _port_clear_trigger_time(port p)
+{
+  asm volatile("clrpt res[%0]" :: "r" (p));
+}
+
+inline void _port_set_trigger_in_equal(port p, int d)
+{
+  _port_setc(p, XS1_SETC_COND_EQ);
+  asm volatile("setd res[%0], %1" :: "r" (p), "r" (d));
+}
+
+inline void _port_set_trigger_in_not_equal(port p, int d)
+{
+  _port_setc(p, XS1_SETC_COND_NEQ);
+  asm volatile("setd res[%0], %1" :: "r" (p), "r" (d));
+}
+
+inline void _port_clear_trigger_in(port p)
+{
+  _port_setc(p, XS1_SETC_COND_NONE);
+}
+
+inline int _port_peek(port p)
+{
+  int data;
+  asm volatile("peek %0, res[%1]" : "=r" (data): "r" (p));
+  return data;
+}
+
+inline void _port_out(port p, int data)
 {
   asm volatile("out res[%0], %1" :: "r" (p), "r" (data));
 }
 
-inline int _port_input(port p)
+inline int _port_in(port p)
 {
   int data;
   asm volatile("in %0, res[%1]" : "=r" (data): "r" (p));
   return data;
 }
 
-typedef enum port_condition {
-  PORT_COND_FULL    =  0x1, //< Condition that holds when port contains data ready to be input
-  PORT_COND_PINSEQ  = 0x11, //< Condition that holds when the pins of the port are equal to the port conditional data
-  PORT_COND_PINSNEQ = 0x19  //< Condition that holds when the pins of the port are equal to the port conditional data
-} port_condition;
-
-inline void _port_set_condition(port p, port_condition c)
+inline void _port_out_shift_right(port p, int *data)
 {
-  asm volatile("setc res[%0], %1" :: "r" (p), "r" (c));
+  // We read-write data
+  asm volatile("outshr res[%1], %0" : "+r" (*data) : "r" (p));
 }
 
-inline void _port_set_conditional_data(port p, int d)
+inline void _port_in_shift_right(port p, int *data)
 {
-  asm volatile("setd res[%0], %1" :: "r" (p), "r" (d));
+  // We read-write data
+  asm volatile("inshr %0, res[%1]" : "+r" (*data) : "r" (p));
+}
+
+inline int _port_endin(port p)
+{
+  int num;
+  asm volatile("endin %0, res[%1]" : "=r" (num) : "r" (p));
+  return num;
 }
 
 inline void _port_clear_buffer(port p)
 {
-  asm volatile("setc res[%0], 0x17" :: "r" (p));
+  _port_setc(p, XS1_SETC_RUN_CLRBUF);
 }
 
 #endif // __xcore_c_port_impl_h__

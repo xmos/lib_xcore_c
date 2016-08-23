@@ -32,7 +32,7 @@ inline void _timer_change_trigger_time(timer t, int time)
   asm volatile("setd res[%0], %1" :: "r" (t), "r" (time));
 }
 
-inline void _timer_setup_trigger(timer t, int time)
+inline void _timer_set_trigger_time(timer t, int time)
 {
   // Set the condition to be AFTER
   asm volatile("setc res[%0], 0x9" :: "r" (t));
@@ -40,7 +40,7 @@ inline void _timer_setup_trigger(timer t, int time)
   _timer_change_trigger_time(t, time);
 }
 
-inline void _timer_clear_trigger(timer t)
+inline void _timer_clear_trigger_time(timer t)
 {
   // Clear the condition
   asm volatile("setc res[%0], 0x1" :: "r" (t));

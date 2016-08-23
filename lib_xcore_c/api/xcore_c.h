@@ -12,7 +12,7 @@
 #include "xcore_c_interrupt.h"
 #include "xcore_c_lock.h"
 #include "xcore_c_port.h"
-#include "xcore_c_port_configure.h"
+#include "xcore_c_port_protocol.h"
 #include "xcore_c_select.h"
 #include "xcore_c_timer.h"
 

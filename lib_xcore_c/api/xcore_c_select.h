@@ -11,6 +11,15 @@
 #include "xcore_c_resource_impl.h"
 #include "xcore_c_error_codes.h"
 
+
+/** resource
+ *
+ *  This is an opaque super type of the types 'chanend', 'port' and 'timer'.
+ *  It is used to form a list to pass into select_wait_ordered()
+ *  and select_no_wait_ordered().
+ */
+// typedef resource
+
 /** Starting value to use for the enum_id
  *
  *  The enum_id is passed to the <resource>_setup_select() and returned by

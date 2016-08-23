@@ -267,7 +267,7 @@ inline xcore_c_error s_chan_in_buf_byte(streaming_chanend c, char buf[], int n)
  */
 inline xcore_c_error s_chan_out_ct(streaming_chanend c, int ct)
 {
-  RETURN_EXCEPTION_OR_ERROR( asm volatile("outct res[%0], %1" :: "r" (c), "r" (ct)) );
+  RETURN_EXCEPTION_OR_ERROR( _s_chan_out_ct(c, ct) );
 }
 
 /** Output a CT_END control token onto a streaming_channel.
@@ -289,7 +289,7 @@ inline xcore_c_error s_chan_out_ct(streaming_chanend c, int ct)
  */
 inline xcore_c_error s_chan_out_ct_end(streaming_chanend c)
 {
-  return s_chan_out_ct(c, XS1_CT_END);
+  RETURN_EXCEPTION_OR_ERROR( _s_chan_out_ct_end(c) );
 }
 
 /** Check that a specific control token on a streaming_channel.
@@ -310,7 +310,7 @@ inline xcore_c_error s_chan_out_ct_end(streaming_chanend c)
  */
 inline xcore_c_error s_chan_check_ct(streaming_chanend c, int ct)
 {
-  RETURN_EXCEPTION_OR_ERROR( asm volatile("chkct res[%0], %1" :: "r" (c), "r" (ct)) );
+  RETURN_EXCEPTION_OR_ERROR( _s_chan_check_ct(c, ct) );
 }
 
 /** Check for a CT_END token on a streaming_channel.
@@ -329,7 +329,7 @@ inline xcore_c_error s_chan_check_ct(streaming_chanend c, int ct)
  */
 inline xcore_c_error s_chan_check_ct_end(streaming_chanend c)
 {
-  return s_chan_check_ct(c, XS1_CT_END);
+  RETURN_EXCEPTION_OR_ERROR( _s_chan_check_ct_end(c) );
 }
 
 #endif // __xcore_c_channel_streaming_h__
