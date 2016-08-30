@@ -7,7 +7,7 @@
 
 void fast(chanend c)
 {
-  timer tmr;
+  hwtimer_t tmr;
   timer_alloc(&tmr);
   xassert(tmr);
 
@@ -37,7 +37,7 @@ void fast(chanend c)
 
 void slow(chanend c)
 {
-  timer tmr;
+  hwtimer_t tmr;
   timer_alloc(&tmr);
   xassert(tmr);
 

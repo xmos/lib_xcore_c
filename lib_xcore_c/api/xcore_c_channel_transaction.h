@@ -88,7 +88,7 @@ inline xcore_c_error chan_init_transaction_slave(chanend *c, transacting_chanend
  *  awaiting another transaction or deallocation.
  *
  *  This call must be accompanied by a call to chan_complete_transaction() on
- *  the other side of the channel.
+ *  the other end of the channel.
  *
  *  \param tc  Transacting chan-end to close. transacting_chanend is invalidated
  *
@@ -100,7 +100,7 @@ inline xcore_c_error chan_init_transaction_slave(chanend *c, transacting_chanend
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  *  \exception  ET_LOAD_STORE         invalid *c or *tc argument.
  */
-inline xcore_c_error chan_complete_transaction(transacting_chanend *tc, chanend *c)
+inline xcore_c_error chan_complete_transaction(chanend *c, transacting_chanend *tc)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 if (tc->last_out) { \

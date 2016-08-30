@@ -14,7 +14,7 @@ typedef enum {
   EVENT_NONE
 } event_choice_t;
 
-void test(chanend c, chanend d, timer tmr, resource ids[])
+void test(chanend c, chanend d, hwtimer_t tmr, resource ids[])
 {
   int time;
   timer_get_time(tmr, &time);
@@ -90,7 +90,7 @@ void channel_first(chanend c, chanend d)
   // No need to clear all events first as the select_wait_ordered will do that
   debug_printf("Running with order [c, d, timer]\n");
 
-  timer tmr;
+  hwtimer_t tmr;
   timer_alloc(&tmr);
 
   resource ids[4] = {c, d, tmr, 0};
@@ -104,7 +104,7 @@ void timer_first(chanend c, chanend d)
   // No need to clear all events first as the select_wait_ordered will do that
   debug_printf("Running with order [timer, d, c]\n");
 
-  timer tmr;
+  hwtimer_t tmr;
   timer_alloc(&tmr);
 
   resource ids[4] = {tmr, d, c, 0};

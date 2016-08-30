@@ -16,7 +16,7 @@ Using timers
 The library provides support for xCORE hardware timers. They are allocated
 using::
 
-  timer tmr;
+  hwtimer_t tmr;
   timer_alloc(&tmr);
 
 A timer can then be read to get the current time by doing::
@@ -171,7 +171,7 @@ The C code to receive this data is of the form::
   for (int i = 0; i < 10; i++) {
     t_chan_in_word(tc, &data[i]);
   }
-  chan_complete_transaction(&tc, &c);
+  chan_complete_transaction(&c, &tc);
 
 There are additional functions to send and receive both bytes and blocks of data.
 
@@ -224,7 +224,7 @@ In order to clean up, both the port and clock block must be freed::
 Ready signals
 ~~~~~~~~~~~~~
 
-Configuring ports to use ready signals is done using the ``port_protocol_``
+Configuring ports to use ready signals is done using the ``port_protocol_*``
 functions provided in ``port_protocol.h``. All the basic functions needed to
 implement this functionality is provided, but the order of configuring a port
 as a strobed or handshaken port is critical and therefore best done using these
@@ -384,7 +384,7 @@ a timer event the library initialisation would install a callback::
 
   void lib_init(void *data)
   {
-    timer tmr;
+    hwtimer_t tmr;
     timer_alloc(&tmr);
     int time;
     timer_get_time(tmr, &time);
@@ -410,7 +410,7 @@ The callback function is passed the user data registered with that resource::
 This will usually be the resource's ID so that the callback can access the resource.
 If additional information is required, data may be a pointer to a struct::
 
-  typedef struct data_t {timer tmr; int period;} data_t;
+  typedef struct data_t {hwtimer_t tmr; int period;} data_t;
 
   void timer_callback_func(void *data) {
     data_t *d = (data_t *)data;
@@ -499,8 +499,8 @@ requirements which must be adhered to ensure safe operation:
 API
 ---
 
-Supporting types
-................
+Supporting opaque types
+.......................
 
 .. doxygentypedef:: resource
 

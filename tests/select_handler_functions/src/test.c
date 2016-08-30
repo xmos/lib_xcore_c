@@ -45,7 +45,7 @@ void test_select_function(chanend c, chanend d)
 }
 
 typedef struct {
-  timer t;
+  hwtimer_t t;
   int value;
 } hanlde_timer_data;
 /*
@@ -67,7 +67,7 @@ void test(chanend c, chanend d)
 {
   // Test enabling a timer outside of the event loop with a function to handle
   // the events.
-  timer t;
+  hwtimer_t t;
   timer_alloc(&t);
   static hanlde_timer_data data;
   data.t = t;

@@ -7,7 +7,7 @@
 
 void core0(chanend c)
 {
-  timer tmr;
+  hwtimer_t tmr;
   timer_alloc(&tmr);
   xassert(tmr);
   lock l = 0;

@@ -80,7 +80,7 @@ void test_interrupt_function(const chan_data_t *cd1, const chan_data_t *cd2, int
 }
 
 typedef struct {
-  timer t;
+  hwtimer_t t;
   int v;
 } timer_data_t;
 
@@ -102,7 +102,7 @@ DEFINE_INTERRUPT_PERMITTED(groupA, void, test, chanend c1, chanend c2)
 {
   // Test enabling a timer outside of the interrupt loop with a function to handle
   // the interrupts.
-  timer t;
+  hwtimer_t t;
   timer_alloc(&t);
 
   static chan_data_t cd1;

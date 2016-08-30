@@ -35,7 +35,7 @@ void test_int(chanend c)
   for (size_t i = 0; i < array_len; i++) {
     t_chan_in_word(&tc, &data[i]);
   }
-  chan_complete_transaction(&tc, &c);
+  chan_complete_transaction(&c, &tc);
   xassert(c && !tc.c);
 
   print_array_int("C received: ", data, array_len);
@@ -51,7 +51,7 @@ void test_int(chanend c)
   for (size_t i = 0; i < array_len; i++) {
     t_chan_out_word(&tc, data[i]);
   }
-  chan_complete_transaction(&tc, &c);
+  chan_complete_transaction(&c, &tc);
   xassert(c && !tc.c);
 }
 
@@ -62,7 +62,7 @@ void test_char(chanend c)
   transacting_chanend tc;
   chan_init_transaction_master(&c, &tc);
   t_chan_in_buf_byte(&tc, data, array_len);
-  chan_complete_transaction(&tc, &c);
+  chan_complete_transaction(&c, &tc);
 
   print_array_char("C received: ", data, array_len);
 
@@ -74,5 +74,5 @@ void test_char(chanend c)
   // Send it back
   chan_init_transaction_slave(&c, &tc);
   t_chan_out_buf_byte(&tc, data, array_len);
-  chan_complete_transaction(&tc, &c);
+  chan_complete_transaction(&c, &tc);
 }

@@ -56,7 +56,7 @@ extern xcore_c_error chan_in_buf_byte(chanend c, char buf[], int n);
 #include "xcore_c_channel_transaction.h"
 extern xcore_c_error chan_init_transaction_master(chanend *c, transacting_chanend *tc);
 extern xcore_c_error chan_init_transaction_slave(chanend *c, transacting_chanend *tc);
-extern xcore_c_error chan_complete_transaction(transacting_chanend *tc, chanend *c);
+extern xcore_c_error chan_complete_transaction(chanend *c, transacting_chanend *tc);
 extern xcore_c_error t_chan_out_word(transacting_chanend *c, int data);
 extern xcore_c_error t_chan_out_byte(transacting_chanend *c, char data);
 extern xcore_c_error t_chan_out_buf_word(transacting_chanend *c, int buf[], int n);

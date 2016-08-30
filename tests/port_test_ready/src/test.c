@@ -30,7 +30,7 @@ void port_test_output(chanend c)
 
   port_out(p, 0xfeedbeef);
 
-  timer tmr;
+  hwtimer_t tmr;
   timer_alloc(&tmr);
   timer_delay(tmr, 1000);
   timer_free(&tmr);
