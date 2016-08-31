@@ -8,6 +8,16 @@
 #include "xcore_c_resource_impl.h"
 #include "xcore_c_error_codes.h"
 
+#ifndef XCORE_C_KSTACK_WORDS
+/** Specify the minimum kernel stack size the interrupt permitting function should create.
+ *
+ *  The user may specify a minimum kstack size by setting the XCORE_C_KSTACK_WORDS
+ *  define in their Makefile.
+ *  This should be done when the kstack is being used by more than interrupt_callback functions.
+ */ 
+#define XCORE_C_KSTACK_WORDS 0
+#endif
+
 /** Define a function that allows interrpts to occur within its scope
  *
  *  This macro will define two functions for you:
@@ -75,16 +85,6 @@
  *  \return     the name of the defined interrupt permitting function
  */
 #define INTERRUPT_PERMITTED(root_function) _INTERRUPT_PERMITTED(root_function)
-
-#ifndef XCORE_C_KSTACK_WORDS
-/** Specify the minimum kernel stack size the interrupt permitting function should create.
- *
- *  The user may specify a minimum kstack size by setting the XCORE_C_KSTACK_WORDS
- * define in their Makefile.
- *  This should be done when the kstack is being used by more than interrupt_callback functions.
- */ 
-#define XCORE_C_KSTACK_WORDS 0
-#endif
 
 /** Mask all interrupts on this logical core.
  *

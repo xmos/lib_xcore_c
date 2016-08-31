@@ -8,8 +8,20 @@
 
 #if !defined(__XC__) || defined(__DOXYGEN__)
 
-#include <xccompat.h>
 #include <hwtimer.h>
+#ifdef __DOXYGEN__
+// Copy typedefs from hwtimer.h for use by doxygen
+/**
+ * hwtimer_t is an opaque type.
+ *
+ *  The hwtimer_t type can be used just like the timer type. It gives a unique
+ *  hardware timer to use (as opposed to the default timer in XC which is
+ *  allocated based on a shared hardware timer per logical core).
+ *
+ *  Users must not access its raw underlying type.
+ */
+typedef unsigned int hwtimer_t;
+#endif
 
 inline hwtimer_t _timer_alloc(void)
 {

@@ -8,6 +8,17 @@
 
 #include <stdint.h>
 #include <xccompat.h>
+#ifdef __DOXYGEN__
+// Copy typedefs from xccompat.h for use by doxygen
+/**
+ * port is an opaque type for use in C/C++ code.
+ * It enables a XC function prototyped as taking a parameter of type port to
+ * be called from C and vice versa.
+ *
+ *  Users must not access its raw underlying type.
+ */
+typedef unsigned port;
+#endif
 #include <xs1.h>
 
 inline void _port_setc(port p, uint32_t c)

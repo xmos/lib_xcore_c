@@ -10,7 +10,7 @@
 #include "xcore_c_resource_impl.h"
 #include "xcore_c_exception_impl.h"
 
-/** Enumeration to identify the current setup of the port */
+/** Enumeration to declare how the port was set up */
 typedef enum {
   PORT_UNBUFFERED = 0,
   PORT_BUFFERED = 1,

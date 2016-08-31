@@ -3,10 +3,14 @@
 #ifndef __xcore_c_error_codes_h__
 #define __xcore_c_error_codes_h__
 
-// Errors returned when XCORE_C_NO_EXCEPTION policy is active.
-// See 'The XMOS XS1/XS2 Architecture' for details of the exceptions.
 #include <xs1.h>
-typedef enum {
+
+/** Errors returned when XCORE_C_NO_EXCEPTION policy is active
+ *
+ *  All errors (apart from error_none) are caught hardware exceptions.
+ *  See 'The XMOS XS1/XS2 Architecture' for details regarding the exceptions.
+ */
+ typedef enum {
   error_none                = XS1_ET_NONE,
   error_link_error          = XS1_ET_LINK_ERROR,
   error_illegal_pc          = XS1_ET_ILLEGAL_PC,

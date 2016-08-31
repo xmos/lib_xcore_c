@@ -5,8 +5,10 @@
 
 #include "xcore_c_exception_impl.h"
 
-/** Type that denotes a hardware lock which provide a mutex function.
+/**
+ * lock is an opaque type that denotes a hardware lock which provide a mutex function.
  *
+ *  Users must not access its raw underlying type.
  */
 typedef int lock;
 

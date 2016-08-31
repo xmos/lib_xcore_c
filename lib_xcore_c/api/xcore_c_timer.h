@@ -224,8 +224,8 @@ inline xcore_c_error timer_setup_select(hwtimer_t t, int time, unsigned enum_id)
  *  \exception  ET_RESOURCE_DEP       another core is actively using the timer.
  *  \exception  ET_ECALL              when xassert enabled, on XS1 bit 16 not set in enum_id.
  */
-inline xcore_c_error timer_setup_select_callback(hwtimer_t t, int time, void *data,
-                                            select_callback func)
+inline xcore_c_error
+timer_setup_select_callback(hwtimer_t t, int time, void *data, select_callback func)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _resource_setup_select_callback(t, data, func);
@@ -249,8 +249,8 @@ inline xcore_c_error timer_setup_select_callback(hwtimer_t t, int time, void *da
  *  \exception  ET_RESOURCE_DEP       another core is actively using the timer.
  *  \exception  ET_ECALL              when xassert enabled, on XS1 bit 16 not set in enum_id.
  */
-inline xcore_c_error timer_setup_interrupt_callback(hwtimer_t t, int time, void *data,
-                                           interrupt_callback func)
+inline xcore_c_error
+timer_setup_interrupt_callback(hwtimer_t t, int time, void *data, interrupt_callback func)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _resource_setup_interrupt_callback(t, data, func);

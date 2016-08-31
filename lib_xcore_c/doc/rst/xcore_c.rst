@@ -127,7 +127,7 @@ Streaming channels
 Streaming channels can be used in a similar manner to standard channels. A
 streaming channel is created using::
 
-  streaming_chanend c;
+  streaming_chanend_t c;
   s_chan_alloc(&c);
 
 Data can then be sent and received using::
@@ -495,43 +495,139 @@ requirements which must be adhered to ensure safe operation:
   #. The core must have interrupts masked when disabling interrupts for a
      resource.
 
+Example
+~~~~~~~
+
+As an example, take a function which receives data from two channels and handles
+whichever one is ready.
+
+We start by declaring the scope in which interrupts may occur. The hosting function will make space on its stack for a temporary kernel stack.
+The best place to do this is where the logical core is started.
+Our ordinary 'void test(chanend,chanend)' is turned into a hosting function by
+wrapping it in a function macro::
+
+  // xc top level file creating our logical cores.
+  DECLARE_INTERRUPT_PERMITTED(void, test, chanend c1, chanend c2);
+  int main() {
+    chan c, d;
+    par {
+      INTERRUPT_PERMITTED(test)(c, d); // interrupts hosted on this core.
+
+      // Start two other cores to create the interrupt events.
+      {
+        delay_ticks(5000);
+        c <: 12;
+        delay_ticks(5000);
+        c <: 34;
+      }
+      {
+        delay_ticks(10000);
+        d <: 56;
+        delay_ticks(10000);
+        d <: 78;
+      }
+    }
+    return 0;
+  }
+
+and likewise the definition (see below for implemenation)::
+
+  DEFINE_INTERRUPT_PERMITTED(my_group, void, test, chanend c1, chanend c2)
+  {
+    ...
+  }
+
+The identifier 'my_group' tells the hosting function which interrupts it will
+be hosting, so it can calculate the stack requirements.
+
+One piece of user data will be sent to the callback as a 'void*' argument.
+We will register a pointer to a structure::
+
+  typedef struct {
+    chanend c;    // The resource that casued the interrupt.
+    const char *message;
+  } chan_data_t;
+
+We now define/declare the interrupt callback function, wrapping it in function
+macros and placing it in the same group::
+
+  volatile int received = 0;  // For the host to monitor events.
+
+  DEFINE_INTERRUPT_CALLBACK(my_group, my_handler, data)
+  {
+    chan_data_t *cd = (chan_data_t*)data;
+    int x;
+    chan_in_word(cd->c, &x);
+    debug_printf("%s received %d\n", cd->message, x);
+    received++;
+  }
+
+And finally we can set up the interrupt and enable them::
+
+  DEFINE_INTERRUPT_PERMITTED(my_group, void, test, chanend c1, chanend c2)
+  {
+    // Set up interrupt.
+    // We assume either the triggers are disabled or interrupts are masked.
+    chan_data_t cd1 = {c1, "channel 1"};
+    chanend_setup_interrupt_callback(cd1.c, (void*)&cd1,
+                                     INTERRUPT_CALLBACK(my_handler));
+    chan_data_t cd2 = {c2, "channel 2"};
+    chanend_setup_interrupt_callback(cd2.c, (void*)&cd2,
+                                     INTERRUPT_CALLBACK(my_handler));
+    // Enable interrupts.
+    chanend_enable_trigger(cd1.c);
+    chanend_enable_trigger(cd2.c);
+    interrupt_unmask_all();
+
+And when we have finished, disable them::
+
+    while (received < 4);
+
+    // Disable interrupts.
+    interrupt_mask_all(); // Mask before disabling.
+    chanend_disable_trigger(cd1.c);
+    chanend_disable_trigger(cd2.c);
+}
+
 
 API
 ---
 
-Supporting opaque types
-.......................
+Opaque types used by the library
+................................
 
 .. doxygentypedef:: resource
 
-.. doxygentypedef:: lock
+.. doxygentypedef:: chanend
 
-.. doxygentypedef:: streaming_chanend
+.. doxygentypedef:: streaming_chanend_t
 
 .. doxygentypedef:: transacting_chanend
 
-.. doxygentypedef:: event_handler
+.. doxygentypedef:: clock
 
-.. doxygentypedef:: interrupt_handler
+.. doxygentypedef:: lock
 
-.. doxygenenum:: port_condition
+.. doxygentypedef:: port
 
-|newpage|
+.. doxygentypedef:: hwtimer_t
 
-Timers
-......
+.. doxygentypedef:: select_callback
 
-.. doxygenfunction:: timer_alloc
-
-.. doxygenfunction:: timer_free
-
-.. doxygenfunction:: timer_get_time
-
-.. doxygenfunction:: timer_delay
+.. doxygentypedef:: interrupt_callback
 
 |newpage|
 
-Channels
+Errors and exception
+....................
+
+.. doxygenenum:: xcore_c_error
+
+.. doxygendefine:: XCORE_C_NO_EXCEPTION
+
+|newpage|
+
+Chanends
 ........
 
 .. doxygenfunction:: chanend_alloc
@@ -539,6 +635,23 @@ Channels
 .. doxygenfunction:: chanend_free
 
 .. doxygenfunction:: chanend_set_dest
+
+.. doxygenfunction:: chanend_setup_select
+
+.. doxygenfunction:: chanend_setup_select_callback
+
+.. doxygenfunction:: chanend_setup_interrupt_callback
+
+.. doxygenfunction:: chanend_enable_trigger
+
+.. doxygenfunction:: chanend_disable_trigger
+
+|newpage|
+
+Channels
+........
+
+.. doxygentypedef:: channel
 
 .. doxygenfunction:: chan_alloc
 
@@ -565,17 +678,11 @@ Channels
 Streaming channels
 ..................
 
+.. doxygentypedef:: streaming_channel
+
 .. doxygenfunction:: s_chan_alloc
 
 .. doxygenfunction:: s_chan_free
-
-.. doxygenfunction:: s_chan_out_ct
-
-.. doxygenfunction:: s_chan_out_ct_end
-
-.. doxygenfunction:: s_chan_check_ct
-
-.. doxygenfunction:: s_chan_check_ct_end
 
 .. doxygenfunction:: s_chan_out_word
 
@@ -592,6 +699,14 @@ Streaming channels
 .. doxygenfunction:: s_chan_in_buf_word
 
 .. doxygenfunction:: s_chan_in_buf_byte
+
+.. doxygenfunction:: s_chan_out_ct
+
+.. doxygenfunction:: s_chan_out_ct_end
+
+.. doxygenfunction:: s_chan_check_ct
+
+.. doxygenfunction:: s_chan_check_ct_end
 
 |newpage|
 
@@ -622,110 +737,6 @@ Channels with transactions
 
 |newpage|
 
-Ports
-.....
-
-.. doxygenfunction:: port_alloc
-
-.. doxygenfunction:: port_alloc_buffered
-
-.. doxygenfunction:: port_free
-
-.. doxygenfunction:: port_set_transfer_width
-
-.. doxygenfunction:: port_set_unbuffered
-
-.. doxygenfunction:: port_set_buffered
-
-.. doxygenfunction:: port_set_clock
-
-.. doxygenfunction:: port_set_inout_data
-
-.. doxygenfunction:: port_set_out_clock
-
-.. doxygenfunction:: port_set_out_ready
-
-.. doxygenfunction:: port_set_invert
-
-.. doxygenfunction:: port_set_no_invert
-
-.. doxygenfunction:: port_set_sample_delay
-
-.. doxygenfunction:: port_set_no_sample_delay
-
-.. doxygenfunction:: port_set_master
-
-.. doxygenfunction:: port_set_slave
-
-.. doxygenfunction:: port_set_no_ready
-
-.. doxygenfunction:: port_set_ready_strobed
-
-.. doxygenfunction:: port_set_ready_handshake
-
-.. doxygenfunction:: port_out
-
-.. doxygenfunction:: port_out_at_time
-
-.. doxygenfunction:: port_out_shift_right
-
-.. doxygenfunction:: port_out_shift_right_at_time
-
-.. doxygenfunction:: port_peek
-
-.. doxygenfunction:: port_in
-
-.. doxygenfunction:: port_in_when_pinseq
-
-.. doxygenfunction:: port_in_when_pinsneq
-
-.. doxygenfunction:: port_in_at_time
-
-.. doxygenfunction:: port_in_shift_right
-
-.. doxygenfunction:: port_in_shift_right_when_pinseq
-
-.. doxygenfunction:: port_in_shift_right_when_pinsneq
-
-.. doxygenfunction:: port_in_shift_right_at_time
-
-.. doxygenfunction:: port_get_timestamp
-
-.. doxygenfunction:: port_set_condition
-
-.. doxygenfunction:: port_set_conditional_data
-
-.. doxygenfunction:: port_clear_condition
-
-.. doxygenfunction:: port_set_time_condition
-
-.. doxygenfunction:: port_clear_time_condition
-
-.. doxygenfunction:: port_clear_buffer
-
-.. doxygenfunction:: port_endin
-
-.. doxygenfunction:: port_force_input
-
-|newpage|
-
-Port configuration helpers
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. doxygenfunction:: port_protocol_in_handshake
-
-.. doxygenfunction:: port_protocol_out_handshake
-
-.. doxygenfunction:: port_protocol_in_strobed_master
-
-.. doxygenfunction:: port_protocol_out_strobed_master
-
-.. doxygenfunction:: port_protocol_in_strobed_slave
-
-.. doxygenfunction:: port_protocol_out_strobed_slave
-
-|newpage|
-
 Clock blocks
 ............
 
@@ -745,6 +756,8 @@ Clock blocks
 
 .. doxygenfunction:: clock_set_divide
 
+.. doxygenfunction:: clock_set_ready_src
+
 |newpage|
 
 Locks
@@ -760,81 +773,198 @@ Locks
 
 |newpage|
 
-Events
-......
+Ports
+.....
 
-.. doxygendefine:: EVENT_MAX_HANDLER_FUNCTIONS
+.. doxygenenum:: port_type_t
 
-.. doxygenfunction:: event_disable
+.. doxygenfunction:: port_alloc
 
-.. doxygenfunction:: event_enable
+.. doxygenfunction:: port_reset
 
-.. doxygenfunction:: event_clear_all
+.. doxygenfunction:: port_alloc_buffered
 
-.. doxygenfunction:: event_setup_timer
+.. doxygenfunction:: port_free
 
-.. doxygenfunction:: event_setup_timer_function
+.. doxygenfunction:: port_set_transfer_width
 
-.. doxygenfunction:: event_clear_timer
+.. doxygenfunction:: port_set_buffered
 
-.. doxygenfunction:: event_change_timer_time
+.. doxygenfunction:: port_set_unbuffered
 
-.. doxygenfunction:: event_setup_chanend
+.. doxygenfunction:: port_set_clock
 
-.. doxygenfunction:: event_setup_chanend_function
+.. doxygenfunction:: port_set_inout_data
 
-.. doxygenfunction:: event_clear_chanend
+.. doxygenfunction:: port_set_out_clock
 
-.. doxygenfunction:: event_setup_port
+.. doxygenfunction:: port_set_out_ready
 
-.. doxygenfunction:: event_setup_port_function
+.. doxygenfunction:: port_set_invert
 
-.. doxygenfunction:: event_clear_port
+.. doxygenfunction:: port_set_no_invert
 
-.. doxygenfunction:: event_change_port_condition
+.. doxygenfunction:: port_set_sample_falling_edge
 
-.. doxygenfunction:: event_change_port_time
+.. doxygenfunction:: port_set_sample_rising_edge
 
-.. doxygenfunction:: event_select
+.. doxygenfunction:: port_set_master
 
-.. doxygenfunction:: event_select_no_wait
+.. doxygenfunction:: port_set_slave
 
-.. doxygenfunction:: event_select_ordered
+.. doxygenfunction:: port_set_no_ready
 
-.. doxygenfunction:: event_select_ordered_no_wait
+.. doxygenfunction:: port_set_ready_strobed
+
+.. doxygenfunction:: port_set_ready_handshake
+
+.. doxygenfunction:: port_get_trigger_time
+
+.. doxygenfunction:: port_set_trigger_time
+
+.. doxygenfunction:: port_clear_trigger_time
+
+.. doxygenfunction:: port_set_trigger_in_equal
+
+.. doxygenfunction:: port_set_trigger_in_not_equal
+
+.. doxygenfunction:: port_clear_trigger_in
+
+.. doxygenfunction:: port_peek
+
+.. doxygenfunction:: port_out
+
+.. doxygenfunction:: port_in
+
+.. doxygenfunction:: port_out_shift_right
+
+.. doxygenfunction:: port_in_shift_right
+
+.. doxygenfunction:: port_out_at_time
+
+.. doxygenfunction:: port_in_at_time
+
+.. doxygenfunction:: port_out_shift_right_at_time
+
+.. doxygenfunction:: port_in_shift_right_at_time
+
+.. doxygenfunction:: port_in_when_pinseq
+
+.. doxygenfunction:: port_in_when_pinsneq
+
+.. doxygenfunction:: port_in_shift_right_when_pinseq
+
+.. doxygenfunction:: port_in_shift_right_when_pinsneq
+
+.. doxygenfunction:: port_clear_buffer
+
+.. doxygenfunction:: port_endin
+
+.. doxygenfunction:: port_force_input
+
+.. doxygenfunction:: port_setup_select
+
+.. doxygenfunction:: port_setup_select_callback
+
+.. doxygenfunction:: port_setup_interrupt_callback
+
+.. doxygenfunction:: port_enable_trigger
+
+.. doxygenfunction:: port_disable_trigger
 
 |newpage|
 
-Interrupts
-..........
+Port protocol helpers
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. doxygendefine:: INTERRUPT_MAX_HANDLER_FUNCTIONS
+.. doxygenfunction:: port_protocol_in_handshake
 
-.. doxygenfunction:: interrupt_disable
+.. doxygenfunction:: port_protocol_out_handshake
 
-.. doxygenfunction:: interrupt_enable
+.. doxygenfunction:: port_protocol_in_strobed_master
+
+.. doxygenfunction:: port_protocol_out_strobed_master
+
+.. doxygenfunction:: port_protocol_in_strobed_slave
+
+.. doxygenfunction:: port_protocol_out_strobed_slave
+
+|newpage|
+
+Timers
+......
+
+.. doxygenfunction:: timer_alloc
+
+.. doxygenfunction:: timer_free
+
+.. doxygenfunction:: timer_get_time
+
+.. doxygenfunction:: timer_set_trigger_time
+
+.. doxygenfunction:: timer_change_trigger_time
+
+.. doxygenfunction:: timer_clear_trigger_time
+
+.. doxygenfunction:: timer_wait_until
+
+.. doxygenfunction:: timer_delay
+
+.. doxygenfunction:: timer_setup_select
+
+.. doxygenfunction:: timer_setup_select_callback
+
+.. doxygenfunction:: timer_setup_interrupt_callback
+
+.. doxygenfunction:: timer_enable_trigger
+
+.. doxygenfunction:: timer_disable_trigger
+
+|newpage|
+
+Select events
+.............
+
+.. doxygendefine:: ENUM_ID_BASE
+
+.. doxygenfunction:: select_disable_trigger_all
+
+.. doxygenfunction:: select_wait
+
+.. doxygenfunction:: select_no_wait
+
+.. doxygenfunction:: select_wait_ordered
+
+.. doxygenfunction:: select_no_wait_ordered
+
+.. doxygendefine:: DEFINE_SELECT_CALLBACK
+
+.. doxygendefine:: DECLARE_SELECT_CALLBACK
+
+.. doxygendefine:: SELECT_CALLBACK
+
+|newpage|
+
+Interrupt events
+................
+
+.. doxygendefine:: XCORE_C_KSTACK_WORDS
+
+.. doxygendefine:: DEFINE_INTERRUPT_PERMITTED
+
+.. doxygendefine:: DECLARE_INTERRUPT_PERMITTED
+
+.. doxygendefine:: INTERRUPT_PERMITTED
 
 .. doxygenfunction:: interrupt_mask_all
 
 .. doxygenfunction:: interrupt_unmask_all
 
-.. doxygenfunction:: interrupt_setup_timer_function
+.. doxygendefine:: DEFINE_INTERRUPT_CALLBACK
 
-.. doxygenfunction:: interrupt_clear_timer
+.. doxygendefine:: DECLARE_INTERRUPT_CALLBACK
 
-.. doxygenfunction:: interrupt_change_timer_time
-
-.. doxygenfunction:: interrupt_setup_chanend_function
-
-.. doxygenfunction:: interrupt_clear_chanend
-
-.. doxygenfunction:: interrupt_setup_port_function
-
-.. doxygenfunction:: interrupt_clear_port
-
-.. doxygenfunction:: interrupt_change_port_condition
-
-.. doxygenfunction:: interrupt_change_port_time
+.. doxygendefine:: INTERRUPT_CALLBACK
 
 |appendix|
 

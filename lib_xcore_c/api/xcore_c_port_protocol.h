@@ -34,8 +34,8 @@
  *                                    or readyin/readyout not a one bit port.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing a port/clock
  */
- inline xcore_c_error port_protocol_in_handshake(port p, port readyin, port readyout,
-                                             clock clk)
+ inline xcore_c_error
+ port_protocol_in_handshake(port p, port readyin, port readyout, clock clk)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _port_set_inout_data(p); \
@@ -82,8 +82,8 @@
  *                                    or readyin/readyout not a one bit port.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing a port/clock
  */
-inline xcore_c_error port_protocol_out_handshake(port p, port readyin, port readyout,
-                                             clock clk, unsigned initial)
+inline xcore_c_error
+port_protocol_out_handshake(port p, port readyin, port readyout, clock clk, unsigned initial)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _port_set_inout_data(p); \
@@ -122,7 +122,8 @@ inline xcore_c_error port_protocol_out_handshake(port p, port readyin, port read
  *                                    or readyout not a one bit port.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing a port/clock
  */
-inline xcore_c_error port_protocol_in_strobed_master(port p, port readyout, const clock clk)
+inline xcore_c_error
+port_protocol_in_strobed_master(port p, port readyout, clock clk)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _port_set_inout_data(p); \
@@ -161,8 +162,8 @@ inline xcore_c_error port_protocol_in_strobed_master(port p, port readyout, cons
  *                                    or readyout not a one bit port.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing a port/clock
  */
-inline xcore_c_error port_protocol_out_strobed_master(port p, port readyout,
-                                                  const clock clk, unsigned initial)
+inline xcore_c_error
+port_protocol_out_strobed_master(port p, port readyout, clock clk, unsigned initial)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _port_set_inout_data(p); \
@@ -198,7 +199,8 @@ inline xcore_c_error port_protocol_out_strobed_master(port p, port readyout,
  *                                    or readyin not a one bit port.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing a port/clock
  */
-inline xcore_c_error port_protocol_in_strobed_slave(port p, port readyin, clock clk)
+inline xcore_c_error
+port_protocol_in_strobed_slave(port p, port readyin, clock clk)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _port_set_inout_data(p); \
@@ -236,8 +238,8 @@ inline xcore_c_error port_protocol_in_strobed_slave(port p, port readyin, clock 
  *                                    or readyin not a one bit port.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing a port/clock
  */
-inline xcore_c_error port_protocol_out_strobed_slave(port p, port readyin,
-                                                 clock clk, unsigned initial)
+inline xcore_c_error
+port_protocol_out_strobed_slave(port p, port readyin, clock clk, unsigned initial)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _port_set_inout_data(p); \

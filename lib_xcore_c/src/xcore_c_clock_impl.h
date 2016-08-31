@@ -7,6 +7,17 @@
 // The contents may vary between releases.
 
 #include <xccompat.h>
+#ifdef __DOXYGEN__
+// Copy typedefs from xccompat.h for use by doxygen
+/**
+ * clock is an opaque type for use in C/C++ code.
+ * It enables a XC function prototyped as taking a parameter of type clock to
+ * be called from C and vice versa.
+ *
+ *  Users must not access its raw underlying type.
+ */
+typedef unsigned clock;
+#endif
 
 inline void _clock_set_ready_src(clock clk, port ready_source)
 {

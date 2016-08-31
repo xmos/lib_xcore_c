@@ -105,15 +105,9 @@ DEFINE_INTERRUPT_PERMITTED(groupA, void, test, chanend c1, chanend c2)
   hwtimer_t t;
   timer_alloc(&t);
 
-  static chan_data_t cd1;
-  cd1.c = c1;
-  cd1.id = CHAN_ID_1;
-  static chan_data_t cd2;
-  cd2.c = c2;
-  cd2.id = CHAN_ID_2;
-  static timer_data_t td;
-  td.t = t;
-  td.v = 0xfeedbeef;
+  chan_data_t cd1 = {c1, CHAN_ID_1};
+  chan_data_t cd2 = {c2, CHAN_ID_2};
+  timer_data_t td = {t, 0xfeedbeef};
 
   // Test 1: Run the test function with the timer enabled
   int time;

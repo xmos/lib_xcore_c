@@ -4,14 +4,14 @@
 extern chanend _chanend_alloc(void);
 extern void _chanend_free(chanend c);
 extern void _chanend_set_dest(chanend c, chanend dst);
-extern void _s_chan_out_word(streaming_chanend c, int data);
-extern void _s_chan_out_byte(streaming_chanend c, char data);
-extern int _s_chan_in_word(streaming_chanend c);
-extern char _s_chan_in_byte(streaming_chanend c);
-extern void _s_chan_out_ct(streaming_chanend c, int ct);
-extern void _s_chan_out_ct_end(streaming_chanend c);
-extern void _s_chan_check_ct(streaming_chanend c, int ct);
-extern void _s_chan_check_ct_end(streaming_chanend c);
+extern void _s_chan_out_word(streaming_chanend_t c, int data);
+extern void _s_chan_out_byte(streaming_chanend_t c, char data);
+extern int _s_chan_in_word(streaming_chanend_t c);
+extern char _s_chan_in_byte(streaming_chanend_t c);
+extern void _s_chan_out_ct(streaming_chanend_t c, int ct);
+extern void _s_chan_out_ct_end(streaming_chanend_t c);
+extern void _s_chan_check_ct(streaming_chanend_t c, int ct);
+extern void _s_chan_check_ct_end(streaming_chanend_t c);
 extern void _t_chan_change_to_input(transacting_chanend *tc);
 extern void _t_chan_change_to_output(transacting_chanend *tc);
 
@@ -28,18 +28,18 @@ extern xcore_c_error chanend_disable_trigger(chanend c);
 #include "xcore_c_channel_streaming.h"
 extern xcore_c_error s_chan_alloc(streaming_channel *c);
 extern xcore_c_error s_chan_free(streaming_channel *c);
-extern xcore_c_error s_chan_out_word(streaming_chanend c, int data);
-extern xcore_c_error s_chan_out_byte(streaming_chanend c, char data);
-extern xcore_c_error s_chan_out_buf_word(streaming_chanend c, int buf[], int n);
-extern xcore_c_error s_chan_out_buf_byte(streaming_chanend c, char buf[], int n);
-extern xcore_c_error s_chan_in_word(streaming_chanend c, int *data);
-extern xcore_c_error s_chan_in_byte(streaming_chanend c, char *data);
-extern xcore_c_error s_chan_in_buf_word(streaming_chanend c, int buf[], int n);
-extern xcore_c_error s_chan_in_buf_byte(streaming_chanend c, char buf[], int n);
-extern xcore_c_error s_chan_out_ct(streaming_chanend c, int ct);
-extern xcore_c_error s_chan_out_ct_end(streaming_chanend c);
-extern xcore_c_error s_chan_check_ct(streaming_chanend c, int ct);
-extern xcore_c_error s_chan_check_ct_end(streaming_chanend c);
+extern xcore_c_error s_chan_out_word(streaming_chanend_t c, int data);
+extern xcore_c_error s_chan_out_byte(streaming_chanend_t c, char data);
+extern xcore_c_error s_chan_out_buf_word(streaming_chanend_t c, int buf[], int n);
+extern xcore_c_error s_chan_out_buf_byte(streaming_chanend_t c, char buf[], int n);
+extern xcore_c_error s_chan_in_word(streaming_chanend_t c, int *data);
+extern xcore_c_error s_chan_in_byte(streaming_chanend_t c, char *data);
+extern xcore_c_error s_chan_in_buf_word(streaming_chanend_t c, int buf[], int n);
+extern xcore_c_error s_chan_in_buf_byte(streaming_chanend_t c, char buf[], int n);
+extern xcore_c_error s_chan_out_ct(streaming_chanend_t c, int ct);
+extern xcore_c_error s_chan_out_ct_end(streaming_chanend_t c);
+extern xcore_c_error s_chan_check_ct(streaming_chanend_t c, int ct);
+extern xcore_c_error s_chan_check_ct_end(streaming_chanend_t c);
 
 #include "xcore_c_channel.h"
 extern xcore_c_error chan_alloc(channel *c);

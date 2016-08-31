@@ -13,13 +13,12 @@
 /** The exception policy for the library.
  *
  *  If the user respects the resource type parameter of the library,
- *  checks for zero on allocation, passes in valid pointers and
- *  does not access the same resource on multiple logical cores
+ *  checks for zero (fail) on allocation, passes in valid pointer addresses
+ *  and does not access the same resource on multiple logical cores
  *  the library will not throw an exception.
- *  Exceptions are seen as user error.
+ *  Exceptions should be viewed as programming errors rather than runtime errors.
  *
- *  The default exception policy for the library is to
- *  throw exceptions.
+ *  The default exception policy for the library is to throw exceptions.
  *  Setting the library to no_exceptions will increase the code size
  *  and run time of the resultant binary.
  *  
