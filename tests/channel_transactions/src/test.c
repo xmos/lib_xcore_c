@@ -29,7 +29,7 @@ void test_int(chanend c)
 {
   // First receive the data as a slave transaction
   int data[array_len];
-  transacting_chanend tc;
+  transacting_chanend_t tc;
   chan_init_transaction_slave(&c, &tc);
   xassert(!c && tc.c);
   for (size_t i = 0; i < array_len; i++) {
@@ -59,7 +59,7 @@ void test_char(chanend c)
 {
   // First receive the data as a slave transaction
   char data[array_len];
-  transacting_chanend tc;
+  transacting_chanend_t tc;
   chan_init_transaction_master(&c, &tc);
   t_chan_in_buf_byte(&tc, data, array_len);
   chan_complete_transaction(&c, &tc);

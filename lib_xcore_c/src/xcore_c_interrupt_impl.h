@@ -6,7 +6,6 @@
 // This file contains private implementation details and is not part of the API.
 // The contents may vary between releases.
 
-#include <stdint.h>
 #include "xcore_c_macros.h"
 #include "xcore_c_resource_impl.h"
 

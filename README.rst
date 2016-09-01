@@ -16,7 +16,8 @@ Features
    with XC channels and the ability to write custom channel protocols
  * Support for ports and clock blocks
  * Support for timers
- * Support for events so that XC 'select' functionality can be implemented
+ * Support for select events so that XC 'select' functionality can be implemented
+ * Support for interrupt events
 
 Software version and dependencies
 .................................

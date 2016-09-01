@@ -13,14 +13,14 @@
 void port_test_output(chanend c)
 {
   port p;
-  port_alloc(&p, XS1_PORT_1A);
+  port_alloc(&p, port_1A);
   port_set_buffered(p);
   port_set_transfer_width(p, 32);
 
   port p_ready;
-  port_alloc(&p_ready, XS1_PORT_1B);
+  port_alloc(&p_ready, port_1B);
   clock clk;
-  clock_alloc(&clk, XS1_CLKBLK_1);
+  clock_alloc(&clk, clock_1);
   clock_start(clk);
 
   port_protocol_out_strobed_master(p, p_ready, clk, 0);
@@ -56,14 +56,14 @@ void port_test_output(chanend c)
 void port_test_input(chanend c)
 {
   port p;
-  port_alloc(&p, XS1_PORT_1C);
+  port_alloc(&p, port_1C);
   port_set_buffered(p);
   port_set_transfer_width(p, 32);
 
   port p_ready;
-  port_alloc(&p_ready, XS1_PORT_1D);
+  port_alloc(&p_ready, port_1D);
   clock clk;
-  clock_alloc(&clk, XS1_CLKBLK_2);
+  clock_alloc(&clk, clock_2);
   clock_start(clk);
 
   port_protocol_in_strobed_slave(p, p_ready, clk);

@@ -19,11 +19,11 @@
 _xcore_c_select_callback_common:
   // This is the body of the _xcore_c_select_callback_XXX functions.
   // We have an active _SELECT_CALLBACK_STACK_SIZE word sp stack.
-  // r1 holds the select_callback function to call.
+  // r1 holds the select_callback_t function to call.
   // event fired viz: clrsr 0x1
   get r11, ed
   add r0, r11, 0
-  bla r1              // The select_callback function.
+  bla r1              // The select_callback_t function.
   ldw lr, sp[_SELECT_CALLBACK_STACK_SIZE]
   ldaw sp, sp[_SELECT_CALLBACK_STACK_SIZE]
   waiteu              // setsr 0x1

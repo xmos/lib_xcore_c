@@ -64,13 +64,13 @@ static void test_xcore_clock(hwtimer_t tmr, port p, clock c)
 static void test_port_clock(hwtimer_t tmr, port p, clock c)
 {
   clock divided_c;
-  clock_alloc(&divided_c, XS1_CLKBLK_2);
+  clock_alloc(&divided_c, clock_2);
   xassert(divided_c);
   clock_set_divide(divided_c, 2);
 
   // Enable a port to use as a clock source
   port p_clk_src;
-  port_alloc(&p_clk_src, XS1_PORT_1B);
+  port_alloc(&p_clk_src, port_1B);
   port_set_clock(p_clk_src, divided_c);
   port_set_out_clock(p_clk_src);
 
@@ -98,11 +98,11 @@ void test_clock_sources()
   xassert(tmr);
   // Allocate the clock to control the port
   clock c;
-  clock_alloc(&c, XS1_CLKBLK_1);
+  clock_alloc(&c, clock_1);
   xassert(c);
   // Enable a port to use as a clock source
   port p;
-  port_alloc(&p, XS1_PORT_1A);
+  port_alloc(&p, port_1A);
   xassert(p);
   port_set_buffered(p);
   port_set_transfer_width(p, 32);

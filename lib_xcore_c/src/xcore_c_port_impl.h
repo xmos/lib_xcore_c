@@ -7,6 +7,7 @@
 // The contents may vary between releases.
 
 #include <stdint.h>
+#include <stddef.h>
 #include <xccompat.h>
 #ifdef __DOXYGEN__
 // Copy typedefs from xccompat.h for use by doxygen
@@ -26,15 +27,15 @@ inline void _port_setc(port p, uint32_t c)
   asm volatile("setc res[%0], %1" :: "r" (p), "r" (c));
 }
 
-inline void _port_set_transfer_width(port p, int width)
+inline void _port_set_transfer_width(port p, size_t width)
 {
   asm volatile("settw res[%0], %1" :: "r" (p), "r" (width));
 }
 
-inline port _port_alloc(int port_id)
+inline port _port_alloc(unsigned id)
 {
-  _port_setc(port_id, XS1_SETC_INUSE_ON);
-  return port_id;
+  _port_setc(id, XS1_SETC_INUSE_ON);
+  return id;
 }
 
 inline void _port_reset(port p)
@@ -140,13 +141,13 @@ inline void _port_clear_trigger_time(port p)
   asm volatile("clrpt res[%0]" :: "r" (p));
 }
 
-inline void _port_set_trigger_in_equal(port p, int d)
+inline void _port_set_trigger_in_equal(port p, uint32_t d)
 {
   _port_setc(p, XS1_SETC_COND_EQ);
   asm volatile("setd res[%0], %1" :: "r" (p), "r" (d));
 }
 
-inline void _port_set_trigger_in_not_equal(port p, int d)
+inline void _port_set_trigger_in_not_equal(port p, uint32_t d)
 {
   _port_setc(p, XS1_SETC_COND_NEQ);
   asm volatile("setd res[%0], %1" :: "r" (p), "r" (d));
@@ -157,40 +158,40 @@ inline void _port_clear_trigger_in(port p)
   _port_setc(p, XS1_SETC_COND_NONE);
 }
 
-inline int _port_peek(port p)
+inline uint32_t _port_peek(port p)
 {
-  int data;
+  uint32_t data;
   asm volatile("peek %0, res[%1]" : "=r" (data): "r" (p));
   return data;
 }
 
-inline void _port_out(port p, int data)
+inline void _port_out(port p, uint32_t data)
 {
   asm volatile("out res[%0], %1" :: "r" (p), "r" (data));
 }
 
-inline int _port_in(port p)
+inline uint32_t _port_in(port p)
 {
-  int data;
+  uint32_t data;
   asm volatile("in %0, res[%1]" : "=r" (data): "r" (p));
   return data;
 }
 
-inline void _port_out_shift_right(port p, int *data)
+inline void _port_out_shift_right(port p, uint32_t *data)
 {
   // We read-write data
   asm volatile("outshr res[%1], %0" : "+r" (*data) : "r" (p));
 }
 
-inline void _port_in_shift_right(port p, int *data)
+inline void _port_in_shift_right(port p, uint32_t *data)
 {
   // We read-write data
   asm volatile("inshr %0, res[%1]" : "+r" (*data) : "r" (p));
 }
 
-inline int _port_endin(port p)
+inline size_t _port_endin(port p)
 {
-  int num;
+  size_t num;
   asm volatile("endin %0, res[%1]" : "=r" (num) : "r" (p));
   return num;
 }

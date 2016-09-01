@@ -3,14 +3,8 @@
 #ifndef __xcore_c_lock_h__
 #define __xcore_c_lock_h__
 
+#include "xcore_c_lock_impl.h"
 #include "xcore_c_exception_impl.h"
-
-/**
- * lock is an opaque type that denotes a hardware lock which provide a mutex function.
- *
- *  Users must not access its raw underlying type.
- */
-typedef int lock;
 
 #if !defined(__XC__) || defined(__DOXYGEN__)
 
@@ -21,13 +15,13 @@ typedef int lock;
  *  When the lock is no longer required, lock_free() must be called
  *  to deallocate it.
  *
- *  \param l    lock variable representing the initialised lock
+ *  \param l    lock_t variable representing the initialised lock
  *
  *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
- *  \exception  ET_LOAD_STORE         invalid *l argument.
+ *  \exception  ET_LOAD_STORE         invalid ''\*l'' argument.
  */
-inline xcore_c_error lock_alloc(lock *l)
+inline xcore_c_error_t lock_alloc(lock_t *l)
 {
   RETURN_EXCEPTION_OR_ERROR( asm volatile("getr %0, 5" : "=r" (*l)) );
 }
@@ -37,16 +31,16 @@ inline xcore_c_error lock_alloc(lock *l)
  *  This function frees the hardware lock.
  *  The lock must be released prior to calling this function.
  *
- *  \param l    The lock to be freed
+ *  \param l    The lock_t to be freed
  *
  *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated lock,
  *                                    or the lock has not been released.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the lock.
- *  \exception  ET_LOAD_STORE         invalid *l argument.
+ *  \exception  ET_LOAD_STORE         invalid ''\*l'' argument.
  */
-inline xcore_c_error lock_free(lock *l)
+inline xcore_c_error_t lock_free(lock_t *l)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 asm volatile("freer res[%0]" :: "r" (*l)); \
@@ -61,17 +55,17 @@ inline xcore_c_error lock_free(lock *l)
  *  lock then this function will pause until the lock is released and this core
  *  becomes the owner.
  *
- *  \param l    The lock to acquire
+ *  \param l    The lock_t to acquire
  *
  *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated lock.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the lock.
  */
-inline xcore_c_error lock_acquire(lock l)
+inline xcore_c_error_t lock_acquire(lock_t l)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
-                                int dummy; \
+                                unsigned dummy; \
                                 asm volatile("in %0, res[%1]" : "=r" (dummy): "r" (l)); \
                               } while (0) );
 }
@@ -83,14 +77,14 @@ inline xcore_c_error lock_acquire(lock l)
  *  *Note*: there are no checks that the core releasing the lock is the current
  *  owner.
  *
- *  \param l    The lock to use release
+ *  \param l    The lock_t to use release
  *
  *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated lock.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the lock.
  */
-inline xcore_c_error lock_release(lock l)
+inline xcore_c_error_t lock_release(lock_t l)
 {
   RETURN_EXCEPTION_OR_ERROR( asm volatile("out res[%0], %0" :: "r" (l)) );
 }

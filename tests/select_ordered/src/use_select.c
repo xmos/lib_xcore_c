@@ -13,9 +13,9 @@ typedef enum {
   EVENT_TIMER
 } event_choice_t;
 
-void test(chanend c, chanend d, hwtimer_t tmr, resource ids[])
+void test(chanend c, chanend d, hwtimer_t tmr, resource_t ids[])
 {
-  int time;
+  uint32_t time;
   timer_get_time(tmr, &time);
   time += 10;
 
@@ -35,14 +35,14 @@ void test(chanend c, chanend d, hwtimer_t tmr, resource ids[])
     switch (choice) {
       case EVENT_CHAN_C: {
         // Read value to clear event
-        int x;
+        uint32_t x;
         chan_in_word(c, &x);
         debug_printf("Received %d on channel c\n", x);
         break;
       }
       case EVENT_CHAN_D: {
         // Read value to clear event
-        int x;
+        uint32_t x;
         chan_in_word(d, &x);
         debug_printf("Received %d on channel d\n", x);
         break;
@@ -75,7 +75,7 @@ void channel_first(chanend c, chanend d)
   hwtimer_t tmr;
   timer_alloc(&tmr);
 
-  resource ids[4] = {c, d, tmr, 0};
+  resource_t ids[4] = {c, d, tmr, 0};
   test(c, d, tmr, ids);
 
   timer_free(&tmr);
@@ -89,7 +89,7 @@ void timer_first(chanend c, chanend d)
   hwtimer_t tmr;
   timer_alloc(&tmr);
 
-  resource ids[4] = {tmr, d, c, 0};
+  resource_t ids[4] = {tmr, d, c, 0};
   test(c, d, tmr, ids);
 
   timer_free(&tmr);

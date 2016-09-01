@@ -19,7 +19,7 @@
  *
  *  Users must not access its raw underlying type.
  */
-typedef uint32_t resource;
+typedef uint32_t resource_t;
 
 typedef void(*callback_function)(void);
 
@@ -29,7 +29,7 @@ typedef void(*callback_function)(void);
  *
  *  Users must not access its raw underlying type.
  */
-typedef callback_function select_callback;
+typedef callback_function select_callback_t;
 
 /** wrapped interrupt callback function
  *
@@ -37,33 +37,33 @@ typedef callback_function select_callback;
  *
  *  Users must not access its raw underlying type.
  */
-typedef callback_function interrupt_callback;
+typedef callback_function interrupt_callback_t;
 
 extern void _select_non_callback(void);  // Implemented in xcore_c_select.S
 
-inline void _resource_enable_trigger(resource r)
+inline void _resource_enable_trigger(resource_t r)
 {
   asm volatile("eeu res[%0]" :: "r" (r));
 }
 
-inline void _resource_disable_trigger(resource r)
+inline void _resource_disable_trigger(resource_t r)
 {
   asm volatile("edu res[%0]" :: "r" (r));
 }
 
-extern void _resource_setup_callback(resource r, void *data, callback_function func, int type);
+extern void _resource_setup_callback(resource_t r, void *data, callback_function func, uint32_t type);
 
-inline void _resource_setup_interrupt_callback(resource r, void *data, interrupt_callback intrpt)
+inline void _resource_setup_interrupt_callback(resource_t r, void *data, interrupt_callback_t intrpt)
 {
   _resource_setup_callback(r, data, intrpt, 0xA);  // Raise interrupts instead of events
 }
 
-inline void _resource_setup_select_callback(resource r, void *data, select_callback callback)
+inline void _resource_setup_select_callback(resource_t r, void *data, select_callback_t callback)
 {
   _resource_setup_callback(r, data, callback, 0x2);  // Raise events instead of interrupts
 }
 
-inline void _resource_setup_select(resource r, uint32_t value)
+inline void _resource_setup_select(resource_t r, uint32_t value)
 {
   _resource_setup_select_callback(r, (void*)value, _select_non_callback);
 }

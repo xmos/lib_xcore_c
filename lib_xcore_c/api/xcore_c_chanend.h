@@ -21,9 +21,9 @@
  *
  *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
- *  \exception  ET_LOAD_STORE         invalid *c argument.
+ *  \exception  ET_LOAD_STORE         invalid ''\*c'' argument.
  */
-inline xcore_c_error chanend_alloc(chanend* c)
+inline xcore_c_error_t chanend_alloc(chanend* c)
 {
   RETURN_EXCEPTION_OR_ERROR( *c = _chanend_alloc() );
 }
@@ -41,9 +41,9 @@ inline xcore_c_error chanend_alloc(chanend* c)
  *                                    an input/output is pending,
  *                                    or it has not received/sent a CT_END token.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
- *  \exception  ET_LOAD_STORE         invalid *c argument.
+ *  \exception  ET_LOAD_STORE         invalid ''\*c'' argument.
  */
-inline xcore_c_error chanend_free(chanend *c)
+inline xcore_c_error_t chanend_free(chanend *c)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _chanend_free(*c); \
@@ -62,7 +62,7 @@ inline xcore_c_error chanend_free(chanend *c)
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
 */
-inline xcore_c_error chanend_set_dest(chanend c, chanend dst)
+inline xcore_c_error_t chanend_set_dest(chanend c, chanend dst)
 {
   RETURN_EXCEPTION_OR_ERROR( _chanend_set_dest(c, dst) );
 }
@@ -76,7 +76,7 @@ inline xcore_c_error chanend_set_dest(chanend c, chanend dst)
  *  Once the event is setup you need to call chanend_enable_trigger() to enable it.
  *
  *  \param c        The chan-end to setup the select event on
- *  \param enum_id  The value to be returned by select_wait() et al then the
+ *  \param enum_id  The value to be returned by select_wait() et al when the
  *                  chan-end event is triggered.
  *
  *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
@@ -85,7 +85,7 @@ inline xcore_c_error chanend_set_dest(chanend c, chanend dst)
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  *  \exception  ET_ECALL              when xassert enabled, on XS1 bit 16 not set in enum_id.
 */
-inline xcore_c_error chanend_setup_select(chanend c, unsigned enum_id)
+inline xcore_c_error_t chanend_setup_select(chanend c, uint32_t enum_id)
 {
   RETURN_EXCEPTION_OR_ERROR( _resource_setup_select(c, enum_id) );
 }
@@ -98,8 +98,8 @@ inline xcore_c_error chanend_setup_select(chanend c, unsigned enum_id)
  *  Once the event is setup you need to call chanend_enable_trigger() to enable it.
  *
  *  \param c      The chan-end to setup the select event on
- *  \param data   The value to be passed to the select_callback function
- *  \param func   The select_callback function to handle the event
+ *  \param data   The value to be passed to the select_callback_t function
+ *  \param func   The select_callback_t function to handle the event
  *
  *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
@@ -107,7 +107,7 @@ inline xcore_c_error chanend_setup_select(chanend c, unsigned enum_id)
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  *  \exception  ET_ECALL              when xassert enabled, on XS1 bit 16 not set in enum_id.
  */
-inline xcore_c_error chanend_setup_select_callback(chanend c, void *data, select_callback func)
+inline xcore_c_error_t chanend_setup_select_callback(chanend c, void *data, select_callback_t func)
 {
   RETURN_EXCEPTION_OR_ERROR( _resource_setup_select_callback(c, data, func) );
 }
@@ -117,8 +117,8 @@ inline xcore_c_error chanend_setup_select_callback(chanend c, void *data, select
  *  Once the event is setup you need to call chanend_enable_trigger() to enable it.
  *
  *  \param c     The chan-end to setup the events on
- *  \param data  The value to be passed to the interrupt_callback function
- *  \param func  The interrupt_callback function to handle events
+ *  \param data  The value to be passed to the interrupt_callback_t function
+ *  \param func  The interrupt_callback_t function to handle events
  *
  *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
@@ -126,8 +126,8 @@ inline xcore_c_error chanend_setup_select_callback(chanend c, void *data, select
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  *  \exception  ET_ECALL              when xassert enabled, on XS1 bit 16 not set in enum_id.
  */
-inline xcore_c_error chanend_setup_interrupt_callback(chanend c, void *data,
-                                                 interrupt_callback func)
+inline xcore_c_error_t chanend_setup_interrupt_callback(chanend c, void *data,
+                                                 interrupt_callback_t func)
 {
   RETURN_EXCEPTION_OR_ERROR( _resource_setup_interrupt_callback(c, data, func) );
 }
@@ -147,7 +147,7 @@ inline xcore_c_error chanend_setup_interrupt_callback(chanend c, void *data,
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid chan-end.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  */
-inline xcore_c_error chanend_enable_trigger(chanend c)
+inline xcore_c_error_t chanend_enable_trigger(chanend c)
 {
   RETURN_EXCEPTION_OR_ERROR( _resource_enable_trigger(c) );
 }
@@ -163,7 +163,7 @@ inline xcore_c_error chanend_enable_trigger(chanend c)
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid chan-end.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
  */
-inline xcore_c_error chanend_disable_trigger(chanend c)
+inline xcore_c_error_t chanend_disable_trigger(chanend c)
 {
   RETURN_EXCEPTION_OR_ERROR( _resource_disable_trigger(c) );
 }

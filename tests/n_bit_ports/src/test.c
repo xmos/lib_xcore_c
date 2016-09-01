@@ -7,7 +7,7 @@
 void port_test_output(chanend c)
 {
   port p;
-  port_alloc(&p, XS1_PORT_4A);
+  port_alloc(&p, port_4A);
 
   int dummy;
   chan_in_word(c, &dummy); // Wait for ack
@@ -31,7 +31,7 @@ void port_test_output(chanend c)
 void port_test_input(chanend c)
 {
   port p;
-  port_alloc(&p, XS1_PORT_4C);
+  port_alloc(&p, port_4C);
 
   int input;
   port_in(p, &input);

@@ -51,7 +51,7 @@ _xcore_c_interrupt_permitted_common:
 _xcore_c_interrupt_callback_common:
   // This is the body of the _xcore_c_interrupt_callback_XXX functions.
   // We have an active _XCORE_C_STACK_ALIGN(7) word ksp frame.
-  // r1 = interrupt_callback function
+  // r1 = interrupt_callback_t function
   stw lr, sp[6]
   // ksp[5] = r11
   stw r0, sp[4]
@@ -59,7 +59,7 @@ _xcore_c_interrupt_callback_common:
   stw r2, sp[2]
   stw r3, sp[1]
   // ksp[0] will be trashed by the bla.
-  // And call the interrupt_callback.
+  // And call the interrupt_callback_t.
   get r11, ed
   add r0, r11, 0
   bla r1

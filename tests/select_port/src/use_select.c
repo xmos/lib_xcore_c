@@ -21,9 +21,9 @@ void port_example()
   select_disable_trigger_all();
 
   port p;
-  port_alloc(&p, XS1_PORT_1A);
+  port_alloc(&p, port_1A);
   port q;
-  port_alloc(&q, XS1_PORT_1B);
+  port_alloc(&q, port_1B);
 
   hwtimer_t t;
   timer_alloc(&t);

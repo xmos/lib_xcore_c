@@ -22,6 +22,6 @@
   error_ecall               = XS1_ET_ECALL,
   error_resource_dep        = XS1_ET_RESOURCE_DEP,
   error_kcall               = XS1_ET_KCALL,
-} xcore_c_error;
+} xcore_c_error_t;
 
 #endif // __xcore_c_error_codes_h__

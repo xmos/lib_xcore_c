@@ -10,10 +10,10 @@ void core0(chanend c)
   hwtimer_t tmr;
   timer_alloc(&tmr);
   xassert(tmr);
-  lock l = 0;
+  lock_t l = 0;
   lock_alloc(&l);
   xassert(l);
-  chan_out_word(c, l);
+  chan_out_word(c, (uint32_t)l);
 
   lock_acquire(l);
   debug_printf("Core0 owns the lock\n");
@@ -22,7 +22,7 @@ void core0(chanend c)
   lock_release(l);
 
   // Wait for core1 to have finished with the lock before freeing it
-  int dummy;
+  uint32_t dummy;
   chan_in_word(c, &dummy);
 
   lock_free(&l);
@@ -33,8 +33,8 @@ void core0(chanend c)
 
 void core1(chanend c)
 {
-  lock l;
-  chan_in_word(c, &l);
+  lock_t l;
+  chan_in_word(c, (uint32_t*)&l);
   debug_printf("Core1 try acquire\n");
   lock_acquire(l);
   debug_printf("Core1 owns the lock\n");

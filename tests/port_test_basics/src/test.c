@@ -7,7 +7,7 @@
 void port_test_output(chanend c)
 {
   port p;
-  port_alloc(&p, XS1_PORT_1A);
+  port_alloc(&p, port_1A);
 
   int dummy;
   port_out(p, 0);
@@ -35,7 +35,7 @@ void port_test_output(chanend c)
 void port_test_input(chanend c)
 {
   port p;
-  port_alloc(&p, XS1_PORT_1B);
+  port_alloc(&p, port_1B);
 
   int input;
   port_in(p, &input);

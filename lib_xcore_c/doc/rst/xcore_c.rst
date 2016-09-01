@@ -21,14 +21,14 @@ using::
 
 A timer can then be read to get the current time by doing::
 
-  int time;
+  uint32_t time;
   timer_get_time(tmr, &time);
 
 There are two functions provided to delay using a timer. The first waits for a
 specified time::
 
   // The times are in 10ns, so 100000 timer ticks is 1ms
-  int now;
+  uint32_t now;
   timer_wait_until(tmr, time + 100000, &now); // Wait for (time + 1ms)
 
 The second delays for a period of time in 100MHz timer ticks::
@@ -49,7 +49,7 @@ Local channels
 Local channel connections on a tile are fully supported by the library. A channel
 connection is created using::
 
-  channel c;
+  channel_t c;
   chan_alloc(&c);
 
 Data can then be sent and received using::
@@ -59,9 +59,9 @@ Data can then be sent and received using::
 
 with a corresponding block of code on another core to consume the data::
 
-  int i;
+  uint32_t i;
   chan_in_word(c.right, &i);
-  char j;
+  uint8_t j;
   chan_in_byte(c.right, &j);
 
 When the channel is finished with then it is closed and the resources released
@@ -137,9 +137,9 @@ Data can then be sent and received using::
 
 with a corresponding block of code on another core to consume the data::
 
-  int i;
+  uint32_t i;
   s_chan_in_word(c.right, &i);
-  char j;
+  uint8_t j;
   s_chan_in_byte(c.right, &j);
 
 When the channel is finished with then it is closed and the resources released
@@ -155,9 +155,9 @@ includes ``master``/``slave`` transactions. For example, a block of xC could use
 ``master`` transaction to send a block of words syhchronised only at the beginning
 and end::
 
-  int data[10] = {...}
+  uint32_t data[10] = {...}
   master {
-    for (int i = 0; i < 10; i++) {
+    for (size_t i = 0; i < 10; i++) {
       c <: data[i];
     }
   }
@@ -165,10 +165,10 @@ and end::
 The C code to receive this data is of the form::
 
   // we have a chanend 'c';
-  transacting_chanend tc;
+  transacting_chanend_t tc;
   chan_init_transaction_slave(&c, &tc);
-  int data[10];
-  for (int i = 0; i < 10; i++) {
+  uint32_t data[10];
+  for (size_t i = 0; i < 10; i++) {
     t_chan_in_word(tc, &data[i]);
   }
   chan_complete_transaction(&c, &tc);
@@ -190,14 +190,14 @@ port. The first thing to do is to configure the clock block. For example, if usi
 clock block 1 to be clocked from a divided version of the reference clock::
 
   clock c;
-  clock_alloc(&c, XS1_CLKBLK_1);
+  clock_alloc(&c, clock_1);
   clock_set_source_clk_ref(c);
   clock_set_divide(c, 1); // Configure to 50MHz (100Mhz / 2*1)
 
 The port to be used can then be enabled, configured and connected to the clock::
 
   port p;
-  port_alloc(&p, XS1_PORT_1A);
+  port_alloc(&p, port_1A);
   port_set_clock(p, c);
 
 Starting the clock will reset the port counters on all connected ports. This is
@@ -234,11 +234,11 @@ For example, to create a data port which is controlled by a strobe then the
 following code sequence could be used::
 
   port p;
-  port_alloc(&p, XS1_PORT_4A);
+  port_alloc(&p, port_4A);
   port p_ready;
-  port_alloc(&p_ready, XS1_PORT_1A);
+  port_alloc(&p_ready, port_1A);
   clock clk;
-  clock_alloc(&clk, XS1_CLKBLK_1);
+  clock_alloc(&clk, clock_1);
 
   port_protocol_in_strobed_slave(p, p_ready, clk);
   clock_start(clk);
@@ -252,7 +252,7 @@ Using hardware locks
 The library provides support for xCORE hardware locks. They are allocated
 using::
 
-  lock l;
+  lock_t l;
   lock_alloc(&l);
 
 To enter a mutex region the lock is then acquired::
@@ -310,7 +310,7 @@ to wait for events to be triggered by either resource::
 
     while (1) {
       event_choice_t choice = select_wait();
-      int x;
+      uint32_t x;
       switch (choice) {
         case EVENT_CHAN_C: {
           // Read value to clear the trigger
@@ -346,7 +346,7 @@ available on either channel::
 
     while (1) {
       event_choice_t choice = select_no_wait(EVENT_NONE);
-      int x;
+      uint32_t x;
       switch (choice) {
         case EVENT_CHAN_C: {
           // Read value and clear event
@@ -386,7 +386,7 @@ a timer event the library initialisation would install a callback::
   {
     hwtimer_t tmr;
     timer_alloc(&tmr);
-    int time;
+    uint32_t time;
     timer_get_time(tmr, &time);
     timer_setup_select_callback(tmr, time + period, data, timer_callback_func);
   }
@@ -410,11 +410,11 @@ The callback function is passed the user data registered with that resource::
 This will usually be the resource's ID so that the callback can access the resource.
 If additional information is required, data may be a pointer to a struct::
 
-  typedef struct data_t {hwtimer_t tmr; int period;} data_t;
+  typedef struct data_t {hwtimer_t tmr; uint32_t period;} data_t;
 
   void timer_callback_func(void *data) {
     data_t *d = (data_t *)data;
-    int time;
+    uint32_t time;
     timer_get_time(d->tmr, &time);
     timer_change_trigger_time(d->tmr, time + d->period);
 
@@ -551,12 +551,12 @@ We will register a pointer to a structure::
 We now define/declare the interrupt callback function, wrapping it in function
 macros and placing it in the same group::
 
-  volatile int received = 0;  // For the host to monitor events.
+  volatile size_t received = 0;  // For the host to monitor events.
 
   DEFINE_INTERRUPT_CALLBACK(my_group, my_handler, data)
   {
     chan_data_t *cd = (chan_data_t*)data;
-    int x;
+    uint32_t x;
     chan_in_word(cd->c, &x);
     debug_printf("%s received %d\n", cd->message, x);
     received++;
@@ -587,7 +587,7 @@ And when we have finished, disable them::
     interrupt_mask_all(); // Mask before disabling.
     chanend_disable_trigger(cd1.c);
     chanend_disable_trigger(cd2.c);
-}
+  }
 
 
 API
@@ -596,32 +596,32 @@ API
 Opaque types used by the library
 ................................
 
-.. doxygentypedef:: resource
+.. doxygentypedef:: resource_t
 
 .. doxygentypedef:: chanend
 
 .. doxygentypedef:: streaming_chanend_t
 
-.. doxygentypedef:: transacting_chanend
+.. doxygenstruct:: transacting_chanend_t
 
 .. doxygentypedef:: clock
 
-.. doxygentypedef:: lock
+.. doxygentypedef:: lock_t
 
 .. doxygentypedef:: port
 
 .. doxygentypedef:: hwtimer_t
 
-.. doxygentypedef:: select_callback
+.. doxygentypedef:: select_callback_t
 
-.. doxygentypedef:: interrupt_callback
+.. doxygentypedef:: interrupt_callback_t
 
 |newpage|
 
 Errors and exception
 ....................
 
-.. doxygenenum:: xcore_c_error
+.. doxygenenum:: xcore_c_error_t
 
 .. doxygendefine:: XCORE_C_NO_EXCEPTION
 
@@ -651,7 +651,7 @@ Chanends
 Channels
 ........
 
-.. doxygentypedef:: channel
+.. doxygentypedef:: channel_t
 
 .. doxygenfunction:: chan_alloc
 
@@ -678,7 +678,7 @@ Channels
 Streaming channels
 ..................
 
-.. doxygentypedef:: streaming_channel
+.. doxygenstruct:: streaming_channel_t
 
 .. doxygenfunction:: s_chan_alloc
 
@@ -740,6 +740,8 @@ Channels with transactions
 Clock blocks
 ............
 
+.. doxygenenum:: clock_id_t
+
 .. doxygenfunction:: clock_alloc
 
 .. doxygenfunction:: clock_free
@@ -775,6 +777,8 @@ Locks
 
 Ports
 .....
+
+.. doxygenenum:: port_id_t
 
 .. doxygenenum:: port_type_t
 

@@ -4,11 +4,7 @@ lib_xcore_c change log
 2.0.0
 -----
 
-  * Alteration & extension of API including:
-      swap event_setup_timer() 2nd & 3rd parameters;
-      consolidation of naming viz: alloc & free;
-      add chan_out_buf_word(), chan_in_buf_word() et al;
-      restructuring of header files;
+  * Alteration & extension of the API
 
 1.0.1
 -----
