@@ -3,13 +3,13 @@
 #ifndef __xcore_c_channel_h__
 #define __xcore_c_channel_h__
 
+#if !defined(__XC__) || defined(__DOXYGEN__)
+
 #include <stdint.h>
 #include <stddef.h>
 #include "xcore_c_channel_streaming.h"
 #include "xcore_c_chan_impl.h"
 #include "xcore_c_exception_impl.h"
-
-#if !defined(__XC__) || defined(__DOXYGEN__)
 
 /** Helper type for passing around both ends of a channel.
 */

@@ -3,12 +3,12 @@
 #ifndef __xcore_c_chanend_h__
 #define __xcore_c_chanend_h__
 
+#if !defined(__XC__) || defined(__DOXYGEN__)
+
 #include <stdint.h>
 #include "xcore_c_chan_impl.h"
 #include "xcore_c_resource_impl.h"
 #include "xcore_c_exception_impl.h"
-
-#if !defined(__XC__) || defined(__DOXYGEN__)
 
 /** Allocate a single chan-end.
  *

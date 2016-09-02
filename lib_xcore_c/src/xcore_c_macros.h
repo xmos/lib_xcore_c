@@ -1,7 +1,7 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
-#ifndef __xcore_c_arch_macro_h__
-#define __xcore_c_arch_macro_h__
+#ifndef __xcore_c_macros_h__
+#define __xcore_c_macros_h__
 
 // This file contains private implementation details and is not part of the API.
 // The contents may vary between releases.
@@ -33,4 +33,4 @@
 #define _XCORE_C_SINGLE_ISSUE
 #endif
 
-#endif // __xcore_c_arch_macro_h__
+#endif // __xcore_c_macros_h__

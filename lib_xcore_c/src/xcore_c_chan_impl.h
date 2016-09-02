@@ -29,6 +29,7 @@ typedef unsigned chanend;
 typedef unsigned streaming_chanend_t;
 #endif
 #include <xs1.h>
+#include "xcore_c_resource_impl.h"
 
 #if !defined(__XC__) || defined(__DOXYGEN__)
 /** An opaque type for handling transactions
@@ -45,13 +46,13 @@ typedef struct transacting_chanend_t {
 inline chanend _chanend_alloc(void)
 {
   chanend c;
-  asm("getr %0, 2" : "=r" (c));
+  _RESOURCE_ALLOC(c, XS1_RES_TYPE_CHANEND);
   return c;
 }
 
 inline void _chanend_free(chanend c)
 {
-  asm volatile("freer res[%0]" :: "r" (c));
+  _resource_free((resource_t)c);
 }
 
 inline void _chanend_set_dest(chanend c, chanend dst)

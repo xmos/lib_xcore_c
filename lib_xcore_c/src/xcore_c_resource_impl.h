@@ -10,6 +10,7 @@
 
 #include <stdint.h>
 #include "xassert.h"
+#include "xcore_c_macros.h"
 
 /** generic resource handle
  *
@@ -66,6 +67,18 @@ inline void _resource_setup_select_callback(resource_t r, void *data, select_cal
 inline void _resource_setup_select(resource_t r, uint32_t value)
 {
   _resource_setup_select_callback(r, (void*)value, _select_non_callback);
+}
+
+#define _RESOURCE_ALLOC(res, id) asm volatile( "getr %0, " _XCORE_C_STR(id) : "=r" (res))
+
+inline void _resource_free(resource_t r)
+{
+  asm volatile("freer res[%0]" :: "r" (r));
+}
+
+inline void _resource_setc(resource_t r, uint32_t c)
+{
+  asm volatile("setc res[%0], %1" :: "r" (r), "r" (c));
 }
 
 #endif // __XC__

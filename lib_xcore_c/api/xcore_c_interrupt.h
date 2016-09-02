@@ -6,6 +6,8 @@
 #include "xcore_c_interrupt_impl.h"
 #include "xcore_c_resource_impl.h"
 #include "xcore_c_error_codes.h"
+#include "xcore_c_macros.h"
+#include <xs1.h>
 
 #ifndef XCORE_C_KSTACK_WORDS
 /** Specify the minimum kernel stack size the interrupt permitting function should create.
@@ -98,7 +100,7 @@
  */
 inline xcore_c_error_t interrupt_mask_all(void)
 {
-  asm volatile("clrsr 0x2");
+  asm volatile("clrsr" _XCORE_C_STR(XS1_SR_IEBLE_MASK));
   return error_none;
 }
 
@@ -111,7 +113,7 @@ inline xcore_c_error_t interrupt_mask_all(void)
  */
 inline xcore_c_error_t interrupt_unmask_all(void)
 {
-  asm volatile("setsr 0x2");
+  asm volatile("setsr" _XCORE_C_STR(XS1_SR_IEBLE_MASK));
   return error_none;
 }
 

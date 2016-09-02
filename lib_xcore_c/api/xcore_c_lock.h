@@ -3,10 +3,10 @@
 #ifndef __xcore_c_lock_h__
 #define __xcore_c_lock_h__
 
+#if !defined(__XC__) || defined(__DOXYGEN__)
+
 #include "xcore_c_lock_impl.h"
 #include "xcore_c_exception_impl.h"
-
-#if !defined(__XC__) || defined(__DOXYGEN__)
 
 /** Allocates a lock.
  *
@@ -23,7 +23,7 @@
  */
 inline xcore_c_error_t lock_alloc(lock_t *l)
 {
-  RETURN_EXCEPTION_OR_ERROR( asm volatile("getr %0, 5" : "=r" (*l)) );
+  RETURN_EXCEPTION_OR_ERROR( *l = _lock_alloc() );
 }
 
 /** Deallocate a lock.
@@ -43,7 +43,7 @@ inline xcore_c_error_t lock_alloc(lock_t *l)
 inline xcore_c_error_t lock_free(lock_t *l)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
-                                asm volatile("freer res[%0]" :: "r" (*l)); \
+                                _resource_free((resource_t)*l); \
                                 *l = 0; \
                               } while (0) );
 }

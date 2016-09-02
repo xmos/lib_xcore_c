@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include "xcore_c_clock_impl.h"
 #include "xcore_c_exception_impl.h"
+#include "xcore_c_resource_impl.h"
 #include <xs1.h>
 
 /** A clock block identifier
@@ -42,8 +43,8 @@ typedef enum {
 inline xcore_c_error_t clock_alloc(clock *clk, clock_id_t id)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
-                                asm volatile("setc res[%0], 8" :: "r" (id)); \
                                 *clk = id; \
+                                _resource_setc(*clk, XS1_SETC_INUSE_ON); \
                               } while (0) );
 }
 
@@ -60,7 +61,7 @@ inline xcore_c_error_t clock_alloc(clock *clk, clock_id_t id)
 inline xcore_c_error_t clock_free(clock *clk)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
-                                asm volatile("setc res[%0], 0" :: "r" (*clk)); \
+                                _resource_setc(*clk, XS1_SETC_INUSE_OFF); \
                                 *clk = 0; \
                               } while (0) );
 }
@@ -78,7 +79,7 @@ inline xcore_c_error_t clock_free(clock *clk)
  */
 inline xcore_c_error_t clock_start(clock clk)
 {
-  RETURN_EXCEPTION_OR_ERROR( asm volatile("setc res[%0], 0xf" :: "r" (clk)) );
+  RETURN_EXCEPTION_OR_ERROR( _resource_setc(clk, XS1_SETC_RUN_STARTR) );
 }
 
 /** Stop a clock
@@ -94,7 +95,7 @@ inline xcore_c_error_t clock_start(clock clk)
  */
 inline xcore_c_error_t clock_stop(clock clk)
 {
-  RETURN_EXCEPTION_OR_ERROR( asm volatile("setc res[%0], 0x7" :: "r" (clk)) );
+  RETURN_EXCEPTION_OR_ERROR( _resource_setc(clk, XS1_SETC_RUN_STOPR) );
 }
 
 /** Configure a clock's source to a 1-bit port

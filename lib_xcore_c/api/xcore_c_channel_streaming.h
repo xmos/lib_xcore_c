@@ -3,12 +3,12 @@
 #ifndef __xcore_c_channel_streaming_h__
 #define __xcore_c_channel_streaming_h__
 
+#if !defined(__XC__) || defined(__DOXYGEN__)
+
 #include <stdint.h>
 #include <stddef.h>
 #include "xcore_c_chan_impl.h"
 #include "xcore_c_exception_impl.h"
-
-#if !defined(__XC__) || defined(__DOXYGEN__)
 
 /** Helper type for passing around both ends of a streaming channel.
 */
@@ -82,8 +82,6 @@ inline xcore_c_error_t s_chan_free(streaming_channel_t *c)
                                 c->right = 0; \
                               } while (0) );
 }
-
-#endif // __XC__
 
 /** Output a word over a streaming_channel_t.
  *
@@ -332,5 +330,7 @@ inline xcore_c_error_t s_chan_check_ct_end(streaming_chanend_t c)
 {
   RETURN_EXCEPTION_OR_ERROR( _s_chan_check_ct_end(c) );
 }
+
+#endif // __XC__
 
 #endif // __xcore_c_channel_streaming_h__
