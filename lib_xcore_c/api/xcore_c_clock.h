@@ -44,7 +44,7 @@ inline xcore_c_error_t clock_alloc(clock *clk, clock_id_t id)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 *clk = id; \
-                                _resource_setc(*clk, XS1_SETC_INUSE_ON); \
+                                _RESOURCE_SETCI(*clk, XS1_SETC_INUSE_ON); \
                               } while (0) );
 }
 
@@ -61,7 +61,7 @@ inline xcore_c_error_t clock_alloc(clock *clk, clock_id_t id)
 inline xcore_c_error_t clock_free(clock *clk)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
-                                _resource_setc(*clk, XS1_SETC_INUSE_OFF); \
+                                _RESOURCE_SETCI(*clk, XS1_SETC_INUSE_OFF); \
                                 *clk = 0; \
                               } while (0) );
 }
@@ -79,7 +79,7 @@ inline xcore_c_error_t clock_free(clock *clk)
  */
 inline xcore_c_error_t clock_start(clock clk)
 {
-  RETURN_EXCEPTION_OR_ERROR( _resource_setc(clk, XS1_SETC_RUN_STARTR) );
+  RETURN_EXCEPTION_OR_ERROR( _RESOURCE_SETCI(clk, XS1_SETC_RUN_STARTR) );
 }
 
 /** Stop a clock
@@ -95,7 +95,7 @@ inline xcore_c_error_t clock_start(clock clk)
  */
 inline xcore_c_error_t clock_stop(clock clk)
 {
-  RETURN_EXCEPTION_OR_ERROR( _resource_setc(clk, XS1_SETC_RUN_STOPR) );
+  RETURN_EXCEPTION_OR_ERROR( _RESOURCE_SETCI(clk, XS1_SETC_RUN_STOPR) );
 }
 
 /** Configure a clock's source to a 1-bit port
@@ -133,7 +133,7 @@ inline xcore_c_error_t clock_set_source_port(clock clk, port p)
  */
 inline xcore_c_error_t clock_set_source_clk_ref(clock clk)
 {
-  RETURN_EXCEPTION_OR_ERROR( asm volatile("setclk res[%0], %1" :: "r" (clk), "r" (0x1)) );
+  RETURN_EXCEPTION_OR_ERROR( asm volatile("setclk res[%0], %1" :: "r" (clk), "r" (XS1_CLK_REF)) );
 }
 
 /** Configure a clock's source to be the xCORE clock.
@@ -151,7 +151,7 @@ inline xcore_c_error_t clock_set_source_clk_ref(clock clk)
  */
 inline xcore_c_error_t clock_set_source_clk_xcore(clock clk)
 {
-  RETURN_EXCEPTION_OR_ERROR( asm volatile("setclk res[%0], %1" :: "r" (clk), "r" (0x101)) );
+  RETURN_EXCEPTION_OR_ERROR( asm volatile("setclk res[%0], %1" :: "r" (clk), "r" (XS1_CLK_XCORE)) );
 }
 
 /** Configure the divider for a clock.

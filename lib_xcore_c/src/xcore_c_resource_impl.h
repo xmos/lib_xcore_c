@@ -76,10 +76,7 @@ inline void _resource_free(resource_t r)
   asm volatile("freer res[%0]" :: "r" (r));
 }
 
-inline void _resource_setc(resource_t r, uint32_t c)
-{
-  asm volatile("setc res[%0], %1" :: "r" (r), "r" (c));
-}
+#define _RESOURCE_SETCI(res, c) asm volatile( "setc res[%0], " _XCORE_C_STR(c) :: "r" (res))
 
 #endif // __XC__
 

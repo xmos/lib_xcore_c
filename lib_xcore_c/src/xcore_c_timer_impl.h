@@ -50,13 +50,13 @@ inline void _timer_change_trigger_time(hwtimer_t t, uint32_t time)
 
 inline void _timer_set_trigger_time(hwtimer_t t, uint32_t time)
 {
-  _resource_setc(t, XS1_SETC_COND_AFTER);
+  _RESOURCE_SETCI(t, XS1_SETC_COND_AFTER);
   _timer_change_trigger_time(t, time);
 }
 
 inline void _timer_clear_trigger_time(hwtimer_t t)
 {
-  _resource_setc(t, XS1_SETC_COND_NONE);
+  _RESOURCE_SETCI(t, XS1_SETC_COND_NONE);
   // timer_get_time() will respond immediately
 }
 

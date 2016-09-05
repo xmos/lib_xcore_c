@@ -92,7 +92,7 @@ inline void _s_chan_out_ct(streaming_chanend_t c, uint8_t ct)
 
 inline void _s_chan_out_ct_end(streaming_chanend_t c)
 {
-  _s_chan_out_ct(c, XS1_CT_END);
+  asm volatile("outct res[%0], " _XCORE_C_STR(XS1_CT_END) :: "r" (c));
 }
 
 inline void _s_chan_check_ct(streaming_chanend_t c, uint8_t ct)
@@ -102,7 +102,7 @@ inline void _s_chan_check_ct(streaming_chanend_t c, uint8_t ct)
 
 inline void _s_chan_check_ct_end(streaming_chanend_t c)
 {
-  _s_chan_check_ct(c, XS1_CT_END);
+  asm volatile("chkct res[%0], " _XCORE_C_STR(XS1_CT_END) :: "r" (c));
 }
 
 #if !defined(__XC__) || defined(__DOXYGEN__)

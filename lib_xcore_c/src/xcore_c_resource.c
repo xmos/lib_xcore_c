@@ -7,7 +7,6 @@ extern void _resource_setup_interrupt_callback(resource_t r, void *data, interru
 extern void _resource_setup_select_callback(resource_t r, void *data, select_callback_t callback);
 extern void _resource_setup_select(resource_t r, uint32_t value);
 extern void _resource_free(resource_t r);
-extern void _resource_setc(resource_t r, uint32_t c);
 
 void _resource_setup_callback(resource_t r, void *data, callback_function func, uint32_t type)
 {
