@@ -8,7 +8,7 @@
 void core0(chanend c)
 {
   hwtimer_t tmr;
-  timer_alloc(&tmr);
+  hwtimer_alloc(&tmr);
   xassert(tmr);
   lock_t l = 0;
   lock_alloc(&l);
@@ -17,7 +17,7 @@ void core0(chanend c)
 
   lock_acquire(l);
   debug_printf("Core0 owns the lock\n");
-  timer_delay(tmr, 100);
+  hwtimer_delay(tmr, 100);
   debug_printf("Core0 done work\n");
   lock_release(l);
 
@@ -27,7 +27,7 @@ void core0(chanend c)
 
   lock_free(&l);
   xassert(!l);
-  timer_free(&tmr);
+  hwtimer_free(&tmr);
   xassert(!tmr);
 }
 

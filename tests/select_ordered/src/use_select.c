@@ -16,7 +16,7 @@ typedef enum {
 void test(chanend c, chanend d, hwtimer_t tmr, resource_t ids[])
 {
   uint32_t time;
-  timer_get_time(tmr, &time);
+  hwtimer_get_time(tmr, &time);
   time += 10;
 
   // Setup the channels to generate events
@@ -24,10 +24,10 @@ void test(chanend c, chanend d, hwtimer_t tmr, resource_t ids[])
   chanend_enable_trigger(c);
   chanend_setup_select(d, EVENT_CHAN_D);
   chanend_enable_trigger(d);
-  timer_setup_select(tmr, time, EVENT_TIMER);
-  timer_enable_trigger(tmr);
+  hwtimer_setup_select(tmr, time, EVENT_TIMER);
+  hwtimer_enable_trigger(tmr);
 
-  int timer_event_count = 0;
+  int hwtimer_event_count = 0;
 
   // Expect N events for each of the resources used
   for (int count = 0; count < events_per_resource * 3; count++) {
@@ -49,10 +49,10 @@ void test(chanend c, chanend d, hwtimer_t tmr, resource_t ids[])
       }
       case EVENT_TIMER: {
         // Read value to clear event
-        timer_get_time(tmr, &time);
-        timer_event_count++;
-        debug_printf("Timer event %d\n", timer_event_count);
-        if (timer_event_count >= events_per_resource) {
+        hwtimer_get_time(tmr, &time);
+        hwtimer_event_count++;
+        debug_printf("Timer event %d\n", hwtimer_event_count);
+        if (hwtimer_event_count >= events_per_resource) {
           // Allow the other resources to have time
           time += 10000000;
         }
@@ -60,7 +60,7 @@ void test(chanend c, chanend d, hwtimer_t tmr, resource_t ids[])
           // Don't give time for other resources to be ready
           time += 10;
         }
-        timer_change_trigger_time(tmr, time);
+        hwtimer_change_trigger_time(tmr, time);
         break;
       }
     }
@@ -73,25 +73,25 @@ void channel_first(chanend c, chanend d)
   debug_printf("Running with order [c, d, timer]\n");
 
   hwtimer_t tmr;
-  timer_alloc(&tmr);
+  hwtimer_alloc(&tmr);
 
   resource_t ids[4] = {c, d, tmr, 0};
   test(c, d, tmr, ids);
 
-  timer_free(&tmr);
+  hwtimer_free(&tmr);
 }
 
-void timer_first(chanend c, chanend d)
+void hwtimer_first(chanend c, chanend d)
 {
   // No need to clear all events first as the select_wait_ordered will do that
   debug_printf("Running with order [timer, d, c]\n");
 
   hwtimer_t tmr;
-  timer_alloc(&tmr);
+  hwtimer_alloc(&tmr);
 
   resource_t ids[4] = {tmr, d, c, 0};
   test(c, d, tmr, ids);
 
-  timer_free(&tmr);
+  hwtimer_free(&tmr);
 }
 

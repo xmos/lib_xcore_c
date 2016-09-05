@@ -31,9 +31,9 @@ void port_test_output(chanend c)
   port_out(p, 0xfeedbeef);
 
   hwtimer_t tmr;
-  timer_alloc(&tmr);
-  timer_delay(tmr, 1000);
-  timer_free(&tmr);
+  hwtimer_alloc(&tmr);
+  hwtimer_delay(tmr, 1000);
+  hwtimer_free(&tmr);
 
   port_out(p, 0x12345678);
 

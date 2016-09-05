@@ -26,17 +26,17 @@ void port_example()
   port_alloc(&q, port_1B);
 
   hwtimer_t t;
-  timer_alloc(&t);
+  hwtimer_alloc(&t);
   int time;
-  timer_get_time(t, &time);
+  hwtimer_get_time(t, &time);
   time += period;
 
   int q_value = 0;
   port_out(q, q_value);
 
   // Setup the resources for eventing
-  timer_setup_select(t, time, EVENT_TIMER);
-  timer_enable_trigger(t);
+  hwtimer_setup_select(t, time, EVENT_TIMER);
+  hwtimer_enable_trigger(t);
   port_setup_select(p, EVENT_PORT_P);
   port_set_trigger_in_equal(p, 0x1);
   port_enable_trigger(p);
@@ -47,11 +47,11 @@ void port_example()
       case EVENT_TIMER: {
         // Read the timer to clear the event
         int dummy;
-        timer_get_time(t, &dummy);
+        hwtimer_get_time(t, &dummy);
 
         // Set up the next timer event
         time += period;
-        timer_change_trigger_time(t, time);
+        hwtimer_change_trigger_time(t, time);
 
         // Toggle the port value
         q_value = !q_value;
@@ -74,7 +74,7 @@ void port_example()
   }
 
   // Release the resources
-  timer_free(&t);
+  hwtimer_free(&t);
   port_free(&q);
   port_free(&p);
 }

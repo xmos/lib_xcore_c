@@ -23,12 +23,12 @@ static void time_port_rate(hwtimer_t tmr, port p, clock c)
   port_out(p, 0); // Start running after a clock edge has moved data from the
                      // transfer register
   int start_time;
-  timer_get_time(tmr, &start_time);
+  hwtimer_get_time(tmr, &start_time);
   for (int i = 0; i < num_writes; ++i) {
     port_out(p, i);
   }
   int end_time;
-  timer_get_time(tmr, &end_time);
+  hwtimer_get_time(tmr, &end_time);
 
   clock_stop(c);
 
@@ -94,7 +94,7 @@ static void test_port_clock(hwtimer_t tmr, port p, clock c)
 void test_clock_sources()
 {
   hwtimer_t tmr;
-  timer_alloc(&tmr);
+  hwtimer_alloc(&tmr);
   xassert(tmr);
   // Allocate the clock to control the port
   clock c;
@@ -116,7 +116,7 @@ void test_clock_sources()
   xassert(!p);
   clock_free(&c);
   xassert(!c);
-  timer_free(&tmr);
+  hwtimer_free(&tmr);
   xassert(!tmr);
 }
 

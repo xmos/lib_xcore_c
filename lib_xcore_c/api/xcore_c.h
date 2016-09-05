@@ -9,11 +9,11 @@
 #include "xcore_c_channel_transaction.h"
 #include "xcore_c_clock.h"
 #include "xcore_c_error_codes.h"
+#include "xcore_c_hwtimer.h"
 #include "xcore_c_interrupt.h"
 #include "xcore_c_lock.h"
 #include "xcore_c_port.h"
 #include "xcore_c_port_protocol.h"
 #include "xcore_c_select.h"
-#include "xcore_c_timer.h"
 
 #endif // __xcore_c_h__

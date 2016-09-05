@@ -1,12 +1,12 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
-#ifndef __xcore_c_timer_h__
-#define __xcore_c_timer_h__
+#ifndef __xcore_c_hwtimer_h__
+#define __xcore_c_hwtimer_h__
 
 #if !defined(__XC__) || defined(__DOXYGEN__)
 
 #include <stdint.h>
-#include "xcore_c_timer_impl.h"
+#include "xcore_c_hwtimer_impl.h"
 #include "xcore_c_resource_impl.h"
 #include "xcore_c_exception_impl.h"
 
@@ -20,7 +20,7 @@
  *  is not making use of the 'timer' resource type, the allocated hardware
  *  timer may be retrieved for use as a hwtimer_t.
  *
- *  N.B. This call must be paired with a call to timer_realloc_xc_timer()
+ *  N.B. This call must be paired with a call to hwtimer_realloc_xc_timer()
  *  prior to the logical core completing its tasks.
  *
  *  N.B. The xScope link also requires a hardware timer.
@@ -29,15 +29,15 @@
  *
  *  \exception  ET_ILLEGAL_RESOURCE   timer has already been deallocated.
  */
-inline xcore_c_error_t timer_free_xc_timer(void)
+inline xcore_c_error_t hwtimer_free_xc_timer(void)
 {
-  RETURN_EXCEPTION_OR_ERROR( _timer_free_xc_timer() );
+  RETURN_EXCEPTION_OR_ERROR( _hwtimer_free_xc_timer() );
 }
 
 /** Reallocate the xC timer resource for a thread
  *
  *  This function reallcoates a logical core's xC hardware timer that was
- *  deallocated by a call to timer_free_xc_timer().
+ *  deallocated by a call to hwtimer_free_xc_timer().
  *
  *  N.B. There must be an available hw timer when this call is made,
  *  otherwise an exception will be raised when the logical core completes.
@@ -46,9 +46,9 @@ inline xcore_c_error_t timer_free_xc_timer(void)
  *
  *  \exception  ET_ECALL   no available hw timer, reallocation failed.
  */
-inline xcore_c_error_t timer_realloc_xc_timer(void)
+inline xcore_c_error_t hwtimer_realloc_xc_timer(void)
 {
-  RETURN_EXCEPTION_OR_ERROR( _timer_realloc_xc_timer() );
+  RETURN_EXCEPTION_OR_ERROR( _hwtimer_realloc_xc_timer() );
 }
 
 /** Allocates and initialise a timer.
@@ -56,7 +56,7 @@ inline xcore_c_error_t timer_realloc_xc_timer(void)
  *  This function allocates a hardware timer.
  *  If there are no timers available, then the function will return 0.
  *  This macro is to be called once on every variable of the type ``timer``.
- *  When the timer is no longer required, timer_free() must be called
+ *  When the timer is no longer required, hwtimer_free() must be called
  *  to deallocate it.
  *
  *  \param t    Timer variable representing the initialised timer
@@ -65,9 +65,9 @@ inline xcore_c_error_t timer_realloc_xc_timer(void)
  *
  *  \exception  ET_LOAD_STORE         invalid ''\*t'' argument.
  */
-inline xcore_c_error_t timer_alloc(hwtimer_t *t)
+inline xcore_c_error_t hwtimer_alloc(hwtimer_t *t)
 {
-  RETURN_EXCEPTION_OR_ERROR( *t = _timer_alloc() );
+  RETURN_EXCEPTION_OR_ERROR( *t = _hwtimer_alloc() );
 }
 
 /** Deallocate a timer.
@@ -82,10 +82,10 @@ inline xcore_c_error_t timer_alloc(hwtimer_t *t)
  *  \exception  ET_RESOURCE_DEP       another core is actively using the timer.
  *  \exception  ET_LOAD_STORE         invalid ''\*t'' argument.
  */
-inline xcore_c_error_t timer_free(hwtimer_t *t)
+inline xcore_c_error_t hwtimer_free(hwtimer_t *t)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
-                                _timer_free(*t); \
+                                _hwtimer_free(*t); \
                                 *t = 0; \
                               } while (0) );
 }
@@ -93,7 +93,7 @@ inline xcore_c_error_t timer_free(hwtimer_t *t)
 /** Get the current time from the timer.
  *
  *  If there is a trigger time setup, the call will stall until after the trigger time.
- *  For select and interrupt event, calling timer_get_time() will clear the event.
+ *  For select and interrupt event, calling hwtimer_get_time() will clear the event.
  *
  *  \param t    The timer on which to input
  *  \param now  The time value (a 32-bit value)
@@ -104,18 +104,18 @@ inline xcore_c_error_t timer_free(hwtimer_t *t)
  *  \exception  ET_RESOURCE_DEP       another core is actively using the timer.
  *  \exception  ET_LOAD_STORE         invalid ''\*now'' argument.
  */
-inline xcore_c_error_t timer_get_time(hwtimer_t t, uint32_t *now)
+inline xcore_c_error_t hwtimer_get_time(hwtimer_t t, uint32_t *now)
 {
-  RETURN_EXCEPTION_OR_ERROR( _timer_get_time(t, now) );
+  RETURN_EXCEPTION_OR_ERROR( _hwtimer_get_time(t, now) );
 }
 
 /** Setup an event trigger on a timer.
  *
- *  This will cause timer_get_time() to pause until the specified time.
- *  The trigger may be cleared using timer_clear_trigger_time().
- *  N.B. timer_wait_until(), timer_delay(), timer_setup_select()
- *  timer_setup_select_callback() and timer_setup_interrupt_callback()
- *  call timer_set_trigger_time().
+ *  This will cause hwtimer_get_time() to pause until the specified time.
+ *  The trigger may be cleared using hwtimer_clear_trigger_time().
+ *  N.B. hwtimer_wait_until(), hwtimer_delay(), hwtimer_setup_select()
+ *  hwtimer_setup_select_callback() and hwtimer_setup_interrupt_callback()
+ *  call hwtimer_set_trigger_time().
  *
  *  \param t     The timer to setup a event trigger on.
  *  \param time  The time at which the timer will trigger an event. The default
@@ -126,9 +126,9 @@ inline xcore_c_error_t timer_get_time(hwtimer_t t, uint32_t *now)
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid timer.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the timer.
  */
-inline xcore_c_error_t timer_set_trigger_time(hwtimer_t t, uint32_t time)
+inline xcore_c_error_t hwtimer_set_trigger_time(hwtimer_t t, uint32_t time)
 {
-  RETURN_EXCEPTION_OR_ERROR( _timer_set_trigger_time(t, time) );
+  RETURN_EXCEPTION_OR_ERROR( _hwtimer_set_trigger_time(t, time) );
 }
 
 /** Change the time at which a timer trigger will fire.
@@ -145,16 +145,16 @@ inline xcore_c_error_t timer_set_trigger_time(hwtimer_t t, uint32_t time)
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid timer.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the timer.
  */
-inline xcore_c_error_t timer_change_trigger_time(hwtimer_t t, uint32_t time)
+inline xcore_c_error_t hwtimer_change_trigger_time(hwtimer_t t, uint32_t time)
 {
-  RETURN_EXCEPTION_OR_ERROR( _timer_change_trigger_time(t, time) );
+  RETURN_EXCEPTION_OR_ERROR( _hwtimer_change_trigger_time(t, time) );
 }
 
 /** Clear an event trigger on a timer.
  *
  *  Makes sure no triggers are setup on a timer.
  *  Should be called when a timer is no longer being used for select and interrupt events.
- *  Both timer_wait_until() and timer_delay() call timer_clear_trigger_time().
+ *  Both hwtimer_wait_until() and hwtimer_delay() call hwtimer_clear_trigger_time().
  *
  *  \param t    The timer to tear down events on
  *
@@ -164,9 +164,9 @@ inline xcore_c_error_t timer_change_trigger_time(hwtimer_t t, uint32_t time)
  *  \exception  ET_RESOURCE_DEP       another core is actively using the timer.
  */
 
-inline xcore_c_error_t timer_clear_trigger_time(hwtimer_t t)
+inline xcore_c_error_t hwtimer_clear_trigger_time(hwtimer_t t)
 {
-  RETURN_EXCEPTION_OR_ERROR( _timer_clear_trigger_time(t) );
+  RETURN_EXCEPTION_OR_ERROR( _hwtimer_clear_trigger_time(t) );
 }
 
 /** Wait until after a specified time.
@@ -183,12 +183,12 @@ inline xcore_c_error_t timer_clear_trigger_time(hwtimer_t t)
  *  \exception  ET_RESOURCE_DEP       another core is actively using the timer.
  *  \exception  ET_LOAD_STORE         invalid ''\*now'' argument.
  */
-inline xcore_c_error_t timer_wait_until(hwtimer_t t, uint32_t until, uint32_t *now)
+inline xcore_c_error_t hwtimer_wait_until(hwtimer_t t, uint32_t until, uint32_t *now)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
-                                _timer_set_trigger_time(t, until); \
-                                _timer_get_time(t, now); \
-                                _timer_clear_trigger_time(t); \
+                                _hwtimer_set_trigger_time(t, until); \
+                                _hwtimer_get_time(t, now); \
+                                _hwtimer_clear_trigger_time(t); \
                               } while (0) );
 }
 
@@ -205,16 +205,16 @@ inline xcore_c_error_t timer_wait_until(hwtimer_t t, uint32_t until, uint32_t *n
  *  \exception  ET_RESOURCE_DEP       another core is actively using the timer.
  *  \exception  ET_LOAD_STORE         invalid ''\*now'' argument.
  */
-inline xcore_c_error_t timer_delay(hwtimer_t t, uint32_t period)
+inline xcore_c_error_t hwtimer_delay(hwtimer_t t, uint32_t period)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 uint32_t start; \
-                                _timer_get_time(t, &start); \
+                                _hwtimer_get_time(t, &start); \
                                 uint32_t until = start + period; \
-                                _timer_set_trigger_time(t, until); \
+                                _hwtimer_set_trigger_time(t, until); \
                                 uint32_t dummy; \
-                                _timer_get_time(t, &dummy); \
-                                _timer_clear_trigger_time(t); \
+                                _hwtimer_get_time(t, &dummy); \
+                                _hwtimer_clear_trigger_time(t); \
                               } while (0) );
 }
 
@@ -224,7 +224,7 @@ inline xcore_c_error_t timer_delay(hwtimer_t t, uint32_t period)
  *  the specified time. It is used in combination with select_wait() et al
  *  functions, returning the enum_id when the event is triggered.
  *
- *  Once the select event is setup you need to call timer_enable_trigger() to enable it.
+ *  Once the select event is setup you need to call hwtimer_enable_trigger() to enable it.
  *
  *  \param t        The timer to setup the select event on
  *  \param time     The time at which the timer will trigger an event. The default
@@ -238,20 +238,20 @@ inline xcore_c_error_t timer_delay(hwtimer_t t, uint32_t period)
  *  \exception  ET_RESOURCE_DEP       another core is actively using the timer.
  *  \exception  ET_ECALL              when xassert enabled, on XS1 bit 16 not set in enum_id.
  */
-inline xcore_c_error_t timer_setup_select(hwtimer_t t, uint32_t time, uint32_t enum_id)
+inline xcore_c_error_t hwtimer_setup_select(hwtimer_t t, uint32_t time, uint32_t enum_id)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _resource_setup_select(t, enum_id); \
-                                _timer_set_trigger_time(t, time); \
+                                _hwtimer_set_trigger_time(t, time); \
                               } while (0) );
 }
 
 /** Setup select event on a timer where the events are handled by a function.
  *
- *  Same as timer_setup_select() except that a callback function is used
+ *  Same as hwtimer_setup_select() except that a callback function is used
  *  rather than the event being passed back to the select_wait() et al functions.
  *
- *  Once the event is setup you need to call timer_enable_trigger() to enable it.
+ *  Once the event is setup you need to call hwtimer_enable_trigger() to enable it.
  *
  *  \param t      The timer to setup the select event on
  *  \param time   The time at which the timer will trigger an event. The default
@@ -266,17 +266,17 @@ inline xcore_c_error_t timer_setup_select(hwtimer_t t, uint32_t time, uint32_t e
  *  \exception  ET_ECALL              when xassert enabled, on XS1 bit 16 not set in enum_id.
  */
 inline xcore_c_error_t
-timer_setup_select_callback(hwtimer_t t, uint32_t time, void *data, select_callback_t func)
+hwtimer_setup_select_callback(hwtimer_t t, uint32_t time, void *data, select_callback_t func)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _resource_setup_select_callback(t, data, func);
-                                _timer_set_trigger_time(t, time);
+                                _hwtimer_set_trigger_time(t, time);
                               } while (0) );
 }
 
 /** Setup interrupt event on a timer.
  *
- *  Once the event is setup you need to call timer_enable_trigger() to enable it.
+ *  Once the event is setup you need to call hwtimer_enable_trigger() to enable it.
  *
  *  \param t      The timer to setup the events on
  *  \param time   The time at which the timer will trigger an event. The default
@@ -291,22 +291,22 @@ timer_setup_select_callback(hwtimer_t t, uint32_t time, void *data, select_callb
  *  \exception  ET_ECALL              when xassert enabled, on XS1 bit 16 not set in enum_id.
  */
 inline xcore_c_error_t
-timer_setup_interrupt_callback(hwtimer_t t, uint32_t time, void *data, interrupt_callback_t func)
+hwtimer_setup_interrupt_callback(hwtimer_t t, uint32_t time, void *data, interrupt_callback_t func)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _resource_setup_interrupt_callback(t, data, func);
-                                _timer_set_trigger_time(t, time);
+                                _hwtimer_set_trigger_time(t, time);
                               } while (0) );
 }
 
 /** Enable select & interrupt events on a timer.
  *
- *  Prior to enabling, timer_setup_select(), timer_setup_select_callback() or
- *  timer_setup_interrupt_callback() must have been called.
- *  Events can be temporarily disabled and re-enabled using timer_disable_trigger()
- *  and timer_enable_trigger().
- *  When the event fires, timer_get_time() must be called to clear the event.
- *  The time of the next event is set using timer_change_trigger_time().
+ *  Prior to enabling, hwtimer_setup_select(), hwtimer_setup_select_callback() or
+ *  hwtimer_setup_interrupt_callback() must have been called.
+ *  Events can be temporarily disabled and re-enabled using hwtimer_disable_trigger()
+ *  and hwtimer_enable_trigger().
+ *  When the event fires, hwtimer_get_time() must be called to clear the event.
+ *  The time of the next event is set using hwtimer_change_trigger_time().
  *  
  *  \param t    The timer to enable events on
  *
@@ -315,7 +315,7 @@ timer_setup_interrupt_callback(hwtimer_t t, uint32_t time, void *data, interrupt
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid timer.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the timer.
  */
-inline xcore_c_error_t timer_enable_trigger(hwtimer_t t)
+inline xcore_c_error_t hwtimer_enable_trigger(hwtimer_t t)
 {
   RETURN_EXCEPTION_OR_ERROR( _resource_enable_trigger(t) );
 }
@@ -333,11 +333,11 @@ inline xcore_c_error_t timer_enable_trigger(hwtimer_t t)
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid timer.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the timer.
  */
-inline xcore_c_error_t timer_disable_trigger(hwtimer_t t)
+inline xcore_c_error_t hwtimer_disable_trigger(hwtimer_t t)
 {
   RETURN_EXCEPTION_OR_ERROR( _resource_disable_trigger(t) );
 }
 
 #endif // !defined(__XC__)
 
-#endif // __xcore_c_timer_h__
+#endif // __xcore_c_hwtimer_h__

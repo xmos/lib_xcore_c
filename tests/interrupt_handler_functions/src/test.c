@@ -82,20 +82,20 @@ void test_interrupt_function(const chan_data_t *cd1, const chan_data_t *cd2, int
 typedef struct {
   hwtimer_t t;
   int v;
-} timer_data_t;
+} hwtimer_data_t;
 
 /*
  * Interrupt handler function. Passed the timer that triggered the interrupt and
  * user data associated with that resource. This simply updates the timer to
  * fire after the period again.
  */
-DEFINE_INTERRUPT_CALLBACK(groupA, timer_handler, data)
+DEFINE_INTERRUPT_CALLBACK(groupA, hwtimer_handler, data)
 {
-  timer_data_t *td = (timer_data_t*)data;
+  hwtimer_data_t *td = (hwtimer_data_t*)data;
   int time;
-  timer_get_time(td->t, &time);
+  hwtimer_get_time(td->t, &time);
   debug_printf("Timer interrupt data 0x%x\n", td->v);
-  timer_change_trigger_time(td->t, time + period);
+  hwtimer_change_trigger_time(td->t, time + period);
 }
 
 DEFINE_INTERRUPT_PERMITTED(groupA, void, test, chanend c1, chanend c2)
@@ -103,27 +103,27 @@ DEFINE_INTERRUPT_PERMITTED(groupA, void, test, chanend c1, chanend c2)
   // Test enabling a timer outside of the interrupt loop with a function to handle
   // the interrupts.
   hwtimer_t t;
-  timer_alloc(&t);
+  hwtimer_alloc(&t);
 
   chan_data_t cd1 = {c1, CHAN_ID_1};
   chan_data_t cd2 = {c2, CHAN_ID_2};
-  timer_data_t td = {t, 0xfeedbeef};
+  hwtimer_data_t td = {t, 0xfeedbeef};
 
   // Test 1: Run the test function with the timer enabled
   int time;
-  timer_get_time(t, &time);
-  timer_setup_interrupt_callback(t, time + period, &td, INTERRUPT_CALLBACK(timer_handler));
-  timer_enable_trigger(t);
+  hwtimer_get_time(t, &time);
+  hwtimer_setup_interrupt_callback(t, time + period, &td, INTERRUPT_CALLBACK(hwtimer_handler));
+  hwtimer_enable_trigger(t);
   test_interrupt_function(&cd1, &cd2, 20);
-  timer_disable_trigger(t);
+  hwtimer_disable_trigger(t);
 
   // Test 2: Run the test function again with the timer disabled
   test_interrupt_function(&cd1, &cd2, 10);
 
   // Test 3: Run the test function again with the timer enabled
-  timer_get_time(t, &time);
-  timer_setup_interrupt_callback(t, time + period, &td, INTERRUPT_CALLBACK(timer_handler));
-  timer_enable_trigger(t);
+  hwtimer_get_time(t, &time);
+  hwtimer_setup_interrupt_callback(t, time + period, &td, INTERRUPT_CALLBACK(hwtimer_handler));
+  hwtimer_enable_trigger(t);
   test_interrupt_function(&cd1, &cd2, 0);
-  timer_disable_trigger(t);
+  hwtimer_disable_trigger(t);
 }

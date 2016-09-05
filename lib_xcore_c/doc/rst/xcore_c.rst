@@ -17,42 +17,42 @@ The library provides support for xCORE hardware timers. They are allocated
 using::
 
   hwtimer_t tmr;
-  timer_alloc(&tmr);
+  hwtimer_alloc(&tmr);
 
 A timer can then be read to get the current time by doing::
 
   uint32_t time;
-  timer_get_time(tmr, &time);
+  hwtimer_get_time(tmr, &time);
 
 There are two functions provided to delay using a timer. The first waits for a
 specified time::
 
   // The times are in 10ns, so 100000 timer ticks is 1ms
   uint32_t now;
-  timer_wait_until(tmr, time + 100000, &now); // Wait for (time + 1ms)
+  hwtimer_wait_until(tmr, time + 100000, &now); // Wait for (time + 1ms)
 
 The second delays for a period of time in 100MHz timer ticks::
 
-  timer_delay(tmr, 100000); // Delay for 1ms
+  hwtimer_delay(tmr, 100000); // Delay for 1ms
 
 When the timer is no longer required it can be released to be used by other cores
 by calling::
 
-  timer_free(&tmr);
+  hwtimer_free(&tmr);
 
 Each logical core is automatically allocated a hardware timer for use by xC code.
 If a task is not running xC code, or the xC code is not using timers, the
 core's hardware timer may be released back into the pool by calling::
 
   // Start of task.
-  timer_free_xc_timer();
+  hwtimer_free_xc_timer();
   ...
-  timer_realloc_xc_timer();
+  hwtimer_realloc_xc_timer();
   // End of task.
 
 As the above code illustrates, the hardware timer must be reallocated before the logical
 core completes execution.
-N.B. there must be a free hardware timer available when timer_realloc_xc_timer() is called.
+N.B. there must be a free hardware timer available when hwtimer_realloc_xc_timer() is called.
 
 
 Using channels
@@ -400,14 +400,14 @@ a timer event the library initialisation would install a callback::
   void lib_init(void *data)
   {
     hwtimer_t tmr;
-    timer_alloc(&tmr);
+    hwtimer_alloc(&tmr);
     uint32_t time;
-    timer_get_time(tmr, &time);
-    timer_setup_select_callback(tmr, time + period, data, timer_callback_func);
+    hwtimer_get_time(tmr, &time);
+    hwtimer_setup_select_callback(tmr, time + period, data, hwtimer_callback_func);
   }
 
 This code allocates a hardware timer and then gets the current time before
-registering callback function. The call to ``timer_setup_select_callback()`` takes
+registering callback function. The call to ``hwtimer_setup_select_callback()`` takes
 four arguments.
 
   1. The timer to configure
@@ -420,18 +420,18 @@ and channel ends (``chanend_setup_select_callback()``).
 
 The callback function is passed the user data registered with that resource::
 
-  void timer_callback_func(void *data);
+  void hwtimer_callback_func(void *data);
 
 This will usually be the resource's ID so that the callback can access the resource.
 If additional information is required, data may be a pointer to a struct::
 
   typedef struct data_t {hwtimer_t tmr; uint32_t period;} data_t;
 
-  void timer_callback_func(void *data) {
+  void hwtimer_callback_func(void *data) {
     data_t *d = (data_t *)data;
     uint32_t time;
-    timer_get_time(d->tmr, &time);
-    timer_change_trigger_time(d->tmr, time + d->period);
+    hwtimer_get_time(d->tmr, &time);
+    hwtimer_change_trigger_time(d->tmr, time + d->period);
 
 
 When using select callback functions, the ``select_disable_trigger_all()`` function
@@ -459,9 +459,9 @@ After the ``handle_events()`` function has completed another equivalent function
 can be called in which the timer callback will continue to be called periodically.
 
 When the timer select callbacks are no longer required then they can be disabled
- using the ``timer_disable_trigger()`` function (or equivalent port/chanend functions)::
+ using the ``hwtimer_disable_trigger()`` function (or equivalent port/chanend functions)::
 
-  timer_disable_trigger(tmr);
+  hwtimer_disable_trigger(tmr);
 
 Ordered select events
 ~~~~~~~~~~~~~~~~~~~~~
@@ -913,35 +913,35 @@ Port protocol helpers
 Timers
 ......
 
-.. doxygenfunction:: timer_free_xc_timer
+.. doxygenfunction:: hwtimer_free_xc_timer
 
-.. doxygenfunction:: timer_realloc_xc_timer
+.. doxygenfunction:: hwtimer_realloc_xc_timer
 
-.. doxygenfunction:: timer_alloc
+.. doxygenfunction:: hwtimer_alloc
 
-.. doxygenfunction:: timer_free
+.. doxygenfunction:: hwtimer_free
 
-.. doxygenfunction:: timer_get_time
+.. doxygenfunction:: hwtimer_get_time
 
-.. doxygenfunction:: timer_set_trigger_time
+.. doxygenfunction:: hwtimer_set_trigger_time
 
-.. doxygenfunction:: timer_change_trigger_time
+.. doxygenfunction:: hwtimer_change_trigger_time
 
-.. doxygenfunction:: timer_clear_trigger_time
+.. doxygenfunction:: hwtimer_clear_trigger_time
 
-.. doxygenfunction:: timer_wait_until
+.. doxygenfunction:: hwtimer_wait_until
 
-.. doxygenfunction:: timer_delay
+.. doxygenfunction:: hwtimer_delay
 
-.. doxygenfunction:: timer_setup_select
+.. doxygenfunction:: hwtimer_setup_select
 
-.. doxygenfunction:: timer_setup_select_callback
+.. doxygenfunction:: hwtimer_setup_select_callback
 
-.. doxygenfunction:: timer_setup_interrupt_callback
+.. doxygenfunction:: hwtimer_setup_interrupt_callback
 
-.. doxygenfunction:: timer_enable_trigger
+.. doxygenfunction:: hwtimer_enable_trigger
 
-.. doxygenfunction:: timer_disable_trigger
+.. doxygenfunction:: hwtimer_disable_trigger
 
 |newpage|
 

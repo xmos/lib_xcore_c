@@ -47,7 +47,7 @@ void test_select_function(chanend c, chanend d)
 typedef struct {
   hwtimer_t t;
   int value;
-} hanlde_timer_data;
+} hanlde_hwtimer_data;
 /*
  * Event handler function. Passed the timer that triggered the event and user
  * data associated with that resource. This simply updates the timer to fire
@@ -55,12 +55,12 @@ typedef struct {
  */
 DEFINE_SELECT_CALLBACK(handle_timer, _data)
 {
-  hanlde_timer_data *data = (hanlde_timer_data*)_data;
+  hanlde_hwtimer_data *data = (hanlde_hwtimer_data*)_data;
 
   int time;
-  timer_get_time(data->t, &time);
+  hwtimer_get_time(data->t, &time);
   debug_printf("Timer event data 0x%x\n", data->value);
-  timer_change_trigger_time(data->t, time + period);
+  hwtimer_change_trigger_time(data->t, time + period);
 }
 
 void test(chanend c, chanend d)
@@ -68,28 +68,28 @@ void test(chanend c, chanend d)
   // Test enabling a timer outside of the event loop with a function to handle
   // the events.
   hwtimer_t t;
-  timer_alloc(&t);
-  static hanlde_timer_data data;
+  hwtimer_alloc(&t);
+  static hanlde_hwtimer_data data;
   data.t = t;
   data.value = 0xfeedbeef;
 
   // Test 1: Run the test function with the timer enabled
   int time;
-  timer_get_time(t, &time);
-  timer_setup_select_callback(t, time + period, (void*)&data, SELECT_CALLBACK(handle_timer));
-  timer_enable_trigger(t);
+  hwtimer_get_time(t, &time);
+  hwtimer_setup_select_callback(t, time + period, (void*)&data, SELECT_CALLBACK(handle_timer));
+  hwtimer_enable_trigger(t);
   test_select_function(c, d);
-  timer_disable_trigger(t);
+  hwtimer_disable_trigger(t);
 
   // Test 2: Run the test function again with the timer disabled
   test_select_function(c, d);
 
   // Test 3: Run the test function again with the timer enabled
-  timer_get_time(t, &time);
-  timer_change_trigger_time(t, time + period);
-  timer_enable_trigger(t);
+  hwtimer_get_time(t, &time);
+  hwtimer_change_trigger_time(t, time + period);
+  hwtimer_enable_trigger(t);
   test_select_function(c, d);
-  timer_disable_trigger(t);
+  hwtimer_disable_trigger(t);
 
-  timer_free(&t);
+  hwtimer_free(&t);
 }
