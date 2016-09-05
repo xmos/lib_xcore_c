@@ -10,6 +10,47 @@
 #include "xcore_c_resource_impl.h"
 #include "xcore_c_exception_impl.h"
 
+/** Deallocate the xC timer resource for a thread
+ *
+ *  This function deallcoates the hardware timer automatically allocated
+ *  for xC use. Each logical core is allocated a hardware timer that is
+ *  multiplexed and used by the xC 'timer' interface. This multiplexed
+ *  timer is not accessible from C.
+ *  If the logical core is not running any xC code, or any xC code
+ *  is not making use of the 'timer' resource type, the allocated hardware
+ *  timer may be retrieved for use as a hwtimer_t.
+ *
+ *  N.B. This call must be paired with a call to timer_realloc_xc_timer()
+ *  prior to the logical core completing its tasks.
+ *
+ *  N.B. The xScope link also requires a hardware timer.
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   timer has already been deallocated.
+ */
+inline xcore_c_error_t timer_free_xc_timer(void)
+{
+  RETURN_EXCEPTION_OR_ERROR( _timer_free_xc_timer() );
+}
+
+/** Reallocate the xC timer resource for a thread
+ *
+ *  This function reallcoates a logical core's xC hardware timer that was
+ *  deallocated by a call to timer_free_xc_timer().
+ *
+ *  N.B. There must be an available hw timer when this call is made,
+ *  otherwise an exception will be raised when the logical core completes.
+ *
+ *  \return     error_none.
+ *
+ *  \exception  ET_ECALL   no available hw timer, reallocation failed.
+ */
+inline xcore_c_error_t timer_realloc_xc_timer(void)
+{
+  RETURN_EXCEPTION_OR_ERROR( _timer_realloc_xc_timer() );
+}
+
 /** Allocates and initialise a timer.
  *
  *  This function allocates a hardware timer.

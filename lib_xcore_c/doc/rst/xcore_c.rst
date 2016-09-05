@@ -40,6 +40,21 @@ by calling::
 
   timer_free(&tmr);
 
+Each logical core is automatically allocated a hardware timer for use by xC code.
+If a task is not running xC code, or the xC code is not using timers, the
+core's hardware timer may be released back into the pool by calling::
+
+  // Start of task.
+  timer_free_xc_timer();
+  ...
+  timer_realloc_xc_timer();
+  // End of task.
+
+As the above code illustrates, the hardware timer must be reallocated before the logical
+core completes execution.
+N.B. there must be a free hardware timer available when timer_realloc_xc_timer() is called.
+
+
 Using channels
 ..............
 
@@ -897,6 +912,10 @@ Port protocol helpers
 
 Timers
 ......
+
+.. doxygenfunction:: timer_free_xc_timer
+
+.. doxygenfunction:: timer_realloc_xc_timer
 
 .. doxygenfunction:: timer_alloc
 

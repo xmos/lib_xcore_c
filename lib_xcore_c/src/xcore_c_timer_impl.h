@@ -26,6 +26,24 @@ typedef unsigned hwtimer_t;
 #include "xcore_c_resource_impl.h"
 #include <xs1.h>
 
+inline void _timer_realloc_xc_timer(void)
+{
+  // __init_threadlocal_timer has resource ID in r2 and it may be zero.
+  // Implement a checked version here instead.
+  unsigned tmr, addr;
+  _RESOURCE_ALLOC(tmr, XS1_RES_TYPE_TIMER);
+  asm volatile( "ecallf %0" :: "r" (tmr));
+  asm volatile( "ldaw %0, dp[__timers]" : "=r" (addr));
+  asm volatile( "get r11, id" ::: /* clobbers */ "r11");
+  asm volatile( "stw  %0, %1[r11]" : : "r" (tmr), "r" (addr));
+}
+
+extern void __free_threadlocal_timer(void);
+inline void _timer_free_xc_timer(void)
+{
+  __free_threadlocal_timer();
+}
+
 inline hwtimer_t _timer_alloc(void)
 {
   hwtimer_t t;

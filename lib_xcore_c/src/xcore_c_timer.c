@@ -1,6 +1,8 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
 #include "xcore_c_timer_impl.h"
+extern void _timer_free_xc_timer(void);
+extern void _timer_realloc_xc_timer(void);
 extern hwtimer_t _timer_alloc(void);
 extern void _timer_free(hwtimer_t t);
 extern void _timer_get_time(hwtimer_t t, uint32_t *now);
@@ -9,6 +11,8 @@ extern void _timer_set_trigger_time(hwtimer_t t, uint32_t time);
 extern void _timer_clear_trigger_time(hwtimer_t t);
 
 #include "xcore_c_timer.h"
+extern xcore_c_error_t timer_free_xc_timer(void);
+extern xcore_c_error_t timer_realloc_xc_timer(void);
 extern xcore_c_error_t timer_alloc(hwtimer_t *t);
 extern xcore_c_error_t timer_free(hwtimer_t *t);
 extern xcore_c_error_t timer_get_time(hwtimer_t t, uint32_t *now);
