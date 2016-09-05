@@ -201,6 +201,6 @@ inline xcore_c_error_t clock_set_ready_src(clock clk, port ready_source)
   RETURN_EXCEPTION_OR_ERROR( _clock_set_ready_src(clk, ready_source) );
 }
 
-#endif // __XC__
+#endif // !defined(__XC__)
 
 #endif // __xcore_c_clock_h__

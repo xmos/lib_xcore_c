@@ -168,6 +168,6 @@ inline xcore_c_error_t chanend_disable_trigger(chanend c)
   RETURN_EXCEPTION_OR_ERROR( _resource_disable_trigger(c) );
 }
 
-#endif // __XC__
+#endif // !defined(__XC__)
 
 #endif // __xcore_c_chanend_h__

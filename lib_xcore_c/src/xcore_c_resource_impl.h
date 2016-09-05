@@ -3,10 +3,10 @@
 #ifndef __xcore_c_resource_impl_h__
 #define __xcore_c_resource_impl_h__
 
-#if !defined(__XC__) || defined(__DOXYGEN__)
-
 // This file contains private implementation details and is not part of the API.
 // The contents may vary between releases.
+
+#if !defined(__XC__) || defined(__DOXYGEN__)
 
 #include <stdint.h>
 #include "xassert.h"
@@ -78,6 +78,6 @@ inline void _resource_free(resource_t r)
 
 #define _RESOURCE_SETCI(res, c) asm volatile( "setc res[%0], " _XCORE_C_STR(c) :: "r" (res))
 
-#endif // __XC__
+#endif // !defined(__XC__)
 
 #endif // __xcore_c_resource_impl_h__

@@ -6,6 +6,8 @@
 // This file contains private implementation details and is not part of the API.
 // The contents may vary between releases.
 
+#if !defined(__XC__) || defined(__DOXYGEN__)
+
 #include "trycatch.h"
 #include "xcore_c_error_codes.h"
 
@@ -41,6 +43,8 @@
     expr ; \
   } \
   return error_none
+
+#endif // !defined(__XC__)
 
 #endif // __xcore_c_exception_impl_h__
 

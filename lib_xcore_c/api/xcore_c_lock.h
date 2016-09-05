@@ -89,6 +89,6 @@ inline xcore_c_error_t lock_release(lock_t l)
   RETURN_EXCEPTION_OR_ERROR( asm volatile("out res[%0], %0" :: "r" (l)) );
 }
 
-#endif // __XC__
+#endif // !defined(__XC__)
 
 #endif // __xcore_c_lock_h__

@@ -254,6 +254,6 @@ port_protocol_out_strobed_slave(port p, port readyin, clock clk, uint32_t initia
                               } while (0) );
 }
 
-#endif // __XC__
+#endif // !defined(__XC__)
 
 #endif // __xcore_c_port_protocol_h__

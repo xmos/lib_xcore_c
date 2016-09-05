@@ -6,13 +6,15 @@
 // This file contains private implementation details and is not part of the API.
 // The contents may vary between releases.
 
+#if !defined(__XC__) || defined(__DOXYGEN__)
+
 #include <stdint.h>
 #include <xccompat.h>
 #ifdef __DOXYGEN__
 // Copy typedefs from xccompat.h for use by doxygen
 /** Opaque type for use in C/C++ code.
  *
- * It enables a XC function prototyped as taking a parameter of type chanend to
+ * It enables a xC function prototyped as taking a parameter of type chanend to
  * be called from C and vice versa.
  *
  *  Users must not access its raw underlying type.
@@ -21,7 +23,7 @@ typedef unsigned chanend;
 
 /** Opaque type for use in C/C++ code.
  *
- * It enables a XC function prototyped as taking a parameter of type
+ * It enables a xC function prototyped as taking a parameter of type
  * streaming_chanend_t to be called from C and vice versa.
  *
  *  Users must not access its raw underlying type.
@@ -31,7 +33,6 @@ typedef unsigned streaming_chanend_t;
 #include <xs1.h>
 #include "xcore_c_resource_impl.h"
 
-#if !defined(__XC__) || defined(__DOXYGEN__)
 /** An opaque type for handling transactions
  *
  *  Users must not access its raw underlying type.
@@ -59,7 +60,7 @@ inline void _chanend_set_dest(chanend c, chanend dst)
 {
   asm("setd res[%0], %1" :: "r" (c), "r" (dst));
 }
-#endif // __XC__
+#endif // !defined(__XC__)
 
 inline void _s_chan_out_word(streaming_chanend_t c, uint32_t data)
 {
@@ -123,7 +124,7 @@ inline void _t_chan_change_to_output(transacting_chanend_t *tc)
     tc->last_out = 1;
   }
 }
-#endif // __XC__
+#endif // !defined(__XC__)
 
 #endif // __xcore_c_chan_impl_h__
 

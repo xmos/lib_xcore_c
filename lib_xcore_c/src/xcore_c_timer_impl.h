@@ -16,7 +16,7 @@
  * hwtimer_t is an opaque type.
  *
  *  The hwtimer_t type can be used just like the timer type. It gives a unique
- *  hardware timer to use (as opposed to the default timer in XC which is
+ *  hardware timer to use (as opposed to the default timer in xC which is
  *  allocated based on a shared hardware timer per logical core).
  *
  *  Users must not access its raw underlying type.
@@ -60,6 +60,6 @@ inline void _timer_clear_trigger_time(hwtimer_t t)
   // timer_get_time() will respond immediately
 }
 
-#endif // __XC__
+#endif // !defined(__XC__)
 
 #endif // __xcore_c_timer_impl_h__

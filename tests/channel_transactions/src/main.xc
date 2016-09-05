@@ -36,7 +36,7 @@ void xc_test_int(chanend c)
   master out_array_int(c, data, array_len);
   slave in_array_int(c, data, array_len);
 
-  print_array_int("XC received: ", data, array_len);
+  print_array_int("xC received: ", data, array_len);
 }
 
 void xc_test_char(chanend c)
@@ -56,7 +56,7 @@ void xc_test_char(chanend c)
       c :> data[i];
     }
   }
-  print_array_char("XC received: ", data, array_len);
+  print_array_char("xC received: ", data, array_len);
 }
 
 int main()

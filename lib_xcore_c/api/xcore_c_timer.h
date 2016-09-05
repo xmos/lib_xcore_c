@@ -297,6 +297,6 @@ inline xcore_c_error_t timer_disable_trigger(hwtimer_t t)
   RETURN_EXCEPTION_OR_ERROR( _resource_disable_trigger(t) );
 }
 
-#endif // __XC__
+#endif // !defined(__XC__)
 
 #endif // __xcore_c_timer_h__

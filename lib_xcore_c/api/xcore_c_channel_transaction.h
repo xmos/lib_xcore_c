@@ -294,6 +294,6 @@ inline xcore_c_error_t t_chan_in_buf_byte(transacting_chanend_t *tc, uint8_t buf
                               } while (0) );
 }
 
-#endif // __XC__
+#endif // !defined(__XC__)
 
 #endif // __xcore_c_channel_transaction_h__

@@ -3,10 +3,10 @@
 #ifndef __xcore_c_select_impl_h__
 #define __xcore_c_select_impl_h__
 
-#if !defined(__XC__) || defined(__DOXYGEN__)
-
 // This file contains private implementation details and is not part of the API.
 // The contents may vary between releases.
+
+#if !defined(__XC__) || defined(__DOXYGEN__)
 
 #include "xcore_c_macros.h"
 #include "xcore_c_resource_impl.h"
@@ -52,7 +52,7 @@
     asm(_XCORE_C_STR(_DEFINE_SELECT_CALLBACK_DEF(callback))); \
     _DECLARE_SELECT_CALLBACK(callback, data)
 
-#endif // __XC__
+#endif // !defined(__XC__)
 
 #endif // __xcore_c_select_impl_h__
 

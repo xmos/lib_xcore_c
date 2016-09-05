@@ -6,6 +6,8 @@
 // This file contains private implementation details and is not part of the API.
 // The contents may vary between releases.
 
+#if !defined(__XC__) || defined(__DOXYGEN__)
+
 #include "xcore_c_resource_impl.h"
 #include <xs1.h>
 
@@ -22,5 +24,7 @@ inline lock_t _lock_alloc(void)
   _RESOURCE_ALLOC(l, XS1_RES_TYPE_LOCK);
   return l;
 }
+
+#endif // !defined(__XC__)
 
 #endif // __xcore_c_lock_impl_h__

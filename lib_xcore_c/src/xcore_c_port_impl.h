@@ -6,6 +6,8 @@
 // This file contains private implementation details and is not part of the API.
 // The contents may vary between releases.
 
+#if !defined(__XC__) || defined(__DOXYGEN__)
+
 #include <stdint.h>
 #include <stddef.h>
 #include <xccompat.h>
@@ -13,7 +15,7 @@
 // Copy typedefs from xccompat.h for use by doxygen
 /**
  * port is an opaque type for use in C/C++ code.
- * It enables a XC function prototyped as taking a parameter of type port to
+ * It enables a xC function prototyped as taking a parameter of type port to
  * be called from C and vice versa.
  *
  *  Users must not access its raw underlying type.
@@ -196,5 +198,7 @@ inline void _port_clear_buffer(port p)
 {
   _RESOURCE_SETCI(p, XS1_SETC_RUN_CLRBUF);
 }
+
+#endif // !defined(__XC__)
 
 #endif // __xcore_c_port_impl_h__

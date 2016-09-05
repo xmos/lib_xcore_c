@@ -1078,6 +1078,6 @@ inline xcore_c_error_t port_disable_trigger(port p)
   RETURN_EXCEPTION_OR_ERROR( _resource_disable_trigger(p) );
 }
 
-#endif // __XC__
+#endif // !defined(__XC__)
 
 #endif // __xcore_c_port_h__

@@ -270,6 +270,6 @@ inline xcore_c_error_t chan_in_buf_byte(chanend c, uint8_t buf[], size_t n)
                               } while (0) );
 }
 
-#endif // __XC__
+#endif // !defined(__XC__)
 
 #endif // __xcore_c_channel_h__

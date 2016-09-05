@@ -4,7 +4,6 @@
 #define __xcore_c_select_h__
 
 #if !defined(__XC__) || defined(__DOXYGEN__)
-// XC files should use the native operators.
 
 #include <stdint.h>
 #include "xcore_c_select_impl.h"
@@ -142,6 +141,6 @@ uint32_t select_no_wait_ordered(uint32_t no_wait_id, const resource_t ids[]);
  */
 #define SELECT_CALLBACK(callback) _SELECT_CALLBACK(callback)
 
-#endif // __XC__
+#endif // !defined(__XC__)
 
 #endif // __xcore_c_select_h__

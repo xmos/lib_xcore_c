@@ -331,6 +331,6 @@ inline xcore_c_error_t s_chan_check_ct_end(streaming_chanend_t c)
   RETURN_EXCEPTION_OR_ERROR( _s_chan_check_ct_end(c) );
 }
 
-#endif // __XC__
+#endif // !defined(__XC__)
 
 #endif // __xcore_c_channel_streaming_h__
