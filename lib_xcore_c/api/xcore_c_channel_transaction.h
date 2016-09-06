@@ -35,7 +35,7 @@
  *  \exception  ET_LINK_ERROR         chan-end destination is not set.
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
- *  \exception  ET_LOAD_STORE         invalid ''\*c'' or ''\*tc'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*c* or *\*tc* argument.
  */
 inline xcore_c_error_t chan_init_transaction_master(chanend *c, transacting_chanend_t *tc)
 {
@@ -66,7 +66,7 @@ inline xcore_c_error_t chan_init_transaction_master(chanend *c, transacting_chan
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
  *                                    or does not contain CT_END token.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
- *  \exception  ET_LOAD_STORE         invalid ''\*c'' or ''\*tc'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*c* or *\*tc* argument.
  */
 inline xcore_c_error_t chan_init_transaction_slave(chanend *c, transacting_chanend_t *tc)
 {
@@ -97,7 +97,7 @@ inline xcore_c_error_t chan_init_transaction_slave(chanend *c, transacting_chane
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
  *                                    or channel handshaking corrupted.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
- *  \exception  ET_LOAD_STORE         invalid ''\*c'' or ''\*tc'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*c* or *\*tc* argument.
  */
 inline xcore_c_error_t chan_complete_transaction(chanend *c, transacting_chanend_t *tc)
 {
@@ -125,7 +125,7 @@ inline xcore_c_error_t chan_complete_transaction(chanend *c, transacting_chanend
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
  *                                    or channel handshaking corrupted.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
- *  \exception  ET_LOAD_STORE         invalid ''\*tc'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*tc* argument.
  */
 inline xcore_c_error_t t_chan_out_word(transacting_chanend_t *tc, uint32_t data)
 {
@@ -146,7 +146,7 @@ inline xcore_c_error_t t_chan_out_word(transacting_chanend_t *tc, uint32_t data)
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
  *                                    or channel handshaking corrupted.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
- *  \exception  ET_LOAD_STORE         invalid ''\*tc'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*tc* argument.
  */
 inline xcore_c_error_t t_chan_out_byte(transacting_chanend_t *tc, uint8_t data)
 {
@@ -168,7 +168,7 @@ inline xcore_c_error_t t_chan_out_byte(transacting_chanend_t *tc, uint8_t data)
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
  *                                    or channel handshaking corrupted.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
- *  \exception  ET_LOAD_STORE         invalid ''\*tc'' or ''buf[]'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*tc* or *buf[]* argument.
  */
 inline xcore_c_error_t t_chan_out_buf_word(transacting_chanend_t *tc, const uint32_t buf[], size_t n)
 {
@@ -192,7 +192,7 @@ inline xcore_c_error_t t_chan_out_buf_word(transacting_chanend_t *tc, const uint
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
  *                                    or channel handshaking corrupted.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
- *  \exception  ET_LOAD_STORE         invalid ''\*tc'' or ''buf[]'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*tc* or *buf[]* argument.
  */
 inline xcore_c_error_t t_chan_out_buf_byte(transacting_chanend_t *tc, const uint8_t buf[], size_t n)
 {
@@ -215,7 +215,7 @@ inline xcore_c_error_t t_chan_out_buf_byte(transacting_chanend_t *tc, const uint
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
  *                                    or channel handshaking corrupted.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
- *  \exception  ET_LOAD_STORE         invalid ''\*tc'' or ''\*data'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*tc* or *\*data* argument.
  */
 inline xcore_c_error_t t_chan_in_word(transacting_chanend_t *tc, uint32_t *data)
 {
@@ -236,7 +236,7 @@ inline xcore_c_error_t t_chan_in_word(transacting_chanend_t *tc, uint32_t *data)
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
  *                                    or channel handshaking corrupted.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
- *  \exception  ET_LOAD_STORE         invalid ''\*tc'' or ''\*data'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*tc* or *\*data* argument.
  */
 inline xcore_c_error_t t_chan_in_byte(transacting_chanend_t *tc, uint8_t *data)
 {
@@ -258,7 +258,7 @@ inline xcore_c_error_t t_chan_in_byte(transacting_chanend_t *tc, uint8_t *data)
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
  *                                    or channel handshaking corrupted.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
- *  \exception  ET_LOAD_STORE         invalid ''\*tc'' or ''buf[]'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*tc* or *buf[]* argument.
  */
 inline xcore_c_error_t t_chan_in_buf_word(transacting_chanend_t *tc, uint32_t buf[], size_t n)
 {
@@ -282,7 +282,7 @@ inline xcore_c_error_t t_chan_in_buf_word(transacting_chanend_t *tc, uint32_t bu
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
  *                                    or channel handshaking corrupted.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
- *  \exception  ET_LOAD_STORE         invalid ''\*tc'' or ''buf[]'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*tc* or *buf[]* argument.
  */
 inline xcore_c_error_t t_chan_in_buf_byte(transacting_chanend_t *tc, uint8_t buf[], size_t n)
 {

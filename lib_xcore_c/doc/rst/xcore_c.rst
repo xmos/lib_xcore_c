@@ -52,7 +52,7 @@ core's hardware timer may be released back into the pool by calling::
 
 As the above code illustrates, the hardware timer must be reallocated before the logical
 core completes execution.
-N.B. there must be a free hardware timer available when hwtimer_realloc_xc_timer() is called.
+**There must be a free hardware timer available when hwtimer_realloc_xc_timer() is called.**
 
 
 Using channels

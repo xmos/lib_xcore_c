@@ -12,7 +12,7 @@
 
 /** Starting value to use for the enum_id
  *
- *  The enum_id is passed to the \<resource\>_setup_select() and returned by
+ *  The enum_id is passed to the *res*_setup_select() and returned by
  *  select_wait() et al
  *
  *  On XS1 the environment vectors (EVs) are only 16-bit and bit 16 will be set
@@ -30,9 +30,8 @@
  *  a new event loop.
  *  This will ensure that no events set up by other code will be triggered
  *
- *  N.B. this affect events setup using \<resource\>_setup_select() and
- *       \<resource\>_setup_select_callback()
- *       but not \<resource\>_setup_interrupt_callback()
+ *  This affect events setup using *res*_setup_select() and
+ *  *res*_setup_select_callback() but not *res*_setup_interrupt_callback()
  *
  *  \return     error_none
  */
@@ -57,7 +56,8 @@ uint32_t select_wait(void);
  *  it returns the enum_id the user has registered with the resource that
  *  triggered the event. If no events are ready then returns the no_wait_id
  *  passed in by the user.
- *  N.B. select_callback_t events are handled, but are not considered 'select events'
+ *
+ *  **select_callback_t events are handled, but are not considered 'select events'**
  *
  *  \param no_wait_id  The enum_id to return if no 'select event' is triggered
  *
@@ -73,14 +73,15 @@ uint32_t select_no_wait(uint32_t no_wait_id);
  *      This includes select_callback_t functions but not interrupt_callback_t functions.
  *    - Enables select events on each resource in turn so that there is a defined
  *      order in which pending events will be taken
- *  N.B. Enabled select_callback_t resources will be taken, but will not terminate
- *  the process. A user may wish to place these at the front of the list.
+ *
+ *  **Enabled select_callback_t resources will be taken, but will not terminate
+ *  the process. A user may wish to place these at the front of the list**
  *
  *  \param ids  Null-terminated list of resources to enable events on
  *
  *  \returns    The enum_id registered with the resource which triggers an event
  *
- *  \exception  ET_LOAD_STORE         invalid ''ids[]'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *ids[]* argument.
  */
 uint32_t select_wait_ordered(const resource_t ids[]);
 
@@ -88,7 +89,8 @@ uint32_t select_wait_ordered(const resource_t ids[]);
  *
  *  This function does the same as select_wait_ordered, but will return the
  *  no_wait_id if no select event fires by the end of the enabling sequence.
- *  N.B. select_callback_t events are handled, but are not considered 'select events'
+ *
+ *  **select_callback_t events are handled, but are not considered 'select events'**
  *
  *  \param no_wait_id  The enum_id to return if no 'select event' is triggered
  *  \param ids         Null-terminated list of resources to enable events on
@@ -96,26 +98,27 @@ uint32_t select_wait_ordered(const resource_t ids[]);
  *  \returns  The enum_id registered with the resource which triggered an event
  *            or the no_wait_id passed in if no event fired
  *
- *  \exception  ET_LOAD_STORE         invalid ''ids[]'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *ids[]* argument.
  */
 uint32_t select_no_wait_ordered(uint32_t no_wait_id, const resource_t ids[]);
 
 /** Define a select callback handling function
  *
  *  This macro will define two functions for you:
- *  1) an ordinary function that may be called directly
- *     Its signature will be 'void \<callback\>(void* \<data\>);'
- *  2) an select_callback_t function for passing to the \<resource\>_setup_select_callback functions
- *     The select_callback_t function name is accessed using the SELECT_CALLBACK() macro
+ *    - An ordinary function that may be called directly
+ *      Its signature will be 'void *callback* ( void\* *data* )'
+ *    - An select_callback_t function for passing to the res_setup_select_callback functions
+ *      The select_callback_t function name is accessed using the SELECT_CALLBACK() macro
  *
- *  Example usage:
+ *  Example usage: \code
  *    DEFINE_SELECT_CALLBACK(myfunc, arg)
  *    {
  *      // This is the body of 'void myfunc(void* arg)'
  *    }
+ *  \endcode
  *
  *  \param callback this is the name of the ordinary function
- *  \param data     the name to use for the \*void argument
+ *  \param data     the name to use for the void* argument
  */
 #define DEFINE_SELECT_CALLBACK(callback, data) _DEFINE_SELECT_CALLBACK(callback, data)
 
@@ -123,19 +126,20 @@ uint32_t select_no_wait_ordered(uint32_t no_wait_id, const resource_t ids[]);
  *
  *  Use this macro when you require a declaration of your select callback function types
  *
- *  Example usage:
+ *  Example usage: \code
  *    DECLARE_SELECT_CALLBACK(myfunc, arg);
  *    chanend_setup_select_callback(c, 0 , SELECT_CALLBACK(myfunc));
+ *	\endcode
  *
  *  \param callback this is the name of the ordinary function
- *  \param data     the name to use for the \*void argument
+ *  \param data     the name to use for the void* argument
  */
 #define DECLARE_SELECT_CALLBACK(callback, data) _DECLARE_SELECT_CALLBACK(callback, data)
 
 /** The name of the defined 'select_callback_t' function
  *
  *  Use this macro for retriving the name of the declared select callback function.
- *  This is the name that is passed to \<resource\>_setup_select_callback() for registration.
+ *  This is the name that is passed to *res*_setup_select_callback() for registration.
  *
  *  \return     the name of the defined select_callback_t function
  */

@@ -13,7 +13,7 @@
 
 /** A clock block identifier
  *
- * Clock resources must be allocated by name rather than from a poll.
+ * Clock resources must be allocated by name rather than from a pool.
  */
 typedef enum {
   clock_ref = XS1_CLKBLK_REF,
@@ -38,7 +38,7 @@ typedef enum {
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid clock.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the clock.
- *  \exception  ET_LOAD_STORE         invalid ''\*clk'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*clk* argument.
  */
 inline xcore_c_error_t clock_alloc(clock *clk, clock_id_t id)
 {
@@ -56,7 +56,7 @@ inline xcore_c_error_t clock_alloc(clock *clk, clock_id_t id)
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid clock.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the clock.
- *  \exception  ET_LOAD_STORE         invalid ''\*clk'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*clk* argument.
  */
 inline xcore_c_error_t clock_free(clock *clk)
 {

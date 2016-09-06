@@ -72,7 +72,7 @@ typedef enum {
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
- *  \exception  ET_LOAD_STORE         invalid ''\*p'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*p* argument.
  */
 inline xcore_c_error_t port_alloc(port *p, port_id_t id)
 {
@@ -89,7 +89,7 @@ inline xcore_c_error_t port_alloc(port *p, port_id_t id)
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
- *  \exception  ET_LOAD_STORE         invalid ''\*p'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*p* argument.
  */
 inline xcore_c_error_t port_reset(port p)
 {
@@ -112,7 +112,7 @@ inline xcore_c_error_t port_reset(port p)
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid port,
  *                                    or is not legal width for the port.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
- *  \exception  ET_LOAD_STORE         invalid ''\*p'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*p* argument.
  */
 inline xcore_c_error_t port_alloc_buffered(port *p, port_id_t id, size_t transfer_width)
 {
@@ -131,7 +131,7 @@ inline xcore_c_error_t port_alloc_buffered(port *p, port_id_t id, size_t transfe
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
- *  \exception  ET_LOAD_STORE         invalid ''\*p'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*p* argument.
  */
 inline xcore_c_error_t port_free(port *p)
 {
@@ -145,8 +145,8 @@ inline xcore_c_error_t port_free(port *p)
  *
  *  The default transfer width is the same as the physical port width.
  *
- * N.B. a port must have been set to buffered if the width is different from the
- * physical port width.
+ *  **A port must have been set to buffered if the width is different from the
+ *  physical port width**
  *
  *  \param p               The port to change the transfer width of
  *  \param transfer_width  Number of bits to serialise; must be 1, 4, 8, or 32.
@@ -467,7 +467,7 @@ inline xcore_c_error_t port_set_ready_handshake(port p)
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
- *  \exception  ET_LOAD_STORE         invalid ''\*t'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*t* argument.
  */
 inline xcore_c_error_t port_get_trigger_time(port p, int16_t *t)
 {
@@ -583,7 +583,7 @@ inline xcore_c_error_t port_clear_trigger_in(port p)
  *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
- *  \exception  ET_LOAD_STORE         invalid ''\*data'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*data* argument.
  */
 inline xcore_c_error_t port_peek(port p, uint32_t *data)
 {
@@ -627,7 +627,7 @@ inline xcore_c_error_t port_out(port p, uint32_t data)
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
- *  \exception  ET_LOAD_STORE         invalid ''\*data'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*data* argument.
  */
 inline xcore_c_error_t port_in(port p, uint32_t *data)
 {
@@ -652,7 +652,7 @@ inline xcore_c_error_t port_in(port p, uint32_t *data)
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
- *  \exception  ET_LOAD_STORE         invalid ''\*data'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*data* argument.
  */
 inline xcore_c_error_t port_out_shift_right(port p, uint32_t *data)
 {
@@ -675,7 +675,7 @@ inline xcore_c_error_t port_out_shift_right(port p, uint32_t *data)
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
- *  \exception  ET_LOAD_STORE         invalid ''\*data'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*data* argument.
  */
 inline xcore_c_error_t port_in_shift_right(port p, uint32_t *data)
 {
@@ -721,7 +721,7 @@ inline xcore_c_error_t port_out_at_time(port p, int16_t t, uint32_t data)
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
- *  \exception  ET_LOAD_STORE         invalid ''\*data'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*data* argument.
  */
 inline xcore_c_error_t port_in_at_time(port p, int16_t t, uint32_t *data)
 {
@@ -748,7 +748,7 @@ inline xcore_c_error_t port_in_at_time(port p, int16_t t, uint32_t *data)
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
- *  \exception  ET_LOAD_STORE         invalid ''\*data'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*data* argument.
  */
 inline xcore_c_error_t port_out_shift_right_at_time(port p, int16_t t, uint32_t *data)
 {
@@ -774,7 +774,7 @@ inline xcore_c_error_t port_out_shift_right_at_time(port p, int16_t t, uint32_t 
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
- *  \exception  ET_LOAD_STORE         invalid ''\*data'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*data* argument.
  */
 inline xcore_c_error_t port_in_shift_right_at_time(port p, int16_t t, uint32_t *data)
 {
@@ -801,7 +801,7 @@ inline xcore_c_error_t port_in_shift_right_at_time(port p, int16_t t, uint32_t *
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
- *  \exception  ET_LOAD_STORE         invalid ''\*data'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*data* argument.
  */
 inline xcore_c_error_t port_in_when_pinseq(port p, port_type_t pt, uint32_t value, uint32_t *data)
 {
@@ -828,7 +828,7 @@ inline xcore_c_error_t port_in_when_pinseq(port p, port_type_t pt, uint32_t valu
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
- *  \exception  ET_LOAD_STORE         invalid ''\*data'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*data* argument.
  */
 inline xcore_c_error_t port_in_when_pinsneq(port p, port_type_t pt, uint32_t value, uint32_t *data)
 {
@@ -856,7 +856,7 @@ inline xcore_c_error_t port_in_when_pinsneq(port p, port_type_t pt, uint32_t val
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
- *  \exception  ET_LOAD_STORE         invalid ''\*data'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*data* argument.
  */
 inline xcore_c_error_t port_in_shift_right_when_pinseq(port p, port_type_t pt, uint32_t value, uint32_t *data)
 {
@@ -884,7 +884,7 @@ inline xcore_c_error_t port_in_shift_right_when_pinseq(port p, port_type_t pt, u
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
- *  \exception  ET_LOAD_STORE         invalid ''\*data'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*data* argument.
  */
 inline xcore_c_error_t port_in_shift_right_when_pinsneq(port p, port_type_t pt, uint32_t value, uint32_t *data)
 {
@@ -936,7 +936,7 @@ inline xcore_c_error_t port_clear_buffer(port p)
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
- *  \exception  ET_LOAD_STORE         invalid ''\*num'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*num* argument.
  */
 inline xcore_c_error_t port_endin(port p, size_t *num)
 {
@@ -956,7 +956,7 @@ inline xcore_c_error_t port_endin(port p, size_t *num)
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
- *  \exception  ET_LOAD_STORE         invalid ''\*num'' or ''\*data'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*num* or *\*data* argument.
  */
 inline xcore_c_error_t port_force_input(port p, size_t *num, uint32_t *data)
 {

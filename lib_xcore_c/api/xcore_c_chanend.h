@@ -21,7 +21,7 @@
  *
  *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
- *  \exception  ET_LOAD_STORE         invalid ''\*c'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*c* argument.
  */
 inline xcore_c_error_t chanend_alloc(chanend* c)
 {
@@ -41,7 +41,7 @@ inline xcore_c_error_t chanend_alloc(chanend* c)
  *                                    an input/output is pending,
  *                                    or it has not received/sent a CT_END token.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
- *  \exception  ET_LOAD_STORE         invalid ''\*c'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*c* argument.
  */
 inline xcore_c_error_t chanend_free(chanend *c)
 {

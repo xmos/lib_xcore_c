@@ -18,7 +18,8 @@
  *  checks for zero (fail) on allocation, passes in valid pointer addresses
  *  and does not access the same resource on multiple logical cores
  *  the library will not throw an exception.
- *  Exceptions should be viewed as programming errors rather than runtime errors.
+ *
+ *  **Exceptions should be viewed as programming errors rather than runtime errors.**
  *
  *  The default exception policy for the library is to throw exceptions.
  *  Setting the library to no_exceptions will increase the code size

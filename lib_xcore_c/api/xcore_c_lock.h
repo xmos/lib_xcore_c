@@ -19,7 +19,7 @@
  *
  *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
- *  \exception  ET_LOAD_STORE         invalid ''\*l'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*l* argument.
  */
 inline xcore_c_error_t lock_alloc(lock_t *l)
 {
@@ -38,7 +38,7 @@ inline xcore_c_error_t lock_alloc(lock_t *l)
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated lock,
  *                                    or the lock has not been released.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the lock.
- *  \exception  ET_LOAD_STORE         invalid ''\*l'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*l* argument.
  */
 inline xcore_c_error_t lock_free(lock_t *l)
 {

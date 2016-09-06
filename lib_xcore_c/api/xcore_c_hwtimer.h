@@ -20,10 +20,10 @@
  *  is not making use of the 'timer' resource type, the allocated hardware
  *  timer may be retrieved for use as a hwtimer_t.
  *
- *  N.B. This call must be paired with a call to hwtimer_realloc_xc_timer()
- *  prior to the logical core completing its tasks.
+ *  **This call must be paired with a call to hwtimer_realloc_xc_timer()
+ *  prior to the logical core completing its tasks**
  *
- *  N.B. The xScope link also requires a hardware timer.
+ *  **The xScope link also requires a hardware timer**
  *
  *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
@@ -39,8 +39,8 @@ inline xcore_c_error_t hwtimer_free_xc_timer(void)
  *  This function reallcoates a logical core's xC hardware timer that was
  *  deallocated by a call to hwtimer_free_xc_timer().
  *
- *  N.B. There must be an available hw timer when this call is made,
- *  otherwise an exception will be raised when the logical core completes.
+ *  **There must be an available hw timer when this call is made,
+ *  otherwise an exception will be raised when the logical core completes**
  *
  *  \return     error_none.
  *
@@ -63,7 +63,7 @@ inline xcore_c_error_t hwtimer_realloc_xc_timer(void)
  *
  *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
- *  \exception  ET_LOAD_STORE         invalid ''\*t'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*t* argument.
  */
 inline xcore_c_error_t hwtimer_alloc(hwtimer_t *t)
 {
@@ -80,7 +80,7 @@ inline xcore_c_error_t hwtimer_alloc(hwtimer_t *t)
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated timer.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the timer.
- *  \exception  ET_LOAD_STORE         invalid ''\*t'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*t* argument.
  */
 inline xcore_c_error_t hwtimer_free(hwtimer_t *t)
 {
@@ -102,7 +102,7 @@ inline xcore_c_error_t hwtimer_free(hwtimer_t *t)
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated timer.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the timer.
- *  \exception  ET_LOAD_STORE         invalid ''\*now'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*now* argument.
  */
 inline xcore_c_error_t hwtimer_get_time(hwtimer_t t, uint32_t *now)
 {
@@ -113,9 +113,10 @@ inline xcore_c_error_t hwtimer_get_time(hwtimer_t t, uint32_t *now)
  *
  *  This will cause hwtimer_get_time() to pause until the specified time.
  *  The trigger may be cleared using hwtimer_clear_trigger_time().
- *  N.B. hwtimer_wait_until(), hwtimer_delay(), hwtimer_setup_select()
+ *
+ *  **hwtimer_wait_until(), hwtimer_delay(), hwtimer_setup_select()
  *  hwtimer_setup_select_callback() and hwtimer_setup_interrupt_callback()
- *  call hwtimer_set_trigger_time().
+ *  call hwtimer_set_trigger_time()**
  *
  *  \param t     The timer to setup a event trigger on.
  *  \param time  The time at which the timer will trigger an event. The default
@@ -171,7 +172,7 @@ inline xcore_c_error_t hwtimer_clear_trigger_time(hwtimer_t t)
 
 /** Wait until after a specified time.
  *
- *  N.B. This will destroy any select or interrupt event triggers.
+ *  **This will destroy any select or interrupt event triggers set on this resource**
  *
  *  \param t      The timer to use for timing
  *  \param until  The time to wait until
@@ -181,7 +182,7 @@ inline xcore_c_error_t hwtimer_clear_trigger_time(hwtimer_t t)
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated timer.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the timer.
- *  \exception  ET_LOAD_STORE         invalid ''\*now'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*now* argument.
  */
 inline xcore_c_error_t hwtimer_wait_until(hwtimer_t t, uint32_t until, uint32_t *now)
 {
@@ -194,7 +195,7 @@ inline xcore_c_error_t hwtimer_wait_until(hwtimer_t t, uint32_t until, uint32_t 
 
 /** Delay for a specified time using a specific timer.
  *
- *  N.B. This will destroy any select or interrupt event triggers.
+ *  **This will destroy any select or interrupt event triggers set on this resource**
  *
  *  \param t    The timer resource to use
  *  \param period The amount of time to wait (in reference time ticks, usually 10ns steps)
@@ -203,7 +204,7 @@ inline xcore_c_error_t hwtimer_wait_until(hwtimer_t t, uint32_t until, uint32_t 
  *
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated timer.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the timer.
- *  \exception  ET_LOAD_STORE         invalid ''\*now'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*now* argument.
  */
 inline xcore_c_error_t hwtimer_delay(hwtimer_t t, uint32_t period)
 {
@@ -324,7 +325,8 @@ inline xcore_c_error_t hwtimer_enable_trigger(hwtimer_t t)
  *
  *  This function prevents any further select or interrupt events being triggered
  *  by a given timer.
- *  N.B. this does not clear the trigger setup.
+ *
+ *  **This does not clear the trigger setup**
  *
  *  \param t    The timer to disable events on
  *

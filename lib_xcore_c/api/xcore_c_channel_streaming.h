@@ -24,14 +24,15 @@ typedef struct streaming_channel_t {
  *  streaming_channel_t with both fields set to 0.
  *  When the streaming_channel_t is no longer required, s_chan_free() must be
  *  called to deallocate it.
- *  N.B. The chan-ends must be accessed on the same tile.
+ *
+ *  **The chan-ends must be accessed on the same tile**
  *
  *  \param c    streaming_channel_t variable holding the two initialised and
  *              joined chan-ends or 0s.
  *
  *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
- *  \exception  ET_LOAD_STORE         invalid ''\*c'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*c* argument.
  */
 inline xcore_c_error_t s_chan_alloc(streaming_channel_t *c)
 {
@@ -67,7 +68,7 @@ inline xcore_c_error_t s_chan_alloc(streaming_channel_t *c)
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated channel,
  *                                    or an input/output is pending.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the channel.
- *  \exception  ET_LOAD_STORE         invalid ''\*c'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*c* argument.
  */
 inline xcore_c_error_t s_chan_free(streaming_channel_t *c)
 {
@@ -130,7 +131,7 @@ inline xcore_c_error_t s_chan_out_byte(streaming_chanend_t c, uint8_t data)
  *  \exception  ET_LINK_ERROR         chan-end destination is not set.
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
- *  \exception  ET_LOAD_STORE         invalid ''buf[]'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *buf[]* argument.
  */
 inline xcore_c_error_t s_chan_out_buf_word(streaming_chanend_t c, const uint32_t buf[], size_t n)
 {
@@ -154,7 +155,7 @@ inline xcore_c_error_t s_chan_out_buf_word(streaming_chanend_t c, const uint32_t
  *  \exception  ET_LINK_ERROR         chan-end destination is not set.
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
- *  \exception  ET_LOAD_STORE         invalid ''buf[]'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *buf[]* argument.
  */
 inline xcore_c_error_t s_chan_out_buf_byte(streaming_chanend_t c, const uint8_t buf[], size_t n)
 {
@@ -177,7 +178,7 @@ inline xcore_c_error_t s_chan_out_buf_byte(streaming_chanend_t c, const uint8_t 
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
  *                                    or has pending control token.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
- *  \exception  ET_LOAD_STORE         invalid ''\*data'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*data* argument.
  */
 inline xcore_c_error_t s_chan_in_word(streaming_chanend_t c, uint32_t *data)
 {
@@ -195,7 +196,7 @@ inline xcore_c_error_t s_chan_in_word(streaming_chanend_t c, uint32_t *data)
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
  *                                    or has pending control token.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
- *  \exception  ET_LOAD_STORE         invalid ''\*data'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *\*data* argument.
  */
 inline xcore_c_error_t s_chan_in_byte(streaming_chanend_t c, uint8_t *data)
 {
@@ -215,7 +216,7 @@ inline xcore_c_error_t s_chan_in_byte(streaming_chanend_t c, uint8_t *data)
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
  *                                    or has pending control token.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
- *  \exception  ET_LOAD_STORE         invalid ''buf[]'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *buf[]* argument.
  */
 inline xcore_c_error_t s_chan_in_buf_word(streaming_chanend_t c, uint32_t buf[], size_t n)
 {
@@ -239,7 +240,7 @@ inline xcore_c_error_t s_chan_in_buf_word(streaming_chanend_t c, uint32_t buf[],
  *  \exception  ET_ILLEGAL_RESOURCE   not an allocated chan-end,
  *                                    or has pending control token.
  *  \exception  ET_RESOURCE_DEP       another core is actively using the chan-end.
- *  \exception  ET_LOAD_STORE         invalid ''buf[]'' argument.
+ *  \exception  ET_LOAD_STORE         invalid *buf[]* argument.
  */
 inline xcore_c_error_t s_chan_in_buf_byte(streaming_chanend_t c, uint8_t buf[], size_t n)
 {
