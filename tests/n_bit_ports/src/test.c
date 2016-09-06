@@ -9,7 +9,7 @@ void port_test_output(chanend c)
   port p;
   port_alloc(&p, port_4A);
 
-  int dummy;
+  uint32_t dummy;
   chan_in_word(c, &dummy); // Wait for ack
 
   for (int i = 0; i < 16; ++i) {
@@ -33,12 +33,11 @@ void port_test_input(chanend c)
   port p;
   port_alloc(&p, port_4C);
 
-  int input;
+  uint32_t input;
   port_in(p, &input);
   chan_out_word(c, 0); // Send ack
 
   for (int i = 0; i < 16; ++i) {
-    int ii;
     port_in_when_pinseq(p, PORT_UNBUFFERED, i, &input);
     if (input != i) {
       debug_printf("Error\n");

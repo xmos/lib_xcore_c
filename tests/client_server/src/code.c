@@ -17,7 +17,7 @@ void get_addresses(chanend c, unsigned *local_server, unsigned *remote_server)
   // Exchange channel IDs with the other end of a channel
   s_chan_out_word(c, c);
   s_chan_out_ct(c, XS1_CT_END);
-  s_chan_in_word(c, (int*)remote_server);
+  s_chan_in_word(c, (uint32_t*)remote_server);
   s_chan_check_ct(c, XS1_CT_END);
   debug_printf("%x:%d: get_addresses: local %x, remote: %x\n",
                tile_id, core_id, *local_server, *remote_server);
@@ -36,8 +36,8 @@ void chanend_server(chanend c)
 
   while (1) {
     chanend sender;
-    s_chan_in_word(c, (int*)&sender);
-    int command;
+    s_chan_in_word(c, (uint32_t*)&sender);
+    uint32_t command;
     s_chan_in_word(c, &command);
     s_chan_check_ct(c, XS1_CT_END);
 
@@ -70,7 +70,7 @@ int send_command(chanend dst, int command)
   s_chan_out_word(c, command);
   s_chan_out_ct(c, XS1_CT_END);
 
-  int response;
+  uint32_t response;
   s_chan_in_word(c, &response);
   s_chan_check_ct(c, XS1_CT_END);
 

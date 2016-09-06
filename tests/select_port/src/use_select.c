@@ -27,7 +27,7 @@ void port_example()
 
   hwtimer_t t;
   hwtimer_alloc(&t);
-  int time;
+  uint32_t time;
   hwtimer_get_time(t, &time);
   time += period;
 
@@ -46,7 +46,7 @@ void port_example()
     switch (choice) {
       case EVENT_TIMER: {
         // Read the timer to clear the event
-        int dummy;
+        uint32_t dummy;
         hwtimer_get_time(t, &dummy);
 
         // Set up the next timer event
@@ -63,7 +63,7 @@ void port_example()
 
       case EVENT_PORT_P: {
         // Read the port to clear the event
-        int x;
+        uint32_t x;
         port_in(p, &x);
         port_set_trigger_in_not_equal(p, x);
 

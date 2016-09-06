@@ -22,12 +22,12 @@ static void time_port_rate(hwtimer_t tmr, port p, clock c)
   port_out(p, 0); // Pre-fill the transfer reg
   port_out(p, 0); // Start running after a clock edge has moved data from the
                      // transfer register
-  int start_time;
+  uint32_t start_time;
   hwtimer_get_time(tmr, &start_time);
   for (int i = 0; i < num_writes; ++i) {
     port_out(p, i);
   }
-  int end_time;
+  uint32_t end_time;
   hwtimer_get_time(tmr, &end_time);
 
   clock_stop(c);

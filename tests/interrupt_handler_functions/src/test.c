@@ -26,14 +26,14 @@ DEFINE_INTERRUPT_CALLBACK(groupA, channel_handler, data)
   chan_data_t *cd = (chan_data_t*)data;
   switch (cd->id) {
     case CHAN_ID_1: {
-      int x;
+      uint32_t x;
       chan_in_word(cd->c, &x);
       remaining_chan_c_reads--;
       debug_printf("Received %d on channel c\n", x);
       break;
     }
     case CHAN_ID_2: {
-      int x;
+      uint32_t x;
       chan_in_word(cd->c, &x);
       remaining_chan_d_reads--;
       debug_printf("Received %d on channel d\n", x);
@@ -92,7 +92,7 @@ typedef struct {
 DEFINE_INTERRUPT_CALLBACK(groupA, hwtimer_handler, data)
 {
   hwtimer_data_t *td = (hwtimer_data_t*)data;
-  int time;
+  uint32_t time;
   hwtimer_get_time(td->t, &time);
   debug_printf("Timer interrupt data 0x%x\n", td->v);
   hwtimer_change_trigger_time(td->t, time + period);
@@ -110,7 +110,7 @@ DEFINE_INTERRUPT_PERMITTED(groupA, void, test, chanend c1, chanend c2)
   hwtimer_data_t td = {t, 0xfeedbeef};
 
   // Test 1: Run the test function with the timer enabled
-  int time;
+  uint32_t time;
   hwtimer_get_time(t, &time);
   hwtimer_setup_interrupt_callback(t, time + period, &td, INTERRUPT_CALLBACK(hwtimer_handler));
   hwtimer_enable_trigger(t);

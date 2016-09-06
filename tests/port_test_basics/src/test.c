@@ -9,7 +9,7 @@ void port_test_output(chanend c)
   port p;
   port_alloc(&p, port_1A);
 
-  int dummy;
+  uint32_t dummy;
   port_out(p, 0);
   chan_in_word(c, &dummy); // Wait for ack
   port_out(p, 1);
@@ -37,7 +37,7 @@ void port_test_input(chanend c)
   port p;
   port_alloc(&p, port_1B);
 
-  int input;
+  uint32_t input;
   port_in(p, &input);
   chan_out_word(c, 0); // Send ack
 

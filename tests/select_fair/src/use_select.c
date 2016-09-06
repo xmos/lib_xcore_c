@@ -29,7 +29,7 @@ void channel_example_fair(chanend c, chanend d)
     switch (choice) {
       case EVENT_CHAN_C: {
         // Read value to clear event and toggle enabled event
-        int x;
+        uint32_t x;
         chan_in_word(c, &x);
         chanend_disable_trigger(c);
         chanend_enable_trigger(d);
@@ -38,7 +38,7 @@ void channel_example_fair(chanend c, chanend d)
       }
       case EVENT_CHAN_D: {
         // Read value to clear event and toggle enabled event
-        int x;
+        uint32_t x;
         chan_in_word(d, &x);
         chanend_disable_trigger(d);
         chanend_enable_trigger(c);

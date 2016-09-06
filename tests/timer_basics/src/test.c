@@ -16,7 +16,7 @@ void fast(chanend c)
   debug_printf("Fast started\n");
 
   // Get a time a long way in the future that both cores will then wait until
-  int time;
+  uint32_t time;
   hwtimer_get_time(tmr, &time);
   time += 10000;
   s_chan_out_word(c, time);
@@ -46,7 +46,7 @@ void slow(chanend c)
   debug_printf("Slow started\n");
 
   // Get the time from the other core to wait until
-  int time;
+  uint32_t time;
   s_chan_in_word(c, &time);
 
   hwtimer_wait_until(tmr, time, &time);

@@ -25,14 +25,14 @@ void channel_example(chanend c, chanend d)
     switch (choice) {
       case EVENT_CHAN_C: {
         // Read value to clear event
-        int x;
+        uint32_t x;
         chan_in_word(c, &x);
         debug_printf("Received %d on channel c\n", x);
         break;
       }
       case EVENT_CHAN_D: {
         // Read value to clear event
-        int x;
+        uint32_t x;
         chan_in_word(d, &x);
         debug_printf("Received %d on channel d\n", x);
         break;

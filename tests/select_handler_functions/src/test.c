@@ -26,14 +26,14 @@ void test_select_function(chanend c, chanend d)
     switch (choice) {
       case EVENT_CHAN_C: {
         // Read value and clear event
-        int x;
+        uint32_t x;
         chan_in_word(c, &x);
         debug_printf("Received %d on channel c\n", x);
         break;
       }
       case EVENT_CHAN_D: {
         // Read value and clear event
-        int x;
+        uint32_t x;
         chan_in_word(d, &x);
         debug_printf("Received %d on channel d\n", x);
         break;
@@ -57,7 +57,7 @@ DEFINE_SELECT_CALLBACK(handle_timer, _data)
 {
   hanlde_hwtimer_data *data = (hanlde_hwtimer_data*)_data;
 
-  int time;
+  uint32_t time;
   hwtimer_get_time(data->t, &time);
   debug_printf("Timer event data 0x%x\n", data->value);
   hwtimer_change_trigger_time(data->t, time + period);
@@ -74,7 +74,7 @@ void test(chanend c, chanend d)
   data.value = 0xfeedbeef;
 
   // Test 1: Run the test function with the timer enabled
-  int time;
+  uint32_t time;
   hwtimer_get_time(t, &time);
   hwtimer_setup_select_callback(t, time + period, (void*)&data, SELECT_CALLBACK(handle_timer));
   hwtimer_enable_trigger(t);

@@ -25,7 +25,7 @@ void port_test_output(chanend c)
 
   port_protocol_out_strobed_master(p, p_ready, clk, 0);
 
-  int dummy;
+  uint32_t dummy;
   chan_in_word(c, &dummy); // Wait for ack
 
   port_out(p, 0xfeedbeef);
@@ -70,7 +70,7 @@ void port_test_input(chanend c)
 
   chan_out_word(c, 0); // Send ack
 
-  unsigned int x;
+  uint32_t x;
   port_in(p, &x);
   if (x != 0xfeedbeef) {
     debug_printf("Error %x received instead of 0xfeedbeef\n", x);
