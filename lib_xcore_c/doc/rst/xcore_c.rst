@@ -403,7 +403,9 @@ a timer event the library initialisation would install a callback::
     hwtimer_alloc(&tmr);
     uint32_t time;
     hwtimer_get_time(tmr, &time);
-    hwtimer_setup_select_callback(tmr, time + period, data, hwtimer_callback_func);
+    hwtimer_setup_select_callback(tmr, time + period,
+                                  data, SELECT_CALLBACK(hwtimer_callback_func));
+    hwtimer_enable_trigger(tmr);
   }
 
 This code allocates a hardware timer and then gets the current time before
@@ -413,7 +415,7 @@ four arguments.
   1. The timer to configure
   2. The time at which the next event should fire
   3. A ``void*`` which is user data that is passed to the handler
-  4. The callback function to call when events are triggered by the timer
+  4. The select_callback_t function to call when events are triggered by the timer
 
 *Note*: There are similar functions for ports (``port_setup_select_callback()``)
 and channel ends (``chanend_setup_select_callback()``).
@@ -422,12 +424,17 @@ The callback function is passed the user data registered with that resource::
 
   void hwtimer_callback_func(void *data);
 
-This will usually be the resource's ID so that the callback can access the resource.
+Howver, we also need to generate a wrapping function, so we use the API's marcro
+to declare both at the same time::
+
+  DECLARE_SELECT_CALLBACK(hwtimer_callback_func, data);
+
+``data`` will usually be the resource's ID so that the callback can access the resource.
 If additional information is required, data may be a pointer to a struct::
 
   typedef struct data_t {hwtimer_t tmr; uint32_t period;} data_t;
 
-  void hwtimer_callback_func(void *data) {
+  DEFINE_SELECT_CALLBACK(hwtimer_callback_func, data) {
     data_t *d = (data_t *)data;
     uint32_t time;
     hwtimer_get_time(d->tmr, &time);
