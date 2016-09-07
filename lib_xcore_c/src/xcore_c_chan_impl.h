@@ -39,24 +39,24 @@ typedef unsigned streaming_chanend_t;
  */
 typedef struct transacting_chanend_t {
 #ifndef __DOXYGEN__
-  chanend c;
+  streaming_chanend_t c;
   unsigned last_out;
 #endif // __DOXYGEN__
 } transacting_chanend_t;
 
-inline chanend _chanend_alloc(void)
+inline streaming_chanend_t _s_chanend_alloc(void)
 {
-  chanend c;
+  streaming_chanend_t c;
   _RESOURCE_ALLOC(c, XS1_RES_TYPE_CHANEND);
   return c;
 }
 
-inline void _chanend_free(chanend c)
+inline void _s_chanend_free(streaming_chanend_t c)
 {
   _resource_free((resource_t)c);
 }
 
-inline void _chanend_set_dest(chanend c, chanend dst)
+inline void _s_chanend_set_dest(streaming_chanend_t c, streaming_chanend_t dst)
 {
   asm("setd res[%0], %1" :: "r" (c), "r" (dst));
 }

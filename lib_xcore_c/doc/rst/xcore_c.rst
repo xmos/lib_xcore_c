@@ -480,7 +480,7 @@ resources. For example, if using two channels (``c``, ``d``) and a timer (``tmr`
 then a null-terminated list can be defined to ensure the channels are handled
 before the timer if they are ready::
 
-  resource ids[4] = {c, d, tmr, 0};
+  resource_t ids[4] = {c, d, tmr, 0};
 
 And then the core of the select event handling loop would be changed to pass this list
 of resource IDs to define the order in which events are enabled::
@@ -645,11 +645,21 @@ Errors and exception
 Chanends
 ........
 
+.. doxygenfunction:: s_chanend_alloc
+
+.. doxygenfunction:: s_chanend_free
+
+.. doxygenfunction:: s_chanend_set_dest
+
+.. doxygenfunction:: s_chanend_convert
+
 .. doxygenfunction:: chanend_alloc
 
 .. doxygenfunction:: chanend_free
 
 .. doxygenfunction:: chanend_set_dest
+
+.. doxygenfunction:: chanend_convert
 
 .. doxygenfunction:: chanend_setup_select
 

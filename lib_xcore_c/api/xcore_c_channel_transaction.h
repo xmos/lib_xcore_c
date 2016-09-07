@@ -42,7 +42,7 @@ inline xcore_c_error_t chan_init_transaction_master(chanend *c, transacting_chan
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _s_chan_out_ct_end(*c); \
                                 tc->last_out = 0; \
-                                tc->c = *c; \
+                                tc->c = (streaming_chanend_t)*c; \
                                 *c = 0; \
                               } while (0) );
 }
@@ -73,7 +73,7 @@ inline xcore_c_error_t chan_init_transaction_slave(chanend *c, transacting_chane
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 _s_chan_check_ct_end(*c); \
                                 tc->last_out = 1; \
-                                tc->c = *c; \
+                                tc->c = (streaming_chanend_t)*c; \
                                 *c = 0; \
                               } while (0) );
 }
@@ -109,7 +109,7 @@ inline xcore_c_error_t chan_complete_transaction(chanend *c, transacting_chanend
                                   _s_chan_check_ct_end(tc->c); \
                                   _s_chan_out_ct_end(tc->c); \
                                 } \
-                                *c = tc->c; \
+                                *c = (chanend)tc->c; \
                                 tc->c = 0; \
                               } while (0) );
 }

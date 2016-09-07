@@ -7,6 +7,7 @@
 
 void fast(chanend c)
 {
+  streaming_chanend_t sc = s_chanend_convert(c);
   hwtimer_t tmr;
   hwtimer_alloc(&tmr);
   xassert(tmr);
@@ -19,7 +20,7 @@ void fast(chanend c)
   uint32_t time;
   hwtimer_get_time(tmr, &time);
   time += 10000;
-  s_chan_out_word(c, time);
+  s_chan_out_word(sc, time);
 
   hwtimer_wait_until(tmr, time, &time);
 
@@ -32,11 +33,12 @@ void fast(chanend c)
   xassert(!tmr);
 
   // Disconnect the channels
-  s_chan_out_ct_end(c);
+  s_chan_out_ct_end(sc);
 }
 
 void slow(chanend c)
 {
+  streaming_chanend_t sc = s_chanend_convert(c);
   hwtimer_t tmr;
   hwtimer_alloc(&tmr);
   xassert(tmr);
@@ -47,7 +49,7 @@ void slow(chanend c)
 
   // Get the time from the other core to wait until
   uint32_t time;
-  s_chan_in_word(c, &time);
+  s_chan_in_word(sc, &time);
 
   hwtimer_wait_until(tmr, time, &time);
 
@@ -59,6 +61,6 @@ void slow(chanend c)
   xassert(!tmr);
 
   // Consume the disconnect token
-  s_chan_check_ct_end(c);
+  s_chan_check_ct_end(sc);
 }
 

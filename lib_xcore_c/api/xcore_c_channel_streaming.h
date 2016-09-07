@@ -37,14 +37,14 @@ typedef struct streaming_channel_t {
 inline xcore_c_error_t s_chan_alloc(streaming_channel_t *c)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
-                                if ((c->left = _chanend_alloc())) {
-                                  if ((c->right = _chanend_alloc())) {
-                                    // exception safe calls to _chanend_set_dest()
-                                    _chanend_set_dest(c->left, c->right);
-                                    _chanend_set_dest(c->right, c->left);
+                                if ((c->left = _s_chanend_alloc())) {
+                                  if ((c->right = _s_chanend_alloc())) {
+                                    // exception safe calls to _s_chanend_set_dest()
+                                    _s_chanend_set_dest(c->left, c->right);
+                                    _s_chanend_set_dest(c->right, c->left);
                                   }
                                   else {
-                                    _chanend_free(c->left);
+                                    _s_chanend_free(c->left);
                                     c->left = 0;
                                     c->right = 0;
                                   }
@@ -77,9 +77,9 @@ inline xcore_c_error_t s_chan_free(streaming_channel_t *c)
                                 _s_chan_out_ct_end(c->right); \
                                 _s_chan_check_ct_end(c->left); \
                                 _s_chan_check_ct_end(c->right); \
-                                _chanend_free(c->left); \
+                                _s_chanend_free(c->left); \
                                 c->left = 0; \
-                                _chanend_free(c->right); \
+                                _s_chanend_free(c->right); \
                                 c->right = 0; \
                               } while (0) );
 }

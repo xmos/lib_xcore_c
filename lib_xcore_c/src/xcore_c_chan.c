@@ -1,9 +1,9 @@
 // Copyright (c) 2016, XMOS Ltd, All rights reserved
 
 #include "xcore_c_chan_impl.h"
-extern chanend _chanend_alloc(void);
-extern void _chanend_free(chanend c);
-extern void _chanend_set_dest(chanend c, chanend dst);
+extern streaming_chanend_t _s_chanend_alloc(void);
+extern void _s_chanend_free(streaming_chanend_t c);
+extern void _s_chanend_set_dest(streaming_chanend_t c, streaming_chanend_t dst);
 extern void _s_chan_out_word(streaming_chanend_t c, uint32_t data);
 extern void _s_chan_out_byte(streaming_chanend_t c, uint8_t data);
 extern uint32_t _s_chan_in_word(streaming_chanend_t c);
@@ -16,8 +16,13 @@ extern void _t_chan_change_to_input(transacting_chanend_t *tc);
 extern void _t_chan_change_to_output(transacting_chanend_t *tc);
 
 #include "xcore_c_chanend.h"
+extern xcore_c_error_t s_chanend_alloc(streaming_chanend_t *c);
+extern xcore_c_error_t s_chanend_free(streaming_chanend_t *c);
+extern xcore_c_error_t s_chanend_set_dest(streaming_chanend_t c, streaming_chanend_t dst);
+extern streaming_chanend_t s_chanend_convert(chanend c);
 extern xcore_c_error_t chanend_alloc(chanend *c);
 extern xcore_c_error_t chanend_free(chanend *c);
+extern chanend chanend_convert(streaming_chanend_t c);
 extern xcore_c_error_t chanend_set_dest(chanend c, chanend dst);
 extern xcore_c_error_t chanend_setup_select(chanend c, uint32_t enum_id);
 extern xcore_c_error_t chanend_setup_select_callback(chanend c, void *data, select_callback_t func);
