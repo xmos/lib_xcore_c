@@ -3,13 +3,13 @@
 # or a valid argument for the -target option when compiling
 TARGET = XCORE-200-EXPLORER
 
-# The APP_NAME variable determines the name of the final .xe file. It should
+# The APP_NAME variable determines the name of the final .xe file. It must
 # not include the .xe postfix. If left blank the name will default to
 # the project name
 APP_NAME = 
 
 # The USED_MODULES variable lists other module used by the application.
-USED_MODULES = lib_logging lib_xcore_c
+USED_MODULES = lib_logging lib_xcore_c lib_xassert
 
 # The flags passed to xcc when building the application
 # You can also set the following to override flags for a particular language:

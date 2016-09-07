@@ -8,57 +8,64 @@ const int events_per_resource = 5;
 
 // For XS1 support all values passed to the event_setup function must have bit 16 set
 typedef enum {
-  EVENT_CHAN_C = EVENT_ENUM_BASE,
+  EVENT_CHAN_C = ENUM_ID_BASE,
   EVENT_CHAN_D,
   EVENT_TIMER,
   EVENT_NONE
 } event_choice_t;
 
-void test(chanend c, chanend d, timer tmr, resource ids[])
+void test(chanend c, chanend d, hwtimer_t tmr, resource_t ids[])
 {
-  int time = timer_get_time(tmr);
+  uint32_t time;
+  hwtimer_get_time(tmr, &time);
   time += 10;
 
   // Setup the channels to generate events
-  event_setup_chanend(c, EVENT_CHAN_C);
-  event_setup_chanend(d, EVENT_CHAN_D);
-  event_setup_timer(tmr, EVENT_TIMER, time);
+  chanend_setup_select(c, EVENT_CHAN_C);
+  chanend_enable_trigger(c);
+  chanend_setup_select(d, EVENT_CHAN_D);
+  chanend_enable_trigger(d);
+  hwtimer_setup_select(tmr, time, EVENT_TIMER);
+  hwtimer_enable_trigger(tmr);
 
-  int timer_event_count = 0;
+  int hwtimer_event_count = 0;
   int default_event_count = 0;
 
   // Expect N events for each of the resources used (and one lot for the default)
   int count = 0;
   while (count < events_per_resource * 4) {
-    event_choice_t choice = event_select_ordered_no_wait(ids, EVENT_NONE);
+    event_choice_t choice = select_no_wait_ordered(EVENT_NONE, ids);
     switch (choice) {
       case EVENT_CHAN_C: {
-        // Read value and clear event
-        int x = chan_input_word(c);
+        // Read value to clear event
+        uint32_t x;
+        chan_in_word(c, &x);
         debug_printf("Received %d on channel c\n", x);
         count += 1;
         break;
       }
       case EVENT_CHAN_D: {
-        // Read value and clear event
-        int x = chan_input_word(d);
+        // Read value to clear event
+        uint32_t x;
+        chan_in_word(d, &x);
         debug_printf("Received %d on channel d\n", x);
         count += 1;
         break;
       }
       case EVENT_TIMER: {
-        // Read value and clear event
-        debug_printf("Timer event %d\n", timer_event_count);
-        time = timer_get_time(tmr);
-        timer_event_count++;
-        if (timer_event_count >= events_per_resource) {
+        // Read value to clear event
+        debug_printf("Timer event %d\n", hwtimer_event_count);
+        hwtimer_get_time(tmr, &time);
+        hwtimer_event_count++;
+        if (hwtimer_event_count >= events_per_resource) {
           // Allow the other resources to have time to finish
           time += 10000000;
-        } else {
+        }
+        else {
           // Give enough time for the default to fire
           time += 1000;
         }
-        event_change_timer_time(tmr, time);
+        hwtimer_change_trigger_time(tmr, time);
         count += 1;
         break;
       }
@@ -80,22 +87,29 @@ void test(chanend c, chanend d, timer tmr, resource ids[])
 
 void channel_first(chanend c, chanend d)
 {
-  // No need to clear all events first as the event_select_ordered will do that
+  // No need to clear all events first as the select_wait_ordered will do that
   debug_printf("Running with order [c, d, timer]\n");
 
-  timer tmr = timer_alloc();
+  hwtimer_t tmr;
+  hwtimer_alloc(&tmr);
 
-  resource ids[4] = {c, d, tmr, 0};
+  resource_t ids[4] = {c, d, tmr, 0};
   test(c, d, tmr, ids);
+
+  hwtimer_free(&tmr);
 }
 
-void timer_first(chanend c, chanend d)
+void hwtimer_first(chanend c, chanend d)
 {
-  // No need to clear all events first as the event_select_ordered will do that
+  // No need to clear all events first as the select_wait_ordered will do that
   debug_printf("Running with order [timer, d, c]\n");
 
-  timer tmr = timer_alloc();
+  hwtimer_t tmr;
+  hwtimer_alloc(&tmr);
 
-  resource ids[4] = {tmr, d, c, 0};
+  resource_t ids[4] = {tmr, d, c, 0};
   test(c, d, tmr, ids);
+
+  hwtimer_free(&tmr);
 }
+

@@ -6,89 +6,163 @@
 #if !defined(__XC__) || defined(__DOXYGEN__)
 
 #include <stdint.h>
-#include <xccompat.h>
+#include <stddef.h>
+#include "xcore_c_port_impl.h"
+#include "xcore_c_resource_impl.h"
+#include "xcore_c_exception_impl.h"
 
-inline void port_set_buffered(port p);
-inline void port_set_transfer_width(port p, int transfer_width);
-
-/** Enables a port.
+/** A port identifier
  *
- *  The port should be one of XS1_PORT_1A .. XS1_PORT_32A as specified on the
- *  datasheet and in the xs1.h include file. Either this function or
- *  port_enable_buffered() should be called once for each variable of type
- *  ``port`` before use. port_disable() should be called afterwards.
- *
- *  \param port_id   Value that identifies which port to drive
- *
- *  \returns         Port variable representing the initialised port
+ * Port resources must be allocated by name rather than from a poll.
  */
-inline port port_enable(int port_id)
+typedef enum {
+  port_1A  = XS1_PORT_1A,
+  port_1B  = XS1_PORT_1B,
+  port_1C  = XS1_PORT_1C,
+  port_1D  = XS1_PORT_1D,
+  port_1E  = XS1_PORT_1E,
+  port_1F  = XS1_PORT_1F,
+  port_1G  = XS1_PORT_1G,
+  port_1H  = XS1_PORT_1H,
+  port_1I  = XS1_PORT_1I,
+  port_1J  = XS1_PORT_1J,
+  port_1K  = XS1_PORT_1K,
+  port_1L  = XS1_PORT_1L,
+  port_1M  = XS1_PORT_1M,
+  port_1N  = XS1_PORT_1N,
+  port_1O  = XS1_PORT_1O,
+  port_1P  = XS1_PORT_1P,
+  port_4A  = XS1_PORT_4A,
+  port_4B  = XS1_PORT_4B,
+  port_4C  = XS1_PORT_4C,
+  port_4D  = XS1_PORT_4D,
+  port_4E  = XS1_PORT_4E,
+  port_4F  = XS1_PORT_4F,
+  port_8A  = XS1_PORT_8A,
+  port_8B  = XS1_PORT_8B,
+  port_8C  = XS1_PORT_8C,
+  port_8D  = XS1_PORT_8D,
+  port_16A = XS1_PORT_16A,
+  port_16B = XS1_PORT_16B,
+  port_16C = XS1_PORT_16C,
+  port_16D = XS1_PORT_16D,
+  port_32A = XS1_PORT_32A,
+  port_32B = XS1_PORT_32B,
+} port_id_t;
+
+
+/** Enumeration to declare how the port was set up */
+typedef enum {
+  PORT_UNBUFFERED = 0,
+  PORT_BUFFERED = 1,
+} port_type_t;
+
+/** Allocates a port.
+ *
+ *  Either this function or port_alloc_buffered() must be called once for each
+ *  variable of type ``port`` before use. port_free() must be called afterwards.
+ *
+ *  The port's state is set to: input, unbuffered, inout_data, no_invert,
+ *  rising_edge, master, no_ready, no triggers, clocked by XS1_CLKBLK_REF.
+ *
+ *  \param p    Port variable representing the initialised port
+ *  \param id   Value that identifies which port to drive
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
+ *  \exception  ET_LOAD_STORE         invalid *\*p* argument.
+ */
+inline xcore_c_error_t port_alloc(port *p, port_id_t id)
 {
-  port p = port_id;
-  asm volatile("setc res[%0], 8" :: "r" (p));
-  return p;
+  RETURN_EXCEPTION_OR_ERROR( *p = _port_alloc(id) );
 }
 
-/** Eables a port to buffer and serialise/deserialise data.
+/** Reset a port.
  *
- *  The port should be one of XS1_PORT_1A .. XS1_PORT_32A as specified on the
- *  datasheet and in the xs1.h include file. Either this function or port_enable()
- *  should be called once for each variable of type ``port`` before use.
- *  port_disable() should be called afterwards.
+ *  Clears a ports settings back to the default state at port_alloc().
  *
- *  \param port_id         Value that identifies which port to drive
+ *  \param p    The port to be reset
  *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
+ *  \exception  ET_LOAD_STORE         invalid *\*p* argument.
+ */
+inline xcore_c_error_t port_reset(port p)
+{
+  RETURN_EXCEPTION_OR_ERROR( _port_reset(p) );
+}
+
+/** Allocates a port to buffer and serialise/deserialise data.
+ *
+ *  Either this function or port_alloc() must be called once for each variable
+ *  of type ``port`` before use. port_free() must be called afterwards.
+ *
+ *  \param p               Port variable representing the initialised port
+ *  \param id         Value that identifies which port to drive
  *  \param transfer_width  Number of bits to serialise; must be 1, 4, 8, or 32.
  *                         The number of bits must be >= to the physical port
  *                         width.
  *
- *  \returns               Port variable representing the initialised port
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port,
+ *                                    or is not legal width for the port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
+ *  \exception  ET_LOAD_STORE         invalid *\*p* argument.
  */
-inline port port_enable_buffered(int port_id, int transfer_width)
+inline xcore_c_error_t port_alloc_buffered(port *p, port_id_t id, size_t transfer_width)
 {
-  port p = port_enable(port_id);
-  port_set_buffered(p);
-  port_set_transfer_width(p, transfer_width);
-  return p;
+  RETURN_EXCEPTION_OR_ERROR(  do { \
+                                *p = _port_alloc(id); \
+                                _port_set_buffered(id); \
+                                _port_set_transfer_width(id, transfer_width); \
+                              } while (0) );
 }
 
-/** Disable the port.
+/** Deallocate a port
  *
- *  This function switches off the port.
+ *  \param p    The port to be freed
  *
- *  \param p      Port to disable
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
+ *  \exception  ET_LOAD_STORE         invalid *\*p* argument.
  */
-inline void port_disable(port p)
+inline xcore_c_error_t port_free(port *p)
 {
-  asm volatile("setc res[%0], 0" :: "r" (p));
+  RETURN_EXCEPTION_OR_ERROR(  do { \
+                                _port_free(*p); \
+                                *p = 0; \
+                              } while (0) );
 }
 
 /** Change the transfer width of a port.
  *
- *  Note that a port must have been set to buffered before calling this function.
+ *  The default transfer width is the same as the physical port width.
+ *
+ *  **A port must have been set to buffered if the width is different from the
+ *  physical port width**
  *
  *  \param p               The port to change the transfer width of
- *
  *  \param transfer_width  Number of bits to serialise; must be 1, 4, 8, or 32.
  *                         The number of bits must be >= to the physical port
  *                         width.
- */
-inline void port_set_transfer_width(port p, int transfer_width)
-{
-  asm volatile("settw res[%0], %1" :: "r" (p), "r" (transfer_width));
-}
-
-/** Sets a port to be unbuffered.
  *
- *  Configures a port into unbuffered mode. Note that before this is called, a
- *  a port needs to have its transfer width equal to the port width and be
- *  configured as a master port.
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
- *  \param p      The port to set as unbuffered
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port,
+ *                                    or is not legal width for the port,
+ *                                    or the port is unbuffered.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
  */
-inline void port_set_unbuffered(port p)
+inline xcore_c_error_t port_set_transfer_width(port p, size_t transfer_width)
 {
-  asm volatile("setc res[%0], 0x2007" :: "r" (p));
+  RETURN_EXCEPTION_OR_ERROR( _port_set_transfer_width(p, transfer_width) );
 }
 
 /** Sets a port to be buffered.
@@ -96,75 +170,106 @@ inline void port_set_unbuffered(port p)
  *  Configures a port into buffered mode where it can automatically serialise or
  *  deserialise data.
  *
- *  \param p      The port to set as buffered
+ *  \param p    The port to set as buffered
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
  */
-inline void port_set_buffered(port p)
+inline xcore_c_error_t port_set_buffered(port p)
 {
-  asm volatile("setc res[%0], 0x200f" :: "r" (p));
+  RETURN_EXCEPTION_OR_ERROR( _port_set_buffered(p) );
 }
 
-/** Set the clock controlling a port.
+/** Sets a port to be unbuffered (default state).
  *
- *  This function connects a port to a clock.
+ *  Configures a port into unbuffered mode. Note that before this is called, a
+ *  a port needs to have its transfer width equal to the port width and be
+ *  configured as a master port.
  *
- *  \param p      Port to set its clock
+ *  \param p    The port to set as unbuffered
  *
- *  \param clk    Clock to attach the port to
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
  */
-inline void port_set_clock(port p, clock clk)
+inline xcore_c_error_t port_set_unbuffered(port p)
 {
-  asm volatile("setclk res[%0], %1" :: "r" (p), "r" (clk));
+  RETURN_EXCEPTION_OR_ERROR( _port_set_unbuffered(p) );
 }
 
-/** Set a port drive out the data value.
+/** Set the clock clocking a port.
  *
- *  \param p      Port to change the mode of
+ *  This function changes the clock used for a port's control functions.
+ *  The default clock is 'XS1_CLKBLK_REF'.
+ *
+ *  \param p    Port whose clock is being changed.
+ *  \param clk  Clock to attach to the port.
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port, clock,
+ *                                    or clock is running.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
  */
-inline void port_set_mode_data_port(port p)
+inline xcore_c_error_t port_set_clock(port p, clock clk)
 {
-  asm volatile("setc res[%0], 0x5007" :: "r" (p));
+  RETURN_EXCEPTION_OR_ERROR( _port_set_clock(p, clk) );
 }
 
-/** Set a port drive out the ready signal of another port.
+/** Set a port drive out the data value (default state).
  *
- *  This function configures the port to drive the ready signal of another port
- *  instead of its own data values. The source of the ready input is configured
- *  using the port_set_ready_input() function.
+ *  \param p    Port to change the mode of
  *
- *  \param p      Port to change the mode of
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
  */
-inline void port_set_mode_ready_port(port p)
+inline xcore_c_error_t port_set_inout_data(port p)
 {
-  asm volatile("setc res[%0], 0x5017" :: "r" (p));
+  RETURN_EXCEPTION_OR_ERROR( _port_set_inout_data(p) );
 }
 
-/** Set a port drive out the clock signal.
+/** Set a port to drive out its clocking signal.
  *
  *  This function configures the port to drive the clock signal instead of its
  *  own data values. The clock signal that is driven out is configured using the
  *  port_set_clock() function.
  *
- *  \param p      Port to change the mode of
+ *  \param p    Port to change the mode of
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
  */
-inline void port_set_mode_clock_port(port p)
+inline xcore_c_error_t port_set_out_clock(port p)
 {
-  asm volatile("setc res[%0], 0x500f" :: "r" (p));
+  RETURN_EXCEPTION_OR_ERROR( _port_set_out_clock(p) );
 }
 
-/** Set the ready input of a port.
+/** Set a port to drive out the ready signal of another port.
  *
- *  This function configures the ready input of one port to be driven by the
- *  ready output of another port. The port then must be configured using
- *  port_set_mode_ready_port() to get it to drive out this ready signal.
+ *  This function configures the port to drive the ready signal of another port
+ *  instead of its own data values.
  *
- *  \param p             Port to change the ready input of. This must be a 1-bit
- *                       port or this function will trap.
+ *  \param p              Port to change the mode of. This must be a 1-bit
+ *                        port or this function will trap.
+ *  \param ready_source   The port whose ready signal will be output
  *
- *  \param ready_source  The port whose ready signal is being used
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *                                    or p not a one bit port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
  */
-inline void port_set_ready_src(port p, port ready_source)
+inline xcore_c_error_t port_set_out_ready(port p, port ready_source)
 {
-  asm volatile("setrdy res[%0], %1" :: "r" (p), "r" (ready_source));
+  RETURN_EXCEPTION_OR_ERROR( _port_set_out_ready(p, ready_source) );
+
 }
 
 /** Set the port to invert its data.
@@ -174,46 +279,66 @@ inline void port_set_ready_src(port p, port ready_source)
  *
  *  \param p   Port to set its data to be inverted. This must be a 1-bit port
  *             or a trap will be raised.
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port,
+  *                                   or p not a one bit port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
  */
-inline void port_set_invert(port p)
+inline xcore_c_error_t port_set_invert(port p)
 {
-  asm volatile("setc res[%0], 0x600f" :: "r" (p));
+  RETURN_EXCEPTION_OR_ERROR( _port_set_invert(p) );
 }
 
-/** Set the port to not invert its data.
+/** Set the port to not invert its data (default state).
  *
  *  This function configures a port to not invert the data on the pin.
  *
- *  \param p   Port to set the data to not be inverted. This must be a 1-bit port
- *             or a trap will be raised.
+ *  \param p   Port to set the data to not be inverted.
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
  */
-inline void port_set_no_invert(port p)
+inline xcore_c_error_t port_set_no_invert(port p)
 {
-  asm volatile("setc res[%0], 0x6007" :: "r" (p));
+  RETURN_EXCEPTION_OR_ERROR( _port_set_no_invert(p) );
 }
 
 /** Set the port to sample on the falling edge.
  *
  *  The default is for a port to sample data on the rising edge of the clock.
  *  This function changes the port to sample on the falling edge instead.
- *  This change can be reverted by calling port_set_no_sample_delay().
+ *  This change can be reverted by calling port_set_sample_rising_edge().
  *
- *  \param p   Port to change to sample on the falling edge.
+ *  \param p    Port to change its sampling edge.
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
  */
-inline void port_set_sample_delay(port p)
+inline xcore_c_error_t port_set_sample_falling_edge(port p)
 {
-  asm volatile("setc res[%0], 0x400f" :: "r" (p));
+  RETURN_EXCEPTION_OR_ERROR( _port_set_sample_falling_edge(p) );
 }
 
-/** Set the port to sample on the rising edge.
+/** Set the port to sample on the rising edge (default state).
  *
  *  This function restores a port to sampling data on the rising edge of the clock.
  *
- *  \param p   Port to restore to sampling on the rising edge
+ *  \param p    Port to change its sampling edge.
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
  */
-inline void port_set_no_sample_delay(port p)
+inline xcore_c_error_t port_set_sample_rising_edge(port p)
 {
-  asm volatile("setc res[%0], 0x4007" :: "r" (p));
+  RETURN_EXCEPTION_OR_ERROR( _port_set_sample_rising_edge(p) );
 }
 
 /** Set the port to master mode (default state).
@@ -221,14 +346,19 @@ inline void port_set_no_sample_delay(port p)
  *  This function configures a port to be a master. This is only relevant when
  *  using ready signals (port_set_ready_strobed() / port_set_ready_handshake()).
  *
- *  It is highly recommended to use the ``port_configure_*`` functions to put a
+ *  It is highly recommended to use the ``port_protocol_*`` functions to put a
  *  port into its desired mode as the order of operations is critical.
  *
- *  \param p   Port to set as a master
+ *  \param p    Port to set as a master
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
  */
-inline void port_set_master(port p)
+inline xcore_c_error_t port_set_master(port p)
 {
-  asm volatile("setc res[%0], 0x1007" :: "r" (p));
+  RETURN_EXCEPTION_OR_ERROR( _port_set_master(p) );
 }
 
 /** Set the port to slave mode.
@@ -239,14 +369,19 @@ inline void port_set_master(port p)
  *  *Note*: the port must be set to use a ready strobe, otherwise this function
  *          will raise an exception.
  *
- *  It is highly recommended to use the ``port_configure_*`` functions to put a
+ *  It is highly recommended to use the ``port_protocol_*`` functions to put a
  *  port into its desired mode as the order of operations is critical.
  *
  *  \param p   Port to set as a slave
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
  */
-inline void port_set_slave(port p)
+inline xcore_c_error_t port_set_slave(port p)
 {
-  asm volatile("setc res[%0], 0x100f" :: "r" (p));
+  RETURN_EXCEPTION_OR_ERROR( _port_set_slave(p) );
 }
 
 /** Set the port to use no ready signals (default state).
@@ -258,14 +393,19 @@ inline void port_set_slave(port p)
  *  *Note*: the port must be a ``master`` port otherwise this function will raise
  *          an exception.
  *
- *  It is highly recommended to use the ``port_configure_*`` functions to put a
+ *  It is highly recommended to use the ``port_protocol_*`` functions to put a
  *  port into its desired mode as the order of operations is critical.
  *
- *  \param p   Port to change to not use ready signals
+ *  \param p    Port to change to not use ready signals
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
  */
-inline void port_set_no_ready(port p)
+inline xcore_c_error_t port_set_no_ready(port p)
 {
-  asm volatile("setc res[%0], 0x3007" :: "r" (p));
+  RETURN_EXCEPTION_OR_ERROR( _port_set_no_ready(p) );
 }
 
 /** Set the port to use a single strobe.
@@ -277,14 +417,19 @@ inline void port_set_no_ready(port p)
  *  *Note*: the port must be a buffered port otherwise this function will raise
  *          an exception.
  *
- *  It is highly recommended to use the ``port_configure_*`` functions to put a
+ *  It is highly recommended to use the ``port_protocol_*`` functions to put a
  *  port into its desired mode as the order of operations is critical.
  *
- *  \param p   Port to change to not use ready signals
+ *  \param p    Port to change to not use ready signals
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
  */
-inline void port_set_ready_strobed(port p)
+inline xcore_c_error_t port_set_ready_strobed(port p)
 {
-  asm volatile("setc res[%0], 0x300f" :: "r" (p));
+  RETURN_EXCEPTION_OR_ERROR( _port_set_ready_strobed(p) );
 }
 
 /** Set the port to be fully handshaken.
@@ -295,14 +440,154 @@ inline void port_set_ready_strobed(port p)
  *  *Note*: the port must be a master buffered port otherwise this function will
  *          raise an exception.
  *
- *  It is highly recommended to use the ``port_configure_*`` functions to put a
+ *  It is highly recommended to use the ``port_protocol_*`` functions to put a
  *  port into its desired mode as the order of operations is critical.
  *
  *  \param p   Port to change to not use ready signals
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
  */
-inline void port_set_ready_handshake(port p)
+inline xcore_c_error_t port_set_ready_handshake(port p)
 {
-  asm volatile("setc res[%0], 0x3017" :: "r" (p));
+  RETURN_EXCEPTION_OR_ERROR( _port_set_ready_handshake(p) );
+}
+
+/** Get the timestamp of the last operation on a port.
+ *
+ *  This function gets the timestamp of the last input or output operation
+ *  on a port.
+ *
+ *  \param p    The port to get the timestamp from
+ *  \param t    The timestamp of the last operation
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
+ *  \exception  ET_LOAD_STORE         invalid *\*t* argument.
+ */
+inline xcore_c_error_t port_get_trigger_time(port p, int16_t *t)
+{
+  RETURN_EXCEPTION_OR_ERROR( *t = _port_get_trigger_time(p) );
+}
+
+/** Set the timestamp at which the port will input/output data.
+ *
+ *  This function sets the time condition for the next input or output on
+ *  a port.
+ *  If the port is unbuffered or the buffer is empty/full a call to port_in()
+ *  or port_out() will pause until the specified time.
+ *  The trigger is cleared by a input/output or by calling port_clear_trigger_time().
+ *
+ *  \param p    The port to set the condition on
+ *  \param t    The port timestamp to match
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the port.
+ */
+inline xcore_c_error_t port_set_trigger_time(port p, int16_t t)
+{
+  RETURN_EXCEPTION_OR_ERROR( _port_set_trigger_time(p, t) );
+}
+
+/** Clear the timestamp trigger on a port.
+ *
+ *  This function clears any trigger_time condition on the port so the next input or
+ *  output will happen unconditionally in respect to the timestamp.
+ *  This function does not clear the trigger_in condition on the port.
+ *
+ *  \param p    the port to clear the trigger_time on
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
+ */
+inline xcore_c_error_t port_clear_trigger_time(port p)
+{
+  RETURN_EXCEPTION_OR_ERROR( _port_clear_trigger_time(p) );
+}
+
+/** Setup an event to trigger on a port when its input value matches.
+ *
+ *  On a unbuffered port the trigger will apply to all future inputs
+ *  until the trigger is set again.
+ *  On an buffered port the trigger will only hold for the next input
+ *  after which the trigger_in_equal will be cleared.
+ *
+ *  \param p    The port to set the trigger on
+ *  \param v    The value to match
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
+ */
+inline xcore_c_error_t port_set_trigger_in_equal(port p, uint32_t v)
+{
+  RETURN_EXCEPTION_OR_ERROR( _port_set_trigger_in_equal(p, v) );
+}
+
+/** Setup an event to trigger on a port when its input value does not matches.
+ *
+ *  On a unbuffered port the trigger will apply to all future inputs
+ *  until the trigger is set again.
+ *  On an buffered port the trigger will only hold for the next input
+ *  after which the trigger_in_not_equal will be cleared.
+ *
+ *  \param p    The port to set the trigger on
+ *  \param v    The value not to match
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
+ */
+inline xcore_c_error_t port_set_trigger_in_not_equal(port p, uint32_t v)
+{
+  RETURN_EXCEPTION_OR_ERROR( _port_set_trigger_in_not_equal(p, v) );
+}
+
+/** Clear the in trigger on a port.
+ *
+ *  This function clears any trigger_in condition on the port so the next input
+ *  will happen unconditionally in respect to the input value.
+ *  This function does not clear the trigger_time condition on the port.
+ *
+ *  \param p    The port to clear the trigger_in on
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
+ */
+inline xcore_c_error_t port_clear_trigger_in(port p)
+{
+  RETURN_EXCEPTION_OR_ERROR( _port_clear_trigger_in(p) );
+}
+
+/** Peek at the value on a a port.
+ *
+ *  Peeking a port returns the current value on the pins of a port, regardless
+ *  of whether the port is an output or input and without affecting its direciton.
+ *  Peek will not pause, regardless of any triggers that have been set.
+ *
+ *  \param p    Port to be peeked
+ *  \param data The current value on the pins
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_LOAD_STORE         invalid *\*data* argument.
+ */
+inline xcore_c_error_t port_peek(port p, uint32_t *data)
+{
+  RETURN_EXCEPTION_OR_ERROR( *data = _port_peek(p) );
 }
 
 /** Outputs a value onto a port.
@@ -311,152 +596,114 @@ inline void port_set_ready_handshake(port p)
  *  the next clock cycle. In the case of a buffered port, the data will be
  *  stored in the buffer, and be serialised onto the output pins.
  *
- *  \param p      Port to output to
- *
- *  \param data   Value to output
- */
-inline void port_output(port p, int data)
-{
-  asm volatile("out res[%0], %1" :: "r" (p), "r" (data));
-}
-
-/** Outputs a value onto a port at a specified port counter value.
- *
- *  In the case of an unbuffered port, the value will be driven on the pins when
- *  on the clock cycle that moves the port counter to the specified time. In
- *  the case of a buffered port, the data will be stored in the buffer, and
- *  be serialised onto the output pins at the point that the time is reached.
+ *  If there is a time trigger setup and the port is unbuffered or the buffer is full
+ *  the call will pause until the specified time.
  *
  *  \param p      Port to output to
- *
  *  \param data   Value to output
  *
- *  \param t      The port counter value at which the output should occur
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
  */
-inline void port_output_at_time(port p, int data, int16_t t)
+inline xcore_c_error_t port_out(port p, uint32_t data)
 {
-  asm volatile("setpt res[%0], %1" :: "r" (p), "r" (t));
-  asm volatile("out res[%0], %1" :: "r" (p), "r" (data));
+  RETURN_EXCEPTION_OR_ERROR( _port_out(p, data) );
 }
 
-/** Outputs a value onto a port and shifts the output data.
+/** Input a value from a port.
+ *
+ *  For unbuffered port with no trigger, the data will be whatever is on the input pins.
+ *  For unbuffered port with a trigger, the data will be the value read when the
+ *  trigger fired. The call will pause if the trigger has not yet fired.
+ *  For buffered port, this function will pause until the buffer is filled up with
+ *  deserialised data.
+ *
+ *  \param p    Port to input from
+ *  \param data The inputted data
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
+ *  \exception  ET_LOAD_STORE         invalid *\*data* argument.
+ */
+inline xcore_c_error_t port_in(port p, uint32_t *data)
+{
+  RETURN_EXCEPTION_OR_ERROR( *data = _port_in(p) );
+}
+
+/** Outputs a value onto a port and shift the output data.
  *
  *  In the case of an unbuffered port, the value will be driven on the pins on
  *  the next clock cycle. In the case of a buffered port, the data will be stored
  *  in the buffer, and be serialised onto the output pins.
  *
+ *  If there is a time trigger setup and the port is unbuffered or the buffer is full
+ *  the call will pause until the specified time.
+ *
  *  \param p      Port to output to
+ *  \param data   data is shifted right by the transfer width of the port,
+ *                with the bits shifting out onto the port.
+ *                The remaining shifted bits are returned in data.
  *
- *  \param data   Value to output
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
- *  \returns      The output data shifted right by the transfer width of the port
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
+ *  \exception  ET_LOAD_STORE         invalid *\*data* argument.
  */
-inline int port_output_shift_right(port p, int data)
+inline xcore_c_error_t port_out_shift_right(port p, uint32_t *data)
 {
-  // The data is a read-write operand
-  asm volatile("outshr res[%0], %1" : "+r" (data) : "r" (p));
-  return (data);
+  RETURN_EXCEPTION_OR_ERROR( _port_out_shift_right(p, data) );
 }
 
-/** Outputs a value onto a port at a specified time and shifts the output data.
+/** Input a value from a port and shift the data.
+ *
+ *  For unbuffered port with no trigger, the data will be whatever is on the input pins.
+ *  For unbuffered port with a trigger, the data will be the value read when the
+ *  trigger fired. The call will pause if the trigger has not yet fired.
+ *  For buffered port, this function will pause until the buffer is filled up with
+ *  deserialised data.
+ *
+ *  \param p      Port to input from
+ *  \param data   The input data shifted right by the transfer width
+ *                of the port
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
+ *  \exception  ET_LOAD_STORE         invalid *\*data* argument.
+ */
+inline xcore_c_error_t port_in_shift_right(port p, uint32_t *data)
+{
+  RETURN_EXCEPTION_OR_ERROR( _port_in_shift_right(p, data) );
+}
+
+/** Outputs a value onto a port at a specified port timestamp.
  *
  *  In the case of an unbuffered port, the value will be driven on the pins when
- *  on the clock cycle that moves the port counter to the specified time. In
+ *  on the clock cycle that moves the port timestamp to the specified time. In
  *  the case of a buffered port, the data will be stored in the buffer, and
  *  be serialised onto the output pins at the point that the time is reached.
  *
  *  \param p      Port to output to
- *
+ *  \param t      The timestamp to do the output on
  *  \param data   Value to output
  *
- *  \param t      The time of the output
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
- *  \returns      The output data shifted right by the transfer width of the port
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
  */
-inline int port_output_shift_right_at_time(port p, int data, int16_t t)
+inline xcore_c_error_t port_out_at_time(port p, int16_t t, uint32_t data)
 {
-  asm volatile("setpt res[%0], %1" :: "r" (p), "r" (t));
-  // The data is a read-write operand
-  asm volatile("outshr res[%0], %1" : "+r" (data) : "r" (p));
-  return (data);
-}
-
-/** Peek at the value on a a port.
- *
- *  Peeking a port returns the current value on the pins of a port, regardless
- *  of whether the port is an output or input and without affecting its direciton.
- *
- *  \param p      Port to be peeked
- *
- *  \returns      The current value on the pins
- */
-inline int port_peek(port p)
-{
-  int data;
-  asm volatile("peek %0, res[%1]" : "=r" (data): "r" (p));
-  return data;
-}
-
-/** Input a value from a port.
- *
- *  In the case of an unbuffered port, the data will be whatever is on the input
- *  pins. In the case of a buffered port, this function will wait until the buffer
- *  is filled up with deserialised data.
- *
- *  \param p      Port to input from
- *
- *  \returns      The inputted data
- */
-inline int port_input(port p)
-{
-  int data;
-  asm volatile("in %0, res[%1]" : "=r" (data): "r" (p));
-  return data;
-}
-
-/** Input data from a port when its pins match a specific value.
- *
- *  In the case of an unbuffered port, the data inputted
- *  be identical to the value. In the case of a buffered port, an input
- *  will wait until the value appears on the pins and then return that
- *  value and some previous values that have been deserialised.
- *
- *  \param p      Port to input from
- *
- *  \param value  The value to match against the pins
- *
- *  \returns      The inputted data
- */
-inline int port_input_when_pinseq(port p, int value)
-{
-  int data;
-  asm volatile("setd res[%0], %1" :: "r" (p), "r" (value));
-  asm volatile("setc res[%0], 0x11" :: "r" (p));
-  asm volatile("in %0, res[%1]" : "=r" (data): "r" (p));
-  return data;
-}
-
-/** Input data from a port when its pins do not
- *  match a specific value.
- *
- *  In the case of an unbuffered port, the inputted data
- *  will be the non-matching pin values. In the case of a buffered port,
- *  this macro will wait until a non matching value appears on the pins, and
- *  then return that value and previous values that have been deserialised.
- *
- *  \param p      Port to input from
- *
- *  \param value  The value to match against the pins
- *
- *  \returns      The inputted data
- */
-inline int port_input_when_pinsneq(port p, int value)
-{
-  int data;
-  asm volatile("setd res[%0], %1" :: "r" (p), "r" (value));
-  asm volatile("setc res[%0], 0x19" :: "r" (p));
-  asm volatile("in %0, res[%1]" : "=r" (data): "r" (p));
-  return data;
+  RETURN_EXCEPTION_OR_ERROR(  do { \
+                                _port_set_trigger_time(p, t); \
+                                _port_out(p, data); \
+                              } while (0) );
 }
 
 /** Input data from a port when its counter is at a specific time.
@@ -467,38 +714,78 @@ inline int port_input_when_pinsneq(port p, int value)
  *  returning a value when the buffer is full.
  *
  *  \param p      Port to input from
+ *  \param t      The timestamp to do input on
+ *  \param data   The inputted data
  *
- *  \param t      The time to do input
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
- *  \returns      The inputted data
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
+ *  \exception  ET_LOAD_STORE         invalid *\*data* argument.
  */
-inline int port_input_at_time(port p, int16_t t)
+inline xcore_c_error_t port_in_at_time(port p, int16_t t, uint32_t *data)
 {
-  int data;
-  asm volatile("setpt res[%0], %1" :: "r" (p), "r" (t));
-  asm volatile("in %0, res[%1]" : "=r" (data): "r" (p));
-  return data;
+  RETURN_EXCEPTION_OR_ERROR(  do { \
+                                _port_set_trigger_time(p, t); \
+                                *data = _port_in(p); \
+                              } while (0) );
 }
 
-/** Input a value from a port and shift the data.
+/** Outputs a value onto a port at a specified time and shifts the output data.
  *
- *  In the case of an unbuffered port, the data will be whatever is on the input
- *  pins. In the case of a buffered port, this function will wait until the
- *  buffer is filled up with deserialised data.
+ *  In the case of an unbuffered port, the value will be driven on the pins when
+ *  on the clock cycle that moves the port counter to the specified time. In
+ *  the case of a buffered port, the data will be stored in the buffer, and
+ *  be serialised onto the output pins at the point that the time is reached.
+ *
+ *  \param p      Port to output to
+ *  \param t      The timestamp of the output
+ *  \param data   data is shifted right by the transfer width of the port,
+ *                with the bits shifting out onto the port.
+ *                The remaining shifted bits are returned in data.
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
+ *  \exception  ET_LOAD_STORE         invalid *\*data* argument.
+ */
+inline xcore_c_error_t port_out_shift_right_at_time(port p, int16_t t, uint32_t *data)
+{
+  RETURN_EXCEPTION_OR_ERROR(  do { \
+                                _port_set_trigger_time(p, t); \
+                                _port_out_shift_right(p, data); \
+                              } while (0) );
+}
+
+/** Input data from a port at a specific time and shift the data.
+ *
+ *  In the case of an unbuffered port, the data will be inputted when the
+ *  counter reaches time ``t``. In the case of a buffered port, an input
+ *  will wait until the given time and then will start capturing data,
+ *  returning a value when the buffer is full.
  *
  *  \param p      Port to input from
- *
- *  \returns      The input data shifted right by the transfer width
+ *  \param t      The timestamp to do input on
+ *  \param data   The input data shifted right by the transfer width
  *                of the port
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
+ *  \exception  ET_LOAD_STORE         invalid *\*data* argument.
  */
-inline int port_input_shift_right(port p)
+inline xcore_c_error_t port_in_shift_right_at_time(port p, int16_t t, uint32_t *data)
 {
-  int data;
-  asm volatile("inshr %0, res[%1]" : "=r" (data) : "r" (p));
-  return data;
+  RETURN_EXCEPTION_OR_ERROR(  do { \
+                                _port_set_trigger_time(p, t); \
+                                _port_in_shift_right(p, data); \
+                              } while (0) );
 }
 
-/** Input data from a port when its pins match a specific value  and shift the data.
+
+/** Input data from a port when its pins match a specific value.
  *
  *  In the case of an unbuffered port, the data inputted
  *  be identical to the value. In the case of a buffered port, an input
@@ -506,19 +793,78 @@ inline int port_input_shift_right(port p)
  *  value and some previous values that have been deserialised.
  *
  *  \param p      Port to input from
- *
+ *  \param pt     If port is buffered or unbuffered.
  *  \param value  The value to match against the pins
+ *  \param data   The inputted data
  *
- *  \returns      The input data shifted right by the transfer width
- *                of the port
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
+ *  \exception  ET_LOAD_STORE         invalid *\*data* argument.
  */
-inline int port_input_shift_right_when_pinseq(port p, int value)
+inline xcore_c_error_t port_in_when_pinseq(port p, port_type_t pt, uint32_t value, uint32_t *data)
 {
-  int data;
-  asm volatile("setd res[%0], %1" :: "r" (p), "r" (value));
-  asm volatile("setc res[%0], 0x11" :: "r" (p));
-  asm volatile("inshr %0, res[%1]" : "=r" (data) : "r" (p));
-  return data;
+  RETURN_EXCEPTION_OR_ERROR(  do { \
+                                _port_set_trigger_in_equal(p , value); \
+                                *data = _port_in(p); \
+                                if (pt==PORT_UNBUFFERED) _port_clear_trigger_in(p); \
+                              } while (0) );
+}
+
+/** Input data from a port when its pins do not match a specific value.
+ *
+ *  In the case of an unbuffered port, the inputted data
+ *  will be the non-matching pin values. In the case of a buffered port,
+ *  this macro will wait until a non matching value appears on the pins, and
+ *  then return that value and previous values that have been deserialised.
+ *
+ *  \param p      Port to input from
+ *  \param pt     If port is buffered or unbuffered.
+ *  \param value  The value to match against the pins
+ *  \param data   The inputted data
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
+ *  \exception  ET_LOAD_STORE         invalid *\*data* argument.
+ */
+inline xcore_c_error_t port_in_when_pinsneq(port p, port_type_t pt, uint32_t value, uint32_t *data)
+{
+  RETURN_EXCEPTION_OR_ERROR(  do { \
+                                _port_set_trigger_in_not_equal(p , value); \
+                                *data = _port_in(p); \
+                                if (pt==PORT_UNBUFFERED) _port_clear_trigger_in(p); \
+                              } while (0) );
+}
+
+
+/** Input data from a port when its pins match a specific value and shift the data.
+ *
+ *  In the case of an unbuffered port, the data inputted
+ *  be identical to the value. In the case of a buffered port, an input
+ *  will wait until the value appears on the pins and then return that
+ *  value and some previous values that have been deserialised.
+ *
+ *  \param p      Port to input from
+ *  \param pt     If port is buffered or unbuffered.
+ *  \param value  The value to match against the pins
+ *  \param data   The input data shifted right by the transfer width of the port
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
+ *  \exception  ET_LOAD_STORE         invalid *\*data* argument.
+ */
+inline xcore_c_error_t port_in_shift_right_when_pinseq(port p, port_type_t pt, uint32_t value, uint32_t *data)
+{
+  RETURN_EXCEPTION_OR_ERROR(  do { \
+                                _port_set_trigger_in_equal(p , value); \
+                                _port_in_shift_right(p, data); \
+                                if (pt==PORT_UNBUFFERED) _port_clear_trigger_in(p); \
+                              } while (0) );
 }
 
 /** Input data from a port when its pins do not
@@ -530,140 +876,23 @@ inline int port_input_shift_right_when_pinseq(port p, int value)
  *  then return that value and previous values that have been deserialised.
  *
  *  \param p      Port to input from
- *
+ *  \param pt     If port is buffered or unbuffered.
  *  \param value  The value to match against the pins
+ *  \param data   The input data shifted right by the transfer width of the port
  *
- *  \returns      The input data shifted right by the transfer width
- *                of the port
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
+ *  \exception  ET_LOAD_STORE         invalid *\*data* argument.
  */
-inline int port_input_shift_right_when_pinsneq(port p, int value)
+inline xcore_c_error_t port_in_shift_right_when_pinsneq(port p, port_type_t pt, uint32_t value, uint32_t *data)
 {
-  int data;
-  asm volatile("setd res[%0], %1" :: "r" (p), "r" (value));
-  asm volatile("setc res[%0], 0x19" :: "r" (p));
-  asm volatile("inshr %0, res[%1]" : "=r" (data) : "r" (p));
-  return data;
-}
-
-/** Input data from a port when its counter is at a specific time  and shift the data.
- *
- *  In the case of an unbuffered port, the data will be inputted when the
- *  counter reaches time ``t``. In the case of a buffered port, an input
- *  will wait until the given time and then will start capturing data,
- *  returning a value when the buffer is full.
- *
- *  \param p      Port to input from
- *
- *  \param t      The time to do input
- *
- *  \returns      The input data shifted right by the transfer width
- *                of the port
- */
-inline int port_input_shift_right_at_time(port p, int16_t t)
-{
-  int data;
-  asm volatile("setpt res[%0], %1" :: "r" (p), "r" (t));
-  asm volatile("setc res[%0], 0x11" :: "r" (p));
-  asm volatile("inshr %0, res[%1]" : "=r" (data) : "r" (p));
-  return data;
-}
-
-/** Get the timestamp of the last operation on a port.
- *
- *  This function gets the timestamp of the last input or output operation
- *  on a port.
- *
- *  \param p   The port to get the timestamp from
- *
- *  \returns   The timestamp of the last operation
- */
-inline int16_t port_get_timestamp(port p)
-{
-  int16_t ts;
-  asm volatile("getts %0, res[%1]" : "=r" (ts) : "r" (p));
-  return ts;
-}
-
-/** Type representing port conditions.
- *
- */
-typedef enum port_condition {
-  PORT_COND_FULL    =  0x1, //< Condition that holds when port contains data ready to be input
-  PORT_COND_PINSEQ  = 0x11, //< Condition that holds when the pins of the port are equal to the port conditional data
-  PORT_COND_PINSNEQ = 0x19  //< Condition that holds when the pins of the port are equal to the port conditional data
-} port_condition;
-
-/** Set the condition on a port.
- *
- *  This sets the condition on a port. This condition will apply to all
- *  future inputs or outputs on
- *  a buffered port until the condition is set again.
- *  On a non-buffered port the condition will only hold for the next input or
- *  output after which the condition will be reset.
- *
- *  \param p  The port to set the condition on
- *
- *  \param c  The condition
- *
- *  \sa port_set_conditional_data
- */
-inline void port_set_condition(port p, port_condition c)
-{
-  asm volatile("setc res[%0], %1" :: "r" (p), "r" (c));
-}
-
-/** Set the conditional data on a port.
- *
- *  This sets the conditional data on a port.
- *  This should be used in conjunction with port_set_condition().
- *
- *  \param p  The port to set the conditional data on
- *
- *  \param d  The conditional data
- */
-inline void port_set_conditional_data(port p, int d)
-{
-  asm volatile("setd res[%0], %1" :: "r" (p), "r" (d));
-}
-
-/** Clear the condition on a port.
- *
- *  This function clears any condition on the port so the next input or
- *  output will happen unconditionally. This function does not clear
- *  any time condition on the port.
- *
- *  \param p  The port to clear the condition on
- */
-inline void port_clear_condition(port p)
-{
-  asm volatile("setc res[%0], 0x1" :: "r" (p));
-}
-
-/** Set the time condition on a port
- *
- *  This function sets the time condition on the next input or output on
- *  a port.
- *
- *  \param p      The port to set the condition on
- *
- *  \param count  The port counter value
- */
-inline void port_set_time_condition(port p, int16_t count)
-{
-  asm volatile("setpt res[%0], %0" :: "r" (p), "r" (count));
-}
-
-/** Clear the time condition on a port.
- *
- *  This function clears any time condition on the port so the next input or
- *  output will happen unconditionally. This function does not clear
- *  any non-time condition on the port.
- *
- *  \param p the port to clear the time condition on
- */
-inline void port_clear_time_condition(port p)
-{
-  asm volatile("clrpt res[%0]" :: "r" (p));
+  RETURN_EXCEPTION_OR_ERROR(  do { \
+                                _port_set_trigger_in_not_equal(p , value); \
+                                _port_in_shift_right(p, data); \
+                                if (pt==PORT_UNBUFFERED) _port_clear_trigger_in(p); \
+                              } while (0) );
 }
 
 /** Clears the buffer used by a port.
@@ -677,11 +906,16 @@ inline void port_clear_time_condition(port p)
  *  it continues to drive the value until an output statement changes the value
  *  driven.
  *
- *  \param p  The port whose buffer is to be cleared
+ *  \param p    The port whose buffer is to be cleared
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
  */
-inline void port_clear_buffer(port p)
+inline xcore_c_error_t port_clear_buffer(port p)
 {
-  asm volatile("setc res[%0], 0x17" :: "r" (p));
+  RETURN_EXCEPTION_OR_ERROR( _port_clear_buffer(p) );
 }
 
 /** Ends the current input on a buffered port.
@@ -695,15 +929,18 @@ inline void port_clear_buffer(port p)
  *  returns transfer-width bits of data with the remaining buffered data
  *  in the most significant bits of this value.
  *
- *  \param p   The port to end the current input on
+ *  \param p    The port to end the current input on
+ *  \param num  The number of bits of data remaining
  *
- *  \return    The number of bits of data remaining
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
+ *  \exception  ET_LOAD_STORE         invalid *\*num* argument.
  */
-inline int port_endin(port p)
+inline xcore_c_error_t port_endin(port p, size_t *num)
 {
-  int num_bits;
-  asm volatile("endin %0, res[%1]" : "=r" (num_bits) : "r" (p));
-  return num_bits;
+  RETURN_EXCEPTION_OR_ERROR( *num = _port_endin(p) );
 }
 
 /** Force an input on a buffered port.
@@ -711,18 +948,136 @@ inline int port_endin(port p)
  *  The function will perform an input on a buffered port even if the buffer is
  *  only partially full.
  *
- *  \param p  The port to do the input on
+ *  \param p    The port to do the input on
+ *  \param num  A variable to be filled with number of bits inputted
+ *  \param data The inputted data
+
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
  *
- *  \param n  A variable to be filled with number of bits inputted
- *
- *  \returns  The inputted data
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
+ *  \exception  ET_LOAD_STORE         invalid *\*num* or *\*data* argument.
  */
-inline int port_force_input(port p, int *n)
+inline xcore_c_error_t port_force_input(port p, size_t *num, uint32_t *data)
 {
-  *n = port_endin(p);
-  return port_input(p);
+  RETURN_EXCEPTION_OR_ERROR(  do { \
+                                *num = _port_endin(p); \
+                                *data = _port_in(p); \
+                              } while (0) );
 }
 
-#endif // __XC__
+/** Setup select events on a port.
+ *
+ *  Configures a port to trigger select events when ready. By default a
+ *  port will trigger when there is data available. The trigger event can be
+ *  changed using the port_set_trigger_*() function.
+ *
+ *  Once the select event is setup you need to call port_enable_trigger() to enable it.
+ *
+ *  \param p        The port to setup the select event on
+ *  \param enum_id  The value to be returned by select_wait() et al when the
+ *                  port event is triggered.
+ *                  On XS1 bit 16 must be set (see ENUM_ID_BASE)
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the port.
+ *  \exception  ET_ECALL              when xassert enabled, on XS1 bit 16 not set in enum_id.
+ */
+inline xcore_c_error_t port_setup_select(port p, uint32_t enum_id)
+{
+  RETURN_EXCEPTION_OR_ERROR(  do { \
+                                _resource_setup_select(p, enum_id); \
+                                _port_clear_trigger_in(p); \
+                              } while (0) );
+}
+
+/** Setup select events on a port where the events are handled by a function.
+ *
+ *  Same as port_setup_select() except that a callback function is used
+ *  rather than the event being passed back to the select_wait() et al functions.
+ *
+ *  Once the event is setup you need to call port_enable_trigger() to enable it.
+ *
+ *  \param p      The port to setup the select event on
+ *  \param data   The value to be passed to the select_callback_t function
+ *                On XS1 bit 16 must be set (see ENUM_ID_BASE)
+ *  \param func   The select_callback_t function to handle events
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the port.
+ *  \exception  ET_ECALL              when xassert enabled, on XS1 bit 16 not set in data.
+ */
+inline xcore_c_error_t port_setup_select_callback(port p, void *data, select_callback_t func)
+{
+  RETURN_EXCEPTION_OR_ERROR(  do { \
+                                _resource_setup_select_callback(p, data, func); \
+                                _port_clear_trigger_in(p); \
+                              } while (0) );
+}
+
+/** Setup interrupt event on a port.
+ *
+ *  Once the event is setup you need to call port_enable_trigger() to enable it.
+ *
+ *  \param p     The port to setup the interrupt event on
+ *  \param data  The value to be passed to the interrupt_callback_t function
+ *               On XS1 bit 16 must be set (see ENUM_ID_BASE)
+ *  \param func  The interrupt_callback_t function to handle events
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the port.
+ *  \exception  ET_ECALL              when xassert enabled, on XS1 bit 16 not set in data.
+ */
+inline xcore_c_error_t port_setup_interrupt_callback(port p, void *data, interrupt_callback_t func)
+{
+  RETURN_EXCEPTION_OR_ERROR(  do { \
+                                _resource_setup_interrupt_callback(p, data, func); \
+                                _port_clear_trigger_in(p); \
+                              } while (0) );
+}
+
+/** Enable select & interrupt events on a port.
+ *
+ *  Prior to enabling, port_setup_select(), port_setup_select_callback() or
+ *  port_setup_interrupt_callback() must have been called.
+ *  Events can be temporarily disabled and re-enabled using port_disable_trigger()
+ *  and port_enable_trigger().
+ *  When the event fires, the value must be read from the port to clear the event.
+ *
+ *  \param p    The port to enable events on
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the port.
+ */
+inline xcore_c_error_t port_enable_trigger(port p)
+{
+  RETURN_EXCEPTION_OR_ERROR( _resource_enable_trigger(p) );
+}
+
+/** Disable select & interrupt events for a given port.
+ *
+ *  This function prevents any further events being triggered by a given port.
+ *
+ *  \param p    The port to disable events on
+ *
+ *  \return     error_none (or exception type if policy is XCORE_C_NO_EXCEPTION).
+ *
+ *  \exception  ET_ILLEGAL_RESOURCE   not a valid port.
+ *  \exception  ET_RESOURCE_DEP       another core is actively using the port.
+ */
+inline xcore_c_error_t port_disable_trigger(port p)
+{
+  RETURN_EXCEPTION_OR_ERROR( _resource_disable_trigger(p) );
+}
+
+#endif // !defined(__XC__)
 
 #endif // __xcore_c_port_h__

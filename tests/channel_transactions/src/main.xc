@@ -3,6 +3,7 @@
 #include <platform.h>
 #include <xs1.h>
 #include <stddef.h>
+#include <stdint.h>
 #include "debug_print.h"
 
 // Provided in test.c
@@ -11,18 +12,18 @@ extern const size_t array_len;
 void test_int(chanend c);
 void test_char(chanend c);
 extern "C" {
-void print_array_int(const char *prefix, int data[], size_t num_words);
-void print_array_char(const char *prefix, char data[], size_t num_bytes);
+  void print_array_int(const char *prefix, const uint32_t data[], size_t num_words);
+  void print_array_char(const char *prefix, const uint8_t data[], size_t num_bytes);
 }
 
-transaction in_array_int(chanend c, int data[], size_t size)
+transaction in_array_int(chanend c, uint32_t data[], size_t size)
 {
   for (size_t i = 0; i < size; i++) {
     c :> data[i];
   }
 }
 
-transaction out_array_int(chanend c, int data[], size_t size)
+transaction out_array_int(chanend c, const uint32_t data[], size_t size)
 {
   for (size_t i = 0; i < size; i++) {
     c <: data[i];
@@ -31,30 +32,32 @@ transaction out_array_int(chanend c, int data[], size_t size)
 
 void xc_test_int(chanend c)
 {
-  int data[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+  uint32_t data[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
   master out_array_int(c, data, array_len);
   slave in_array_int(c, data, array_len);
 
-  print_array_int("XC received: ", data, array_len);
+  print_array_int("xC received: ", data, array_len);
 }
 
 void xc_test_char(chanend c)
 {
-  char data[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'};
+  uint8_t data[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'};
 
   slave {
-    for (size_t i = 0; i < array_len; i++) {
+    for (size_t i = 0; i < array_len; i++)
+    {
       c <: data[i];
     }
   }
 
   master {
-    for (size_t i = 0; i < array_len; i++) {
+    for (size_t i = 0; i < array_len; i++)
+    {
       c :> data[i];
     }
   }
-  print_array_char("XC received: ", data, array_len);
+  print_array_char("xC received: ", data, array_len);
 }
 
 int main()

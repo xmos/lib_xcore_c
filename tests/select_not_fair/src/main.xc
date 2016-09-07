@@ -15,12 +15,14 @@ int main()
   par {
     channel_example(c, d);
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 5; i++)
+    {
       // Provide test data
       c <: 555 + i;
     }
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 5; i++)
+    {
       // Provide test data
       d <: 333 + i;
     }

@@ -6,7 +6,7 @@
 
 // For XS1 support all values passed to the event_setup function must have bit 16 set
 typedef enum {
-  EVENT_CHAN_C = EVENT_ENUM_BASE,
+  EVENT_CHAN_C = ENUM_ID_BASE,
   EVENT_CHAN_D
 } event_choice_t;
 
@@ -16,28 +16,32 @@ typedef enum {
  */
 void channel_example_fair(chanend c, chanend d)
 {
-  event_clear_all();
+  select_disable_trigger_all();
 
   // Setup the channels to generate events
-  event_setup_chanend(c, EVENT_CHAN_C);
-  event_setup_chanend(d, EVENT_CHAN_D);
+  chanend_setup_select(c, EVENT_CHAN_C);
+  chanend_enable_trigger(c);
+  chanend_setup_select(d, EVENT_CHAN_D);
+  chanend_enable_trigger(d);
 
   for (int count = 0; count < 10; count++) {
-    event_choice_t choice = event_select();
+    event_choice_t choice = select_wait();
     switch (choice) {
       case EVENT_CHAN_C: {
-        // Read value and clear event
-        int x = chan_input_word(c);
-        event_disable(c);
-        event_enable(d);
+        // Read value to clear event and toggle enabled event
+        uint32_t x;
+        chan_in_word(c, &x);
+        chanend_disable_trigger(c);
+        chanend_enable_trigger(d);
         debug_printf("Received %d on channel c\n", x);
         break;
       }
       case EVENT_CHAN_D: {
-        // Read value and clear event
-        int x = chan_input_word(d);
-        event_disable(d);
-        event_enable(c);
+        // Read value to clear event and toggle enabled event
+        uint32_t x;
+        chan_in_word(d, &x);
+        chanend_disable_trigger(d);
+        chanend_enable_trigger(c);
         debug_printf("Received %d on channel d\n", x);
         break;
       }

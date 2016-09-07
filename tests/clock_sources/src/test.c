@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "xcore_c.h"
 #include "debug_print.h"
+#include "xassert.h"
 
 /*
  * Time the number of reference clock ticks that it takes to drive a number of
@@ -12,20 +13,22 @@
  * The clock is started at the beginning and stopped at the end so that it can
  * be re-configured by the tests.
  */
-static void time_port_rate(timer tmr, port p, clock c)
+static void time_port_rate(hwtimer_t tmr, port p, clock c)
 {
   int num_writes = 100;
 
   clock_start(c);
 
-  port_output(p, 0); // Pre-fill the transfer reg
-  port_output(p, 0); // Start running after a clock edge has moved data from the
+  port_out(p, 0); // Pre-fill the transfer reg
+  port_out(p, 0); // Start running after a clock edge has moved data from the
                      // transfer register
-  int start_time = timer_get_time(tmr);
+  uint32_t start_time;
+  hwtimer_get_time(tmr, &start_time);
   for (int i = 0; i < num_writes; ++i) {
-    port_output(p, i);
+    port_out(p, i);
   }
-  int end_time = timer_get_time(tmr);
+  uint32_t end_time;
+  hwtimer_get_time(tmr, &end_time);
 
   clock_stop(c);
 
@@ -35,7 +38,7 @@ static void time_port_rate(timer tmr, port p, clock c)
 /*
  * Test the timing using the reference clock as the clock source.
  */
-static void test_reference_clock(timer tmr, port p, clock c)
+static void test_reference_clock(hwtimer_t tmr, port p, clock c)
 {
   clock_set_source_clk_ref(c);
   clock_set_divide(c, 0);
@@ -45,7 +48,7 @@ static void test_reference_clock(timer tmr, port p, clock c)
 /*
  * Test the timing using the xCORE clock as the clock source.
  */
-static void test_xcore_clock(timer tmr, port p, clock c)
+static void test_xcore_clock(hwtimer_t tmr, port p, clock c)
 {
   clock_set_source_clk_xcore(c);
   clock_set_divide(c, 1); // Non-zero divide required for port logic to function correctly
@@ -58,15 +61,18 @@ static void test_xcore_clock(timer tmr, port p, clock c)
  * Use a second clock block to drive a port and then use that port as the input
  * for the first clock block.
  */
-static void test_port_clock(timer tmr, port p, clock c)
+static void test_port_clock(hwtimer_t tmr, port p, clock c)
 {
-  clock divided_c = clock_enable(XS1_CLKBLK_2);
+  clock divided_c;
+  clock_alloc(&divided_c, clock_2);
+  xassert(divided_c);
   clock_set_divide(divided_c, 2);
 
   // Enable a port to use as a clock source
-  port p_clk_src = port_enable(XS1_PORT_1B);
+  port p_clk_src;
+  port_alloc(&p_clk_src, port_1B);
   port_set_clock(p_clk_src, divided_c);
-  port_set_mode_clock_port(p_clk_src);
+  port_set_out_clock(p_clk_src);
 
   clock_start(divided_c);
 
@@ -76,8 +82,10 @@ static void test_port_clock(timer tmr, port p, clock c)
   time_port_rate(tmr, p, c);
 
   clock_stop(divided_c);
-  clock_disable(divided_c);
-  port_disable(p_clk_src);
+  clock_free(&divided_c);
+  xassert(!divided_c);
+  port_free(&p_clk_src);
+  xassert(!p_clk_src);
 }
 
 /*
@@ -85,13 +93,17 @@ static void test_port_clock(timer tmr, port p, clock c)
  */
 void test_clock_sources()
 {
-  timer tmr = timer_alloc();
-
+  hwtimer_t tmr;
+  hwtimer_alloc(&tmr);
+  xassert(tmr);
   // Allocate the clock to control the port
-  clock c = clock_enable(XS1_CLKBLK_1);
-
+  clock c;
+  clock_alloc(&c, clock_1);
+  xassert(c);
   // Enable a port to use as a clock source
-  port p = port_enable(XS1_PORT_1A);
+  port p;
+  port_alloc(&p, port_1A);
+  xassert(p);
   port_set_buffered(p);
   port_set_transfer_width(p, 32);
   port_set_clock(p, c);
@@ -100,7 +112,11 @@ void test_clock_sources()
   test_xcore_clock(tmr, p, c);
   test_port_clock(tmr, p, c);
 
-  port_disable(p);
-  clock_disable(c);
-  timer_free(tmr);
+  port_free(&p);
+  xassert(!p);
+  clock_free(&c);
+  xassert(!c);
+  hwtimer_free(&tmr);
+  xassert(!tmr);
 }
+

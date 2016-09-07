@@ -6,7 +6,7 @@
 
 // For XS1 support all values passed to the event_setup function must have bit 16 set
 typedef enum {
-  EVENT_TIMER = EVENT_ENUM_BASE,
+  EVENT_TIMER = ENUM_ID_BASE,
   EVENT_PORT_P
 } port_event_result_t;
 
@@ -18,38 +18,44 @@ typedef enum {
 void port_example()
 {
   static const int period = 5000;
-  event_clear_all();
+  select_disable_trigger_all();
 
-  port p = port_enable(XS1_PORT_1A);
-  port q = port_enable(XS1_PORT_1B);
+  port p;
+  port_alloc(&p, port_1A);
+  port q;
+  port_alloc(&q, port_1B);
 
-  timer t = timer_alloc();
-  int time = timer_get_time(t);
+  hwtimer_t t;
+  hwtimer_alloc(&t);
+  uint32_t time;
+  hwtimer_get_time(t, &time);
   time += period;
 
   int q_value = 0;
-  port_output(q, q_value);
+  port_out(q, q_value);
 
   // Setup the resources for eventing
-  event_setup_timer(t, EVENT_TIMER, time);
-  event_setup_port(p, EVENT_PORT_P);
-
-  event_change_port_condition(p, PORT_COND_PINSEQ, 0x1);
+  hwtimer_setup_select(t, time, EVENT_TIMER);
+  hwtimer_enable_trigger(t);
+  port_setup_select(p, EVENT_PORT_P);
+  port_set_trigger_in_equal(p, 0x1);
+  port_enable_trigger(p);
 
   for (int count = 0; count < 10; count++) {
-    port_event_result_t choice = event_select();
+    port_event_result_t choice = select_wait();
     switch (choice) {
       case EVENT_TIMER: {
         // Read the timer to clear the event
-        timer_get_time(t);
+        uint32_t dummy;
+        hwtimer_get_time(t, &dummy);
 
         // Set up the next timer event
         time += period;
-        event_change_timer_time(t, time);
+        hwtimer_change_trigger_time(t, time);
 
         // Toggle the port value
         q_value = !q_value;
-        port_output(q, q_value);
+        port_out(q, q_value);
 
         debug_printf("Timer event, drive %d\n", q_value);
         break;
@@ -57,8 +63,9 @@ void port_example()
 
       case EVENT_PORT_P: {
         // Read the port to clear the event
-        int x = port_input(p);
-        event_change_port_condition(p, PORT_COND_PINSNEQ, x);
+        uint32_t x;
+        port_in(p, &x);
+        port_set_trigger_in_not_equal(p, x);
 
         debug_printf("Port event got %d\n", x);
         break;
@@ -67,5 +74,7 @@ void port_example()
   }
 
   // Release the resources
-  timer_free(t);
+  hwtimer_free(&t);
+  port_free(&q);
+  port_free(&p);
 }
