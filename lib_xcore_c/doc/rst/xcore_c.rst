@@ -415,7 +415,7 @@ four arguments.
   1. The timer to configure
   2. The time at which the next event should fire
   3. A ``void*`` which is user data that is passed to the handler
-  4. The select_callback_t function to call when events are triggered by the timer
+  4. The macro generated select_callback_t function called when events are triggered by the timer
 
 *Note*: There are similar functions for ports (``port_setup_select_callback()``)
 and channel ends (``chanend_setup_select_callback()``).
@@ -424,7 +424,7 @@ The callback function is passed the user data registered with that resource::
 
   void hwtimer_callback_func(void *data);
 
-Howver, we also need to generate a wrapping function, so we use the API's marcro
+However, we also need to generate a wrapping function, so we use the API's marcro
 to declare both at the same time::
 
   DECLARE_SELECT_CALLBACK(hwtimer_callback_func, data);
@@ -439,7 +439,6 @@ If additional information is required, data may be a pointer to a struct::
     uint32_t time;
     hwtimer_get_time(d->tmr, &time);
     hwtimer_change_trigger_time(d->tmr, time + d->period);
-
 
 When using select callback functions, the ``select_disable_trigger_all()`` function
 should not be called, otherwise any registered callback functions will be disabled.
@@ -459,7 +458,7 @@ Instead, users should now clear any triggers it enables::
     // Disable select events local to this function
     chanend_disable_trigger(c);
     chanend_disable_trigger(d);
-    // The chenends keep their setup should you wish to re-enable their triggering.
+    // The chanends keep their setup should you wish to re-enable their triggering.
   }
 
 After the ``handle_events()`` function has completed another equivalent function
@@ -523,7 +522,8 @@ Example
 As an example, take a function which receives data from two channels and handles
 whichever one is ready.
 
-We start by declaring the scope in which interrupts may occur. The hosting function will make space on its stack for a temporary kernel stack.
+We start by declaring the scope in which interrupts may occur.
+The hosting function will make space on its stack for a temporary kernel stack.
 The best place to do this is where the logical core is started.
 Our ordinary 'void test(chanend,chanend)' is turned into a hosting function by
 wrapping it in a function macro::
@@ -552,7 +552,7 @@ wrapping it in a function macro::
     return 0;
   }
 
-and likewise the definition (see below for implemenation)::
+and likewise the definition (see below for implementation)::
 
   DEFINE_INTERRUPT_PERMITTED(my_group, void, test, chanend c1, chanend c2)
   {
@@ -566,7 +566,7 @@ One piece of user data will be sent to the callback as a 'void*' argument.
 We will register a pointer to a structure::
 
   typedef struct {
-    chanend c;    // The resource that casued the interrupt.
+    chanend c;    // The resource that caused the interrupt.
     const char *message;
   } chan_data_t;
 
