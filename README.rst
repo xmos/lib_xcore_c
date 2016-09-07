@@ -18,6 +18,7 @@ Features
  * Support for timers
  * Support for select events so that xC 'select' functionality can be implemented
  * Support for interrupt events
+ * Support for hardware locks
 
 Software version and dependencies
 .................................
