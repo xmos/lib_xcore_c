@@ -10,10 +10,11 @@ static const int period = 10000;
 // For XS1 support all values passed to the event_setup function must have bit 16 set
 typedef enum {
   EVENT_CHAN_C = ENUM_ID_BASE,
-  EVENT_CHAN_D
+  EVENT_CHAN_D,
+  EVENT_NONE,
 } event_choice_t;
 
-void test_select_function(chanend c, chanend d)
+void test_select_function(chanend c, chanend d, hwtimer_t t)
 {
   // Setup the channels to generate events
   chanend_setup_select(c, EVENT_CHAN_C);
@@ -21,8 +22,10 @@ void test_select_function(chanend c, chanend d)
   chanend_enable_trigger(c);
   chanend_enable_trigger(d);
 
+  resource_t ids[4] = {t, d, c, 0};
+
   for (int count = 0; count < 10; count++) {
-    event_choice_t choice = select_wait();
+    event_choice_t choice = select_no_wait_ordered(EVENT_NONE,ids);
     switch (choice) {
       case EVENT_CHAN_C: {
         // Read value and clear event
@@ -38,6 +41,8 @@ void test_select_function(chanend c, chanend d)
         debug_printf("Received %d on channel d\n", x);
         break;
       }
+      case EVENT_NONE:
+        count--;
     }
   }
   chanend_disable_trigger(c);
@@ -76,19 +81,19 @@ void test(chanend c, chanend d)
   // Test 1: Run the test function with the timer enabled
   uint32_t time;
   hwtimer_get_time(t, &time);
-  hwtimer_setup_select_callback(t, time + period, (void*)&data, SELECT_CALLBACK(handle_timer));
+  hwtimer_setup_select_callback(t, time-10, (void*)&data, SELECT_CALLBACK(handle_timer));
   hwtimer_enable_trigger(t);
-  test_select_function(c, d);
+  test_select_function(c, d, t);
   hwtimer_disable_trigger(t);
 
   // Test 2: Run the test function again with the timer disabled
-  test_select_function(c, d);
+  test_select_function(c, d, t);
 
   // Test 3: Run the test function again with the timer enabled
   hwtimer_get_time(t, &time);
   hwtimer_change_trigger_time(t, time + period);
   hwtimer_enable_trigger(t);
-  test_select_function(c, d);
+  test_select_function(c, d, t);
   hwtimer_disable_trigger(t);
 
   hwtimer_free(&t);

@@ -20,16 +20,16 @@ int main()
     // Provide test data
     for (int test = 0; test < num_tests; ++test) {
       for (int i = 0; i < 5; i++) {
-        c <: 555*test + i;
         delay_ticks(5000 * i);
+        c <: 555*test + i;
       }
     }
 
     // Provide test data
     for (int test = 0; test < num_tests; ++test) {
       for (int i = 0; i < 5; i++) {
-        d <: 333*test + i;
         delay_ticks(5000 * i);
+        d <: 333*test + i;
       }
     }
   }
