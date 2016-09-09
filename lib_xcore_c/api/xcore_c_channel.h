@@ -54,10 +54,10 @@ inline xcore_c_error_t chan_free(channel_t *c)
 {
   // Not implemented in terms of s_chan_free() as we have already hand-shook a CT_END.
   RETURN_EXCEPTION_OR_ERROR(  do { \
-                                _s_chanend_free(c->left); \
-                                c->left = 0; \
-                                _s_chanend_free(c->right); \
-                                c->right = 0; \
+                                _s_chanend_free(c->end_a); \
+                                c->end_a = 0; \
+                                _s_chanend_free(c->end_b); \
+                                c->end_b = 0; \
                               } while (0) );
 }
 

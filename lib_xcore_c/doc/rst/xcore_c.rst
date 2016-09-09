@@ -69,15 +69,15 @@ connection is created using::
 
 Data can then be sent and received using::
 
-  chan_out_word(c.left, 1);
-  chan_out_byte(c.left, 2);
+  chan_out_word(c.end_a, 1);
+  chan_out_byte(c.end_a, 2);
 
 with a corresponding block of code on another core to consume the data::
 
   uint32_t i;
-  chan_in_word(c.right, &i);
+  chan_in_word(c.end_b, &i);
   uint8_t j;
-  chan_in_byte(c.right, &j);
+  chan_in_byte(c.end_b, &j);
 
 When the channel is finished with then it is closed and the resources released
 using::
@@ -142,20 +142,20 @@ Streaming channels
 Streaming channels can be used in a similar manner to standard channels. A
 streaming channel is created using::
 
-  streaming_chanend_t c;
+  streaming_channel_t c;
   s_chan_alloc(&c);
 
 Data can then be sent and received using::
 
-  s_chan_out_word(c.left, 1);
-  s_chan_out_byte(c.left, 2);
+  s_chan_out_word(c.end_a, 1);
+  s_chan_out_byte(c.end_a, 2);
 
 with a corresponding block of code on another core to consume the data::
 
   uint32_t i;
-  s_chan_in_word(c.right, &i);
+  s_chan_in_word(c.end_b, &i);
   uint8_t j;
-  s_chan_in_byte(c.right, &j);
+  s_chan_in_byte(c.end_b, &j);
 
 When the channel is finished with then it is closed and the resources released
 using::
@@ -522,11 +522,11 @@ Example
 As an example, take a function which receives data from two channels and handles
 whichever one is ready.
 
-We start by declaring the scope in which interrupts may occur.
-The hosting function will make space on its stack for a temporary kernel stack.
-The best place to do this is where the logical core is started.
+We start by declaring the scope in which interrupts may occur - 'the hosting function'.
+The hosting function will make space on its stack for a temporary kernel stack which
+will be used by the interrupts.
 Our ordinary 'void test(chanend,chanend)' is turned into a hosting function by
-wrapping it in a function macro::
+wrapping it in the 'DECLARE_INTERRUPT_PERMITTED' function macro::
 
   // xc top level file creating our logical cores.
   DECLARE_INTERRUPT_PERMITTED(void, test, chanend c1, chanend c2);

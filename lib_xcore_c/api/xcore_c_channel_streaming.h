@@ -13,8 +13,8 @@
 /** Helper type for passing around both ends of a streaming channel.
 */
 typedef struct streaming_channel_t {
-  streaming_chanend_t left;
-  streaming_chanend_t right;
+  streaming_chanend_t end_a;
+  streaming_chanend_t end_b;
 } streaming_channel_t;
 
 /** Allocate a streaming_channel_t.
@@ -37,21 +37,21 @@ typedef struct streaming_channel_t {
 inline xcore_c_error_t s_chan_alloc(streaming_channel_t *c)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
-                                if ((c->left = _s_chanend_alloc())) {
-                                  if ((c->right = _s_chanend_alloc())) {
+                                if ((c->end_a = _s_chanend_alloc())) {
+                                  if ((c->end_b = _s_chanend_alloc())) {
                                     // exception safe calls to _s_chanend_set_dest()
-                                    _s_chanend_set_dest(c->left, c->right);
-                                    _s_chanend_set_dest(c->right, c->left);
+                                    _s_chanend_set_dest(c->end_a, c->end_b);
+                                    _s_chanend_set_dest(c->end_b, c->end_a);
                                   }
                                   else {
-                                    _s_chanend_free(c->left);
-                                    c->left = 0;
-                                    c->right = 0;
+                                    _s_chanend_free(c->end_a);
+                                    c->end_a = 0;
+                                    c->end_b = 0;
                                   }
                                 }
                                 else {
-                                  c->left = 0;
-                                  c->right = 0;
+                                  c->end_a = 0;
+                                  c->end_b = 0;
                                 }
                               } while (0) );
 }
@@ -73,14 +73,14 @@ inline xcore_c_error_t s_chan_alloc(streaming_channel_t *c)
 inline xcore_c_error_t s_chan_free(streaming_channel_t *c)
 {
   RETURN_EXCEPTION_OR_ERROR(  do {
-                                _s_chan_out_ct_end(c->left); \
-                                _s_chan_out_ct_end(c->right); \
-                                _s_chan_check_ct_end(c->left); \
-                                _s_chan_check_ct_end(c->right); \
-                                _s_chanend_free(c->left); \
-                                c->left = 0; \
-                                _s_chanend_free(c->right); \
-                                c->right = 0; \
+                                _s_chan_out_ct_end(c->end_a); \
+                                _s_chan_out_ct_end(c->end_b); \
+                                _s_chan_check_ct_end(c->end_a); \
+                                _s_chan_check_ct_end(c->end_b); \
+                                _s_chanend_free(c->end_a); \
+                                c->end_a = 0; \
+                                _s_chanend_free(c->end_b); \
+                                c->end_b = 0; \
                               } while (0) );
 }
 
