@@ -6,6 +6,12 @@ lib_xcore_c change log
 
   * Alteration & extension of the API
 
+  * Changes to dependencies:
+
+    - lib_trycatch: Added dependency 1.0.0
+
+    - lib_xassert: Added dependency 2.0.1
+
 1.0.1
 -----
 
