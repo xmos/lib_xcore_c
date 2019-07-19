@@ -131,7 +131,7 @@ inline xcore_c_error_t chanend_free(chanend *c)
 */
 inline xcore_c_error_t chanend_set_dest(chanend c, chanend dst)
 {
-  return chanend_set_dest((streaming_chanend_t)c,(streaming_chanend_t)dst);
+  return s_chanend_set_dest((streaming_chanend_t)c,(streaming_chanend_t)dst);
 }
 
 /** Convert a streaming_chanend_t to a chanend.
