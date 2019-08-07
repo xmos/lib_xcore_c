@@ -11,7 +11,7 @@
 .type  _xcore_c_interrupt_permitted_common,@function
 .cc_top _xcore_c_interrupt_permitted_common.function,_xcore_c_interrupt_permitted_common
 _xcore_c_interrupt_permitted_common:
-  // This is the body of the __xcore_c_interrupt_permitted_XXX functions.
+  // This is the body of the _xcore_c_interrupt_permitted_XXX functions.
   // We have an active _XCORE_C_STACK_ALIGN(3) word sp frame.
   // sp[2] = saved r5
   // sp[1] = saved r4
@@ -20,14 +20,36 @@ _xcore_c_interrupt_permitted_common:
   // r4 = kstack words needed.
   // r5 = root_function.
   // Set up the kstack on our stack.
+  //
+  // Stack before:
+  //
+  // N-X:  --------- (end of stack)
+  // ........... (enough space for stack required by root_function)
+  // N-R4: ----------
+  // ........... (enough space for stack required by ISRs)
+  // N-2:  ----------
+  // N-1:  ----------
+  // N-0:  ---------- <- SP
+  //
   ldaw r11, sp[0]
-  ldaw r11, r11[-r4]  // Where the sp will be moved to.
-  stw r11, sp[0]      // Make the current sp the ksp.
-  ldaw r4, sp[0]      // Keep a record of the current sp
-  krestsp 0           // Pop the new sp.
+  ldaw r11, r11[-r4]  // Calculate the new SP address (_kstack_words into the current stack)
+  stw r11, sp[0]      // Store the new SP address onto the top of the current stack
+  ldaw r4, sp[0]      // Keep a record of the current SP
+  krestsp 0           // Makes the current SP the KSP and pops the new SP address into SP
+  //
+  // Stack after:
+  //
+  // N-X:  --------- (end of stack)
+  // ........... (enough space for stack required by root_function)
+  // N-R4: ---------- <- SP
+  // ........... (enough space for stack required by ISRs)
+  // N-2:  ----------
+  // N-1:  ----------
+  // N-0:  ---------- <- KSP
+  //
   // Call the root_function.
   bla r5
-  set sp, r4          // Pop the kstack from our stack (making ksp invalid).
+  set sp, r4          // Restore SP
   // And return.
   ldw r4, sp[1]
   ldw r5, sp[2]
