@@ -66,7 +66,7 @@ inline xcore_c_error_t lock_acquire(lock_t l)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
                                 unsigned dummy; \
-                                asm volatile("in %0, res[%1]" : "=r" (dummy): "r" (l)); \
+                                asm volatile("in %0, res[%1]" : "=r" (dummy): "r" (l) : "memory"); \
                               } while (0) );
 }
 
@@ -86,7 +86,7 @@ inline xcore_c_error_t lock_acquire(lock_t l)
  */
 inline xcore_c_error_t lock_release(lock_t l)
 {
-  RETURN_EXCEPTION_OR_ERROR( asm volatile("out res[%0], %0" :: "r" (l)) );
+  RETURN_EXCEPTION_OR_ERROR( asm volatile("out res[%0], %0" :: "r" (l) : "memory") );
 }
 
 #endif // !defined(__XC__)
