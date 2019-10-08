@@ -183,11 +183,11 @@ inline xcore_c_error_t chan_out_buf_byte(chanend c, const uint8_t buf[], size_t 
 inline xcore_c_error_t chan_in_word(chanend c, uint32_t *data)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
-                                _s_chan_out_ct_end(c); \
                                 _s_chan_check_ct_end(c); \
+                                _s_chan_out_ct_end(c); \
                                 *data = _s_chan_in_word(c); \
-                                _s_chan_out_ct_end(c); \
                                 _s_chan_check_ct_end(c); \
+                                _s_chan_out_ct_end(c); \
                               } while (0) );
 }
 
@@ -207,11 +207,11 @@ inline xcore_c_error_t chan_in_word(chanend c, uint32_t *data)
 inline xcore_c_error_t chan_in_byte(chanend c, uint8_t *data)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
-                                _s_chan_out_ct_end(c); \
                                 _s_chan_check_ct_end(c); \
+                                _s_chan_out_ct_end(c); \
                                 *data = _s_chan_in_byte(c); \
-                                _s_chan_out_ct_end(c); \
                                 _s_chan_check_ct_end(c); \
+                                _s_chan_out_ct_end(c); \
                               } while (0) );
 }
 
@@ -233,13 +233,13 @@ inline xcore_c_error_t chan_in_byte(chanend c, uint8_t *data)
 inline xcore_c_error_t chan_in_buf_word(chanend c, uint32_t buf[], size_t n)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
-                                _s_chan_out_ct_end(c);
                                 _s_chan_check_ct_end(c);
+                                _s_chan_out_ct_end(c);
                                 for (size_t i = 0; i < n; i++) { \
                                   buf[i] = _s_chan_in_word(c); \
                                 } \
-                                _s_chan_out_ct_end(c);
                                 _s_chan_check_ct_end(c);
+                                _s_chan_out_ct_end(c);
                               } while (0) );
 }
 
@@ -261,13 +261,13 @@ inline xcore_c_error_t chan_in_buf_word(chanend c, uint32_t buf[], size_t n)
 inline xcore_c_error_t chan_in_buf_byte(chanend c, uint8_t buf[], size_t n)
 {
   RETURN_EXCEPTION_OR_ERROR(  do { \
-                                _s_chan_out_ct_end(c);
                                 _s_chan_check_ct_end(c);
+                                _s_chan_out_ct_end(c);
                                 for (size_t i = 0; i < n; i++) { \
                                   buf[i] = _s_chan_in_byte(c); \
                                 } \
-                                _s_chan_out_ct_end(c);
                                 _s_chan_check_ct_end(c);
+                                _s_chan_out_ct_end(c);
                               } while (0) );
 }
 
