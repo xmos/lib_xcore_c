@@ -56,10 +56,12 @@ inline void _port_set_unbuffered(port p)
   _RESOURCE_SETCI(p, XS1_SETC_BUF_NOBUFFERS);
 }
 
+#if USE_XCORE_CLOCK_TYPE
 inline void _port_set_clock(port p, clock clk)
 {
   asm volatile("setclk res[%0], %1" :: "r" (p), "r" (clk));
 }
+#endif
 
 inline void _port_set_inout_data(port p)
 {

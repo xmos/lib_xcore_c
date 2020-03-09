@@ -8,7 +8,9 @@ extern void _port_reset(port p);
 extern void _port_free(port p);
 extern void _port_set_buffered(port p);
 extern void _port_set_unbuffered(port p);
+#if USE_XCORE_CLOCK_TYPE
 extern void _port_set_clock(port p, clock clk);
+#endif
 extern void _port_set_inout_data(port p);
 extern void _port_set_out_clock(port p);
 extern void _port_set_out_ready(port p, port ready_source);
@@ -43,7 +45,9 @@ extern xcore_c_error_t port_free(port *p);
 extern xcore_c_error_t port_set_transfer_width(port p, size_t transfer_width);
 extern xcore_c_error_t port_set_buffered(port p);
 extern xcore_c_error_t port_set_unbuffered(port p);
+#if USE_XCORE_CLOCK_TYPE
 extern xcore_c_error_t port_set_clock(port p, clock clk);
+#endif
 extern xcore_c_error_t port_set_inout_data(port p);
 extern xcore_c_error_t port_set_out_clock(port p);
 extern xcore_c_error_t port_set_out_ready(port p, port ready_source);
@@ -84,6 +88,7 @@ extern xcore_c_error_t port_setup_interrupt_callback(port p, void *data, interru
 extern xcore_c_error_t port_enable_trigger(port p);
 extern xcore_c_error_t port_disable_trigger(port p);
 
+#if USE_XCORE_CLOCK_TYPE
 #include "xcore_c_port_protocol.h"
 extern xcore_c_error_t port_protocol_in_handshake(port p, port readyin, port readyout, clock clk);
 extern xcore_c_error_t port_protocol_out_handshake(port p, port readyin, port readyout, clock clk, uint32_t initial);
@@ -91,3 +96,4 @@ extern xcore_c_error_t port_protocol_in_strobed_master(port p, port readyout, cl
 extern xcore_c_error_t port_protocol_out_strobed_master(port p, port readyout, clock clk, uint32_t initial);
 extern xcore_c_error_t port_protocol_in_strobed_slave(port p, port readyin, clock clk);
 extern xcore_c_error_t port_protocol_out_strobed_slave(port p, port readyin, clock clk, uint32_t initial);
+#endif

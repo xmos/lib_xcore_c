@@ -214,10 +214,12 @@ inline xcore_c_error_t port_set_unbuffered(port p)
  *                                    or clock is running.
  *  \exception  ET_RESOURCE_DEP       another core is actively changing the port.
  */
+#if USE_XCORE_CLOCK_TYPE
 inline xcore_c_error_t port_set_clock(port p, clock clk)
 {
   RETURN_EXCEPTION_OR_ERROR( _port_set_clock(p, clk) );
 }
+#endif
 
 /** Set a port drive out the data value (default state).
  *
@@ -1081,3 +1083,4 @@ inline xcore_c_error_t port_disable_trigger(port p)
 #endif // !defined(__XC__)
 
 #endif // __xcore_c_port_h__
+
