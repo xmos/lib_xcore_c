@@ -14,6 +14,12 @@
 #define XCORE_C_KSTACK_WORDS 0
 #endif
 
+#ifdef __XS2A__
+# define ISSUE_MODE_SINGLE .issue_mode single
+#else
+# define ISSUE_MODE_SINGLE
+#endif
+
 #define _INTERRUPT_PERMITTED(root_function) \
     _xcore_c_interrupt_permitted_ ## root_function
 
@@ -29,6 +35,7 @@
     .globl _INTERRUPT_PERMITTED(root_function); \
     .align _XCORE_C_CODE_ALIGNMENT; \
     .type  _INTERRUPT_PERMITTED(root_function),@function; \
+    ISSUE_MODE_SINGLE; \
     .cc_top _INTERRUPT_PERMITTED(root_function).function,_INTERRUPT_PERMITTED(root_function); \
     _INTERRUPT_PERMITTED(root_function):; \
       _XCORE_C_ENTSP(_XCORE_C_STACK_ALIGN(3)); \
@@ -69,6 +76,7 @@
     .globl _INTERRUPT_CALLBACK(intrpt); \
     .align _XCORE_C_CODE_ALIGNMENT; \
     .type  _INTERRUPT_CALLBACK(intrpt),@function; \
+    ISSUE_MODE_SINGLE; \
     .cc_top _INTERRUPT_CALLBACK(intrpt).function,_INTERRUPT_CALLBACK(intrpt); \
     _INTERRUPT_CALLBACK(intrpt):; \
       _XCORE_C_SINGLE_ISSUE /* Do we know what KEDI is set to? */; \

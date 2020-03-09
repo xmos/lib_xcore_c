@@ -14,8 +14,10 @@
 // _SELECT_CALLBACK_STACK_SIZE also defined in xcore_c_select.S
 #ifdef __XS2A__
 # define _SELECT_CALLBACK_STACK_SIZE  2
+# define ISSUE_MODE_SINGLE .issue_mode single
 #else
 # define _SELECT_CALLBACK_STACK_SIZE  1
+# define ISSUE_MODE_SINGLE
 #endif
 
 #define _SELECT_CALLBACK(callback) \
@@ -30,6 +32,7 @@
     .globl _SELECT_CALLBACK(callback); \
     .align _XCORE_C_CODE_ALIGNMENT; \
     .type  _SELECT_CALLBACK(callback),@function; \
+    ISSUE_MODE_SINGLE; \
     .cc_top _SELECT_CALLBACK(callback).function,_SELECT_CALLBACK(callback); \
     _SELECT_CALLBACK(callback):; \
       _XCORE_C_ENTSP( _SELECT_CALLBACK_STACK_SIZE ); \
