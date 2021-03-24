@@ -1,38 +1,47 @@
-Received 0 on channel c
-Received 1 on channel c
+Timer event data 0xFEEDBEEF
 Received 0 on channel d
+Received 0 on channel c
 Received 1 on channel d
-Received 2 on channel c
+Received 1 on channel c
+Timer event data 0xFEEDBEEF
 Received 2 on channel d
+Received 2 on channel c
 Timer event data 0xFEEDBEEF
-Received 3 on channel c
+Timer event data 0xFEEDBEEF
 Received 3 on channel d
+Received 3 on channel c
 Timer event data 0xFEEDBEEF
 Timer event data 0xFEEDBEEF
-Received 4 on channel c
 Received 4 on channel d
-Received 555 on channel c
-Received 556 on channel c
 Received 333 on channel d
+Received 4 on channel c
+Received 555 on channel c
 Received 334 on channel d
-Received 557 on channel c
-Received 335 on channel d
-Received 558 on channel c
-Received 336 on channel d
-Received 559 on channel c
-Received 337 on channel d
+Received 556 on channel c
 Timer event data 0xFEEDBEEF
+Received 335 on channel d
+Received 557 on channel c
+Timer event data 0xFEEDBEEF
+Timer event data 0xFEEDBEEF
+Received 336 on channel d
+Received 558 on channel c
+Timer event data 0xFEEDBEEF
+Timer event data 0xFEEDBEEF
+Received 337 on channel d
+Received 666 on channel d
+Received 667 on channel d
+Received 559 on channel c
 Received 1110 on channel c
 Received 1111 on channel c
-Received 666 on channel d
 Timer event data 0xFEEDBEEF
-Received 667 on channel d
-Received 1112 on channel c
 Received 668 on channel d
+Received 1112 on channel c
 Timer event data 0xFEEDBEEF
-Received 1113 on channel c
 Received 669 on channel d
 Timer event data 0xFEEDBEEF
-Received 1114 on channel c
+Received 1113 on channel c
 Timer event data 0xFEEDBEEF
 Received 670 on channel d
+Timer event data 0xFEEDBEEF
+Received 1114 on channel c
+

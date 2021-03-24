@@ -7,6 +7,29 @@
 # define _SELECT_CALLBACK_STACK_SIZE  1
 #endif
 
+// Callback functions may be triggered during select setup phase.
+// If this happens, we need to re-run the setup.
+// It is always safe to re-run the setup.
+// We need a rerun-address, and arguments r0 & r1
+// The data is layed out to make access most efficient.
+.section  .dp.bss,"awd",@nobits
+.cc_top _xcore_c_select_rerun.data,_xcore_c_select_rerun
+#ifdef __XS2A__
+.align  8
+#else
+.align  4
+#endif
+.type _xcore_c_select_rerun,@object
+_xcore_c_select_rerun:
+#ifdef __XS2A__
+  .size _xcore_c_select_rerun, (4*2*8)*2
+  .space  (4*2*8)*2    // {recall,r0}[number of threads], {r1,padding}[number of threads]
+#else
+  .size _xcore_c_select_rerun, 4*8*3
+  .space  4*8*3    // recall[number of threads], r0[number of threads], r1[number of threads]
+#endif
+.cc_bottom _xcore_c_select_rerun.data
+
 .text
 
 .globl _xcore_c_select_callback_common
@@ -26,7 +49,24 @@ _xcore_c_select_callback_common:
   bla r1              // The select_callback_t function.
   ldw lr, sp[_SELECT_CALLBACK_STACK_SIZE]
   ldaw sp, sp[_SELECT_CALLBACK_STACK_SIZE]
-  waiteu              // setsr 0x1
+  // Do we need to re-run the select setup or can we do a waite?
+  ldaw r3, dp[_xcore_c_select_rerun]
+  get r11, id
+#ifdef __XS2A__
+  ldd  r2, r0, r3[r11]
+  waitef r2   // setsr 0x1
+  add r11, r11, 8
+  ldd r1, r3, r3[r11]
+  bau r2;     // re-run the select setup.
+#else
+  ldw  r2, r3[r11]
+  waitef r2   // setsr 0x1  // no rerun needed
+  add r11, r11, 8
+  ldw  r0, r3[r11]
+  add r11, r11, 8
+  ldw  r1, r3[r11]
+  bau r2;     // re-run the select setup.
+#endif
 .cc_bottom _xcore_c_select_callback_common.function
 .set   _xcore_c_select_callback_common.nstackwords, 0
 .globl _xcore_c_select_callback_common.nstackwords
@@ -72,18 +112,27 @@ _select_non_callback:
 
 .globl select_wait
 #ifdef __XS2A__
-.issue_mode dual
+.issue_mode single
 .align 4
 #else
 .align 2
 #endif
 .type  select_wait,@function
 .cc_top select_wait.function,select_wait
-select_wait:
-  waiteu              // setsr 0x1
+select_wait: // no args.
 #ifdef __XS2A__
-  nop // handle dual issue.
+  ENTSP_lu6 0
 #endif
+  // clear the recall state
+  ldc r2, 0
+  ldaw r3, dp[_xcore_c_select_rerun]
+  get r11, id
+#ifdef __XS2A__
+  std  r2, r0, r3[r11]
+#else
+  stw r2, r3[r11]
+#endif
+  waiteu              // setsr 0x1
   // function returns via _select_non_callback
 .cc_bottom select_wait.function
 .set   select_wait.nstackwords, 0 + _select_non_callback.nstackwords
@@ -106,10 +155,23 @@ select_wait:
 #endif
 .type  select_no_wait,@function
 .cc_top select_no_wait.function,select_no_wait
-select_no_wait:
+select_no_wait: // r0 = 'nowait' return
 #ifdef __XS2A__
   ENTSP_lu6 0
 #endif
+  // set up the recall state
+  ldap r11, _select_no_wait_rerun
+  add r2, r11, 0
+  ldaw r3, dp[_xcore_c_select_rerun]
+  get r11, id
+#ifdef __XS2A__
+  std  r2, r0, r3[r11]
+#else
+  stw r2, r3[r11]
+  add r11, r11, 8
+  stw r0, r3[r11]
+#endif
+_select_no_wait_rerun:
   setsr 0x1           // Enable events
 #if defined(__XS2A__)
   nop                 // Allow channel events to fire
@@ -139,10 +201,23 @@ select_no_wait:
 #endif
 .type  select_wait_ordered,@function
 .cc_top select_wait_ordered.function,select_wait_ordered
-select_wait_ordered:
+select_wait_ordered: // r0 = resoure_order[]
 #ifdef __XS2A__
   ENTSP_lu6 0
 #endif
+  // set up the recall state
+  ldap r11, _select_wait_ordered_rerun
+  add r2, r11, 0
+  ldaw r3, dp[_xcore_c_select_rerun]
+  get r11, id
+#ifdef __XS2A__
+  std  r2, r0, r3[r11]
+#else
+  stw r2, r3[r11]
+  add r11, r11, 8
+  stw r0, r3[r11]
+#endif
+_select_wait_ordered_rerun:
   clre                // disable all 'select event' resources
   setsr 0x1           // Enable events on core
   ldc r2, 0           // Resource list index
@@ -177,10 +252,27 @@ select_wait_ordered_done:
 #endif
 .type  select_no_wait_ordered,@function
 .cc_top select_no_wait_ordered.function,select_no_wait_ordered
-select_no_wait_ordered:
+select_no_wait_ordered: // r0 = 'nowait' return, r1 = resoure_order[]
 #ifdef __XS2A__
   ENTSP_lu6 0
 #endif
+  // set up the recall state
+  ldap r11, _select_no_wait_ordered_rerun
+  add r2, r11, 0
+  ldaw r3, dp[_xcore_c_select_rerun]
+  get r11, id
+#ifdef __XS2A__
+  std r2, r0, r3[r11]
+  add r11, r11, 8
+  std r1, r1, r3[r11]
+#else
+  stw r2, r3[r11]
+  add r11, r11, 8
+  stw r0, r3[r11]
+  add r11, r11, 8
+  stw r1, r3[r11]
+#endif
+_select_no_wait_ordered_rerun:
   clre                // disable all 'select event' resources
   setsr 0x1           // Enable events on core
   ldc r2, 0           // Resource list index
