@@ -1,5 +1,8 @@
-xCORE C Library
-===============
+DEPRECATED: xCORE C Library
+===========================
+
+**This library is no longer supported. A system library with similar intent has been
+added to the 15.0.x tools release and should be used in preference to this library.**
 
 Overview
 --------
